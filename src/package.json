@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@azure/ai-text-analytics": "^5.1.0",
+    "cosine-similarity": "^1.0.1",
+    "face-api.js": "^0.22.2",
+    "js-levenshtein": "^1.1.6",
+    "microsoft-cognitiveservices-speech-sdk": "^1.36.0",
+    "natural": "^7.0.6",
+    "node-record-lpcm16": "^1.0.1",
+    "play-sound": "^1.1.6",
+    "string-similarity": "^4.0.4"
+  }
+}
