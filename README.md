@@ -1,0 +1,2 @@
+# ainb
+USE AI MAKE MNEY
