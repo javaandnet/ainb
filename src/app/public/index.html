@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Audio Recorder</title>
+</head>
+<body>
+  <h1>Web Audio Recorder</h1>
+  <button id="startButton">Start Recording</button>
+  <button id="stopButton" disabled>Stop Recording</button>
+  
+  <script>
+    let mediaRecorder;
+    let audioChunks = [];
+
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+
+    startButton.addEventListener('click', startRecording);
+    stopButton.addEventListener('click', stopRecording);
+
+    async function startRecording() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+
+      mediaRecorder.addEventListener('dataavailable', event => {
+        audioChunks.push(event.data);
+      });
+
+      startButton.disabled = true;
+      stopButton.disabled = false;
+
+      mediaRecorder.start();
+    }
+
+    function stopRecording() {
+      startButton.disabled = false;
+      stopButton.disabled = true;
+      mediaRecorder.stop();
+
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      const formData = new FormData();
+      formData.append('audio', audioBlob);
+
+      fetch('/send-audio', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        console.log('Audio sent successfully');
+      })
+      .catch(error => {
+        console.error('Error sending audio:', error);
+      });
+    }
+  </script>
+</body>
+</html>

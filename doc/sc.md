@@ -11,4 +11,8 @@ japaneast
 https://fsr.cognitiveservices.azure.com/
 
 const subscriptionKey = "6f78e68a9ef543988c4866e30d46bbae";
-const serviceRegion = "japaneast";
+const serviceRegion = "japaneast";35_3jo-EyF
+
+https://blog.caoyu.info/centos7-upgrade-libc.html
+
+160.16.143.36

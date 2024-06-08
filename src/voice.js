@@ -1,35 +1,43 @@
-const sdk = require("microsoft-cognitiveservices-speech-sdk");
-const fs = require('fs');
-const play = require('play-sound')();
+const express = require('express');
+const micRecord = require('node-mic-record');
+const sdk = require('microsoft-cognitiveservices-speech-sdk');
 
-// Set your Azure subscription key and service region
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// 创建一个 WebSocket 服务器
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
 const subscriptionKey = "6f78e68a9ef543988c4866e30d46bbae";
 const serviceRegion = "japaneast";
+// 监听客户端连接
+io.on('connection', (socket) => {
+  console.log('A user connected');
 
-// Set the speech synthesis config
-const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+  // 开始录制麦克风输入
+  const recognizer = new sdk.SpeechRecognizer({
+    subscriptionKey: subscriptionKey,
+    region: serviceRegion, // 例如：'eastus'
+  });
 
-// Set the synthesis voice and output format
-const synthesisVoice = sdk.VoiceList.getDefaultVoice("en-US", sdk.VoiceType.Neural);
-const synthesisOptions = {
-    language: 'en-US',
-    voice: synthesisVoice,
-    format: sdk.AudioOutputFormat.Raw16Khz16BitMonoPcm
-};
+  const audioConfig = sdk.AudioConfig.fromDefaultMicrophoneInput();
+  recognizer.recognizeOnceAsync(
+    result => {
+      console.log(`Recognized: ${result.text}`);
+      socket.emit('transcription', result.text);
+    },
+    err => {
+      console.error('Recognition error:', err);
+      socket.emit('transcription', 'Recognition error');
+    });
 
-// Create the speech synthesizer
-const synthesizer = new sdk.SpeechSynthesizer(speechConfig, null);
+  // 处理客户端断开连接
+  socket.on('disconnect', () => {
+    console.log('A user disconnected');
+    recognizer.close();
+  });
+});
 
-// Text to be synthesized
-const text = "This is a test.";
-
-// Synthesize the text
-synthesizer.speakTextAsync(text, result => {
-    if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
-        console.log("Speech synthesized successfully.");
-        // Play synthesized audio
-        play.buffer(result.audioData);
-    } else {
-        console.error(`Error: ${result.errorDetails}`);
-    }
+server.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
