@@ -16,3 +16,5 @@ const serviceRegion = "japaneast";35_3jo-EyF
 https://blog.caoyu.info/centos7-upgrade-libc.html
 
 160.16.143.36
+
+https://qiita.com/hoto17296/items/8d32d0863d7e102b33f6

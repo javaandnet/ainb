@@ -3,7 +3,7 @@ const fs = require('fs');
 const http = require('http')
 const path = require('path')
 const socketio = require('socket.io')
- 
+var https = require('https');
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
 const { Readable } = require('stream');
  
@@ -19,13 +19,18 @@ const ai = new AI();
 
 
 const app = express();
-
+var options = {
+    key:  fs.readFileSync(path.join(__dirname, 'crt/local.key')),
+    cert: fs.readFileSync(path.join(__dirname, 'crt/local.crt'))
+  };
 app.use('/', express.static(path.join(__dirname, 'public')))
 
-server = http.createServer(app).listen(3000, function () {
+server = https.createServer(options,app).listen(443, function () {
     console.log('Example app listening on port 3000')
 })
-
+// server = http.createServer(options,app).listen(3000, function () {
+//     console.log('Example app listening on port 3000')
+// })
 const io = socketio(server);
 
 
