@@ -3,44 +3,20 @@ const fs = require('fs');
 const http = require('http')
 const path = require('path')
 const socketio = require('socket.io')
-const WavEncoder = require('wav-encoder')
+ 
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
 const { Readable } = require('stream');
-const subscriptionKey = "6f78e68a9ef543988c4866e30d46bbae";
-const serviceRegion = "japaneast";
+ 
+const OpenAI = require("openai");
+const Azure = require('./azure.js');
+const AI = require('./ai.js');
+
+
+
 //const ffmpeg = require('fluent-ffmpeg');
+const azure = new Azure();
+const ai = new AI();
 
-var json = [{
-    q: "自己紹介をお願いします。"
-}, {
-    q: "一番得意言語はなんですか？"
-}];
-
-
-// 创建一个从 ArrayBuffer 读取数据的 Readable Stream
-class ArrayBufferReadable extends Readable {
-    constructor(buffer) {
-        super();
-        this.buffer = Buffer.from(buffer);
-        this.sent = false;
-    }
-
-    _read() {
-        if (!this.sent) {
-            this.push(this.buffer);
-            this.sent = true;
-        } else {
-            this.push(null);
-        }
-    }
-}
-
-
-// 创建语音配置
-const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
-// 设置语音合成的语言
-speechConfig.speechSynthesisLanguage = "ja-JP";
-speechConfig.speechRecognitionLanguage = "ja-JP";  // 设置为日语
 
 const app = express();
 
@@ -53,11 +29,13 @@ server = http.createServer(app).listen(3000, function () {
 const io = socketio(server);
 
 
-
 io.on('connection', (socket) => {
     let sampleRate = 48000;
     let bufferAll = [];
 
+    /**
+     * 初期化
+     */
     socket.on('start', (data) => {
         sampleRate = data.sampleRate;
         bufferAll = [];
@@ -65,44 +43,18 @@ io.on('connection', (socket) => {
     });
 
     socket.on('play', (data, rtn) => {
-        index = data.index;
-        console.log(calculate("java","javaです"));
-        createWav(index, rtn);
-    });
-
-    const createWav = (index, rtn) => {
-
-        // 创建语音配置和语音合成器
-        const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
-
-        const audioFilePath = path.join(__dirname, `/public/${index}.wav`);
-        // 设置语音合成的语言
-        speechConfig.speechSynthesisLanguage = "ja-JP";
-        const audioConfig = sdk.AudioConfig.fromAudioFileOutput(audioFilePath);
-        const synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
-        // 要转换为语音的文本
-        const text = json[0].q;
-        synthesizer.speakTextAsync(
-            text,
-            result => {
-                if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
-
-                    console.log("Synthesis completed.");
-                    rtn(111);
-                } else {
-                    console.error("Speech synthesis canceled, " + result.errorDetails);
-                }
-                synthesizer.close();
-            },
-            error => {
-                console.error(error);
-                synthesizer.close();
+        // var rtn3 = "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VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NIxHwAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
+        // rtn({data:rtn3});
+        azure.t2v("いのちゃんは豚１８です").then(
+            //Base64
+            function(stream){
+                rtn({data:stream});
             }
         );
-
-    };
-
-
+    });
+/**
+ * Add Str
+ */
     socket.on('send_pcm', (data) => {
         const itr = data.values()
         const buf = new Array(data.length)
@@ -110,122 +62,59 @@ io.on('connection', (socket) => {
             buf[i] = itr.next().value
         }
         bufferAll = bufferAll.concat(buf)
-    })
+    });
 
     //Stop
     socket.on('stop', (data, ack) => {
-        const f32array = toF32Array(bufferAll);
-        exportWAV(f32array, sampleRate, ack);
-    })
-})
-
-
-
-// Convert byte array to Float32Array
-const toF32Array = (buf) => {
-    const buffer = new ArrayBuffer(buf.length)
-    const view = new Uint8Array(buffer)
-    for (var i = 0; i < buf.length; i++) {
-        view[i] = buf[i]
-    }
-    return new Float32Array(buffer)
-}
-
-// data: Float32Array
-// sampleRate: number
-const exportWAV = (data, sampleRate, ack) => {
-    const audioData = {
-        sampleRate: sampleRate,
-        channelData: [data]
-    }
-    WavEncoder.encode(audioData).then((buffer) => {
-        // saveFile(buffer);
-        v2t(buffer, ack);
-    });
-}
-
-const saveFile = (buffer) => {
-
-    const filename = path.join(__dirname, `/${String(Date.now())}.wav`);
-    fs.writeFile(filename, Buffer.from(buffer), (e) => {
-        if (e) {
-            console.log(e)
-        } else {
-            console.log(`Successfully saved ${filename}`);
-        }
-    });
-};
-
-const createStream = (buffer) => {
-
-    // 创建 ArrayBuffer 的可读流
-    const audioStream = new ArrayBufferReadable(buffer);
-
-    // 创建一个 pushStream
-    const pushStream = sdk.AudioInputStream.createPushStream();
-
-    // 从 Readable Stream 中读取数据并将其推送到 pushStream
-    audioStream.on('data', (chunk) => {
-        pushStream.write(chunk);
-    });
-
-    audioStream.on('end', () => {
-        pushStream.close();
-    });
-    return pushStream;
-
-};
-
-const v2t = (buffer, ack) => {
-
-    // 创建音频配置
-    const audioConfig = sdk.AudioConfig.fromStreamInput(createStream(buffer));
-
-    // 创建语音识别器
-    const recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
-
-    recognizer.recognizeOnceAsync(result => {
-        if (result.reason === sdk.ResultReason.RecognizedSpeech) {
-            ack({ info: result.text });
-        } else {
-            ack({ info: "fail" });
+        //const filename = path.join(__dirname, `/public/222.wav`);
+        azure.v2t(bufferAll,1).then(function(text){
+              ai.ask(text) .then(function(ans){
+                azure.t2v(ans).then(
+                    //Base64
+                    function(stream){
+                        ack({data:stream});
+                    }
+                );
+            });
+        }).catch((result) => {
             console.log(result);
-            console.error(`Fail: ${result.errorDetails}`);
-        }
-        recognizer.close();
+            ack({info:"fail"});
+        });
     });
-}
+});
+
+
 
 const getToNgram = (text, n) => {
     let ret = {};
     for (var m = 0; m < n; m++) {
-      for (var i = 0; i < text.length - m; i++) {
-        const c = text.substring(i, i + m + 1);
-        ret[c] = ret[c] ? ret[c] + 1 : 1;
-      }
+        for (var i = 0; i < text.length - m; i++) {
+            const c = text.substring(i, i + m + 1);
+            ret[c] = ret[c] ? ret[c] + 1 : 1;
+        }
     }
     return ret;
-  };
-  // valueが数値のobjectの数値の和を求める関数。
+};
+// valueが数値のobjectの数値の和を求める関数。
 const getValuesSum = (object) => {
     return Object.values(object).reduce((prev, current) => prev + current, 0);
-  };
-  
-  const calculate =  (a, b) => {
+};
+
+const calculate = (a, b) => {
     const aGram = getToNgram(a);
     const bGram = getToNgram(b);
     const keyOfAGram = Object.keys(aGram);
     const keyOfBGram = Object.keys(bGram);
     // aGramとbGramに共通するN-gramのkeyの配列
     const abKey = keyOfAGram.filter((n) => keyOfBGram.includes(n));
-  
+
     // aGramとbGramの内積(0と1の掛け算のため、小さいほうの値を足し算すれば終わる。)
     let dot = abKey.reduce(
-      (prev, key) => prev + Math.min(aGram[key], bGram[key]),
-      0
+        (prev, key) => prev + Math.min(aGram[key], bGram[key]),
+      
     );
-  
+
     // 長さの積(平方根の積は積の平方根)
     const abLengthMul = Math.sqrt(getValuesSum(aGram) * getValuesSum(bGram));
     return dot / abLengthMul;
-  };
+};

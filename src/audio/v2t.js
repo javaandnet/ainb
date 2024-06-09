@@ -27,9 +27,24 @@ const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceR
 // 设置语音合成的语言
 speechConfig.speechSynthesisLanguage = "ja-JP";
 speechConfig.speechRecognitionLanguage = "ja-JP";  // 设置为日语
-// 创建音频配置
-const audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync(audioFilePath));
 
+// 创建音频配置
+//const audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync(audioFilePath));
+// create the push stream we need for the speech sdk.
+var pushStream = sdk.AudioInputStream.createPushStream();
+    
+// open the file and push it to the push stream.
+fs.createReadStream(audioFilePath).on('data', function(arrayBuffer) {
+  pushStream.write(arrayBuffer.slice());
+}).on('end', function() {
+  pushStream.close();
+});
+
+
+
+// 创建音频配置
+const audioConfig = sdk.AudioConfig.fromStreamInput(pushStream);
+speechConfig.setProperty(sdk.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "10000"); // 10000ms
 // 创建语音识别器
 const recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
 
@@ -37,6 +52,7 @@ recognizer.recognizeOnceAsync(result => {
     if (result.reason === sdk.ResultReason.RecognizedSpeech) {
         console.log(`Recognized: ${result.text}`);
     } else {
+        console.log(result);
         console.error(`Error recognizing speech: ${result.errorDetails}`);
     }
     recognizer.close();

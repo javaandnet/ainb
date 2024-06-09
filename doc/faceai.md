@@ -5,7 +5,8 @@
     https://github.com/babysor/MockingBird?tab=readme-ov-file
     azure
 3. 声音感情识别
-    azure
+    [素材](https://amitaro.net/)
+    [説明](https://qiita.com/Dukapan100knock/items/045612608ceba53b5e40)
 4. 文字相关
    1. 文字转化
    2. 文字感情识别
