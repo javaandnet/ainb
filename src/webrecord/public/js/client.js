@@ -50,7 +50,8 @@ function stopRecording() {
         track.stop()
     })
     socket.emit('stop', '', (res) => {
-        document.getElementById("msg").innerHTML = `${res.data}`; 
+        document.getElementById("msg").innerHTML = `${res.a}`; 
+        
         var newData = "data:audio/mp3;base64,"+ res.data;
         const audio = new Audio();
       audio.src = newData;

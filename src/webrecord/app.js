@@ -61,30 +61,20 @@ io.on('connection', (socket) => {
     socket.on('stop', (data, ack) => {
         //const filename = path.join(__dirname, `/public/222.wav`);
         azure.v2t(bufferAll, 1).then(function (text) {
+            //text: 问题
+            //ans:回答
             ai.ask(text).then(function (ans) {
                 azure.t2v(ans).then(
                     //Base64
                     function (stream) {
-                        ack({ data: stream });
+                        ack({ data: stream,q: text,a:ans});
                     }
                 );
             });
         }).catch((result) => {
             console.log(result);
-            ack({ info: "fail" });
+            ack({ a: "fail" });
         });
     });
 });
 
-
-
-const getToNgram = (text, n) => {
-    let ret = {};
-    for (var m = 0; m < n; m++) {
-        for (var i = 0; i < text.length - m; i++) {
-            const c = text.substring(i, i + m + 1);
-            ret[c] = ret[c] ? ret[c] + 1 : 1;
-        }
-    }
-    return ret;
-};
