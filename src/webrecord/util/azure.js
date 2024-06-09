@@ -4,9 +4,11 @@ const WavEncoder = require('wav-encoder')
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
 const { Readable } = require('stream');
 const PassThrough = require('stream').PassThrough;
+const Config = require("./config.js");
+const config = new Config();
 
-const subscriptionKey = "6f78e68a9ef543988c4866e30d46bbae";
-const serviceRegion = "japaneast";
+const subscriptionKey = config.azure.subscriptionKey;
+const serviceRegion = config.azure.serviceRegion;
 // 创建语音配置
 const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
 // 设置语音合成的语言

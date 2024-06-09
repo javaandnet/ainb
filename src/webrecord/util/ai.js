@@ -1,9 +1,7 @@
 const OpenAI = require("openai");
-const openai = new OpenAI({
-    organization: "org-7JnZDaFZRVxEBIwVWj84ptjj",//
-    project: "proj_OslquGFuzI1ln4zehBXhdCpI",
-    apiKey: "sk-proj-0qspq1SJopmlioDdiX2gT3BlbkFJLkAyaVkwtvRGv2ty6lau"
-});
+const Config = require("./config.js");
+const config = new Config();
+const openai = new OpenAI(config.openai);
 
 // default config
 module.exports = class {
