@@ -13,3 +13,4 @@ src/webrecord/crt/local.key
 vue/fsr/.npmrc
 src/webrecord/util/config.js
 src/webrecord/util/config.js
+src/webrecord/util/config.js
