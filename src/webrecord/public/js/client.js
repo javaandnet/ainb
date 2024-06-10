@@ -1,89 +1,103 @@
 const socket = io.connect()
 let processor = null
 let localstream = null
+let recorder = null;
 
-// let recorder = new Recorder();
-// recorder.start().then(() => {
-//   // 开始录音
-// }, (error) => {
-//   // 出错了
-//   console.log(`${error.name} : ${error.message}`);
-// });
-// Recorder.getPermission().then(() => {
-//   console.log('给权限了');
-// }, (error) => {
-//    alert(error);
-// });
+function statusHtml(txt) {
+    document.getElementById('status').innerHTML = txt;
+}
+
+/**
+ * 権限をチェックする
+ */
+Recorder.getPermission().then(() => {
+    // console.log('権限あり');
+    statusHtml("権限あり");
+}, (error) => {
+    statusHtml(error);
+});
+
+var state = {
+    sampleBit: 16,
+    sampleRate: 48000,
+    numChannel: 1,
+    compiling: false,
+    isRecording: false,     // 是否正在录音
+    duration: 0,
+    fileSize: 0,
+    vol: 0,
+}
+collectData = () => {
+    return {
+        sampleBits: state.sampleBit,
+        sampleRate: state.sampleRate,
+        numChannels: state.numChannel,
+        compiling: state.compiling,       // 是否开启边录音边转化（后期改用web worker）
+    };
+}
 /**
  * 开始记录
  */
 function startRecording() {
-    console.log('start recording')
-    context = new window.AudioContext()
-    socket.emit('start', { 'sampleRate': context.sampleRate });
-    // document.getElementById("btn").innerHTML ="離され終了";
-    navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then((stream) => {
-        localstream = stream;
-        const input = this.context.createMediaStreamSource(stream);
-        processor = context.createScriptProcessor(4096, 1, 1)
+    context = new window.AudioContext();
+    const config = collectData();
+    if (!recorder) {
+        recorder = new Recorder(config);
+        recorder.onprogress = (params) => {
+            voice = params.data;
+            socket.emit('send_pcm', params.data.buffer);
+        };
+    }
+    socket.emit('start', { 'wavRate': context.sampleRate },function(info){
+        statusHtml(info.info);
+        recorder.start().then(() => {
+        }, (error) => {
+            console.log(`${error.name} : ${error.message}`);
+        });
+    });
 
-        input.connect(processor);
-        processor.connect(context.destination);
-        //Send data
-        processor.onaudioprocess = (e) => {
-            const voice = e.inputBuffer.getChannelData(0);
-            socket.emit('send_pcm', voice.buffer);
-        }
-    }).catch((e) => {
-        // "DOMException: Rrequested device not found" will be caught if no mic is available
-        console.log(e)
-    })
+    
 }
 
 function stopRecording() {
-  // recorder.stop(); 
-   console.log('stop recording')
-    processor.disconnect()
-    processor.onaudioprocess = null
-    processor = null
-    localstream.getTracks().forEach((track) => {
-        track.stop()
-    })
-    socket.emit('stop', '', (res) => {
-        document.getElementById("msg").innerHTML = `${res.a}`; 
-        
-        var newData = "data:audio/mp3;base64,"+ res.data;
-        const audio = new Audio();
-      audio.src = newData;
-
-    function play() {
-      audio.play();
-    }
-    play();       
+    recorder.stop();
+    console.log('stop recording')
+    // socket.emit('stop', '', (res) => {
+    //     document.getElementById("msg").innerHTML = `${res.a}`;
+    //     play(res.data);
+    // });
+    //For Test
+    socket.emit('saveRec', '', (res) => {
+        statusHtml("save");
     });
 
-    // document.getElementById("btn").innerHTML ="押下開始";
 }
-  // 获取按钮元素
-  const btn_start = document.getElementById('btn_start');
-  const btn_end = document.getElementById('btn_end');
-  // 处理按钮按下事件
-  btn_start.addEventListener('click', () => {
-      startRecording();
-  });
-
-  // 处理按钮松手事件
-  btn_end.addEventListener('click', () => {
-      stopRecording();
-  });
 
 
+function play(base64Str) {
 
-  // 获取按钮元素
-  const btn_play = document.getElementById('btn_play');
-  // 处理按钮松手事件
-  btn_play.addEventListener('click', () => {
-    play();
+    var newData = "data:audio/mp3;base64," + base64Str;
+    const audio = new Audio();
+    audio.src = newData;
+
+    function play64() {
+        audio.play();
+    }
+    play64();
+}
+// 获取按钮元素
+const btn_start = document.getElementById('btn_start');
+const btn_end = document.getElementById('btn_end');
+// 处理按钮按下事件
+btn_start.addEventListener('click', () => {
+    startRecording();
 });
+
+// 处理按钮松手事件
+btn_end.addEventListener('click', () => {
+    stopRecording();
+});
+
+
 
 

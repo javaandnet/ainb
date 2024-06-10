@@ -1,12 +1,12 @@
 
 const WavEncoder = require('wav-encoder')
-
+const fs = require('fs');
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
 const { Readable } = require('stream');
 const PassThrough = require('stream').PassThrough;
 const Config = require("./config.js");
 const config = new Config();
-
+const path = require('path');
 const subscriptionKey = config.azure.subscriptionKey;
 const serviceRegion = config.azure.serviceRegion;
 // 创建语音配置
@@ -73,13 +73,14 @@ module.exports = class {
     };
     exportWAV = (buffer) => {
         return new Promise(resolve => {
-            let sampleRate = 48000;
+            let sampleRate = 48000;//此处需要修改 是否一致
             const f32array = toF32Array(buffer);
             const audioData = {
                 sampleRate: sampleRate,
                 channelData: [f32array]
             }
-            const filename = `public/wav/${String(Date.now())}.wav`;
+            const filename =path.join(__dirname, `../public/wav/${String(Date.now())}.wav`)
+   
             WavEncoder.encode(audioData).then((buffer) => {
                 fs.writeFile(filename, Buffer.from(buffer), (e) => {
                     if (e) {
@@ -92,6 +93,8 @@ module.exports = class {
             });
         });
     }
+
+
 
 
     createStream = (obj, type) => {
@@ -158,7 +161,7 @@ module.exports = class {
 
                 recognizer.recognizeOnceAsync(result => {
                     if (result.reason === sdk.ResultReason.RecognizedSpeech) {
-                        console.log(result.text);
+                        console.log("v2t:"+result.text);
                         resolve(result.text);
                     } else {
                         reject(result);
@@ -195,10 +198,8 @@ module.exports = class {
                 result => {
                     if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
                         console.log("Synthesis completed.");
-
                     } else {
                         console.error("Speech synthesis canceled, " + result.errorDetails);
-                        
                     }
                     synthesizer.close();
                     //resolve(bufferStream);

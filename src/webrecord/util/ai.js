@@ -16,7 +16,7 @@ module.exports = class {
             str += chunk.choices[0]?.delta?.content || "";
             //process.stdout.write(chunk.choices[0]?.delta?.content || "");
         }
-        console.log(str);
+        console.log("ai:"+str);
         return str;
     }
 };

@@ -22,41 +22,45 @@ var options = {
     cert: fs.readFileSync(path.join(__dirname, 'crt/local.crt'))
 };
 app.use('/', express.static(path.join(__dirname, 'public')))
-
-server = https.createServer(options, app).listen(443, function () {
-    console.log('Example app listening on port 3000')
+const port = 443;
+server = https.createServer(options, app).listen(port, function () {
+    console.log(`AI App listening on port ${port}`);
 })
 // server = http.createServer(options,app).listen(3000, function () {
 //     console.log('Example app listening on port 3000')
 // })
 const io = socketio(server);
 
-
+//初期化
 io.on('connection', (socket) => {
-    let sampleRate = 48000;
+    let wavRate = 48000;
     let bufferAll = [];
 
     /**
      * 初期化
      */
-    socket.on('start', (data) => {
-        sampleRate = data.sampleRate;
+    socket.on('start', (data,ack) => {
+        wavRate = data.wavRate;
+        console.log(wavRate);
         bufferAll = [];
-        //console.log(`Sample Rate: ${sampleRate}`);
+        ack({ info: "ok" });
     });
 
     /**
      * Add Str
      */
     socket.on('send_pcm', (data) => {
-        const itr = data.values()
-        const buf = new Array(data.length)
+        const itr = data.values();
+        const buf = new Array(data.length);
         for (var i = 0; i < buf.length; i++) {
-            buf[i] = itr.next().value
+            buf[i] = itr.next().value;
         }
-        bufferAll = bufferAll.concat(buf)
+        bufferAll = bufferAll.concat(buf);
     });
 
+    socket.on('saveRec', (data, ack) => {
+        azure.exportWAV(bufferAll);
+    });
     //Stop
     socket.on('stop', (data, ack) => {
         //const filename = path.join(__dirname, `/public/222.wav`);
@@ -64,7 +68,19 @@ io.on('connection', (socket) => {
             //text: 问题
             //ans:回答
             ai.ask(text).then(function (ans) {
-                azure.t2v(ans).then(
+                var voiceAns ="";
+                if(ans.length > 25){
+                    var ansArr = ans.split("。");
+                    if(ansArr.length > 0){
+                        voiceAns = ansArr[0]+"。";
+                    }else{
+                        voiceAns = ansArr[0];
+                    }
+                    console.log(voiceAns);
+                }else{
+                    voiceAns =ans;
+                }
+                azure.t2v(voiceAns).then(
                     //Base64
                     function (stream) {
                         ack({ data: stream,q: text,a:ans});
@@ -72,7 +88,6 @@ io.on('connection', (socket) => {
                 );
             });
         }).catch((result) => {
-            console.log(result);
             ack({ a: "fail" });
         });
     });
