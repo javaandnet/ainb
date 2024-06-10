@@ -1,4 +1,4 @@
-# pj
+# ai
 
 ## Project setup
 ```
