@@ -11,3 +11,12 @@ vue/fsr/.npmrc
 src/webrecord/util/config.js
 src/recorder-master
 
+src/webrecord/pj/src/assets/logo.png
+src/webrecord/pj/.npmrc
+src/webrecord/pj/pnpm-lock.yaml
+src/webrecord/util/config.js
+src/webrecord/pj/src/App.vue
+src/webrecord/pj/public/favicon.ico
+src/webrecord/public/js
+src/webrecord/public/css
+src/webrecord/public/index.html

@@ -3,7 +3,7 @@ module.exports = class {
     openai = {
         organization: "org-7JnZDaFZRVxEBIwVWj84ptjj",//
         project: "proj_OslquGFuzI1ln4zehBXhdCpI",
-        apiKey: "sk-proj-us23oEIAev02sFz6mUfBT3BlbkFJiW03OYaL0m8H601yREPn"
+        apiKey: "sk-proj-zn1jlb6Gh89rVh7jDcBBT3BlbkFJkNb5sttlaGqIWwNxss3R"
     };
     azure = {
         subscriptionKey: "6f78e68a9ef543988c4866e30d46bbae",
