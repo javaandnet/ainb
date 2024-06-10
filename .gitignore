@@ -20,3 +20,4 @@ src/webrecord/pj/public/favicon.ico
 src/webrecord/public/js
 src/webrecord/public/css
 src/webrecord/public/index.html
+src/webrecord/util/config.js
