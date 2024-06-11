@@ -18,5 +18,8 @@ module.exports = class {
         }
         console.log("ai:"+str);
         return str;
-    }
+    };
+ 
+
+
 };

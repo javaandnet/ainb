@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "play-sound": "^1.1.6"
+    "play-sound": "^1.1.6",
+    "sass": "^1.77.4",
+    "vue-advanced-chat": "^2.1.0"
   }
 }

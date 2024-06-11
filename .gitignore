@@ -22,3 +22,5 @@ src/webrecord/public/css
 src/webrecord/public/index.html
 src/webrecord/util/config.js
 src/webrecord/util/config.js
+src/socket/src/js/vue-advanced-chat.umd.js
+src/socket/src/js/vue-advanced-chat.es.js
