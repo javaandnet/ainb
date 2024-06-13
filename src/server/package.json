@@ -1,10 +1,11 @@
 {
-  "name": "node-audio-stream",
+  "name": "fsr-ai-chat",
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
   },
+  "type": "module",
   "dependencies": {
     "@azure/ai-text-analytics": "^5.1.0",
     "@tensorflow/tfjs-node": "^4.20.0",
@@ -13,10 +14,13 @@
     "cosine-similarity": "^1.0.1",
     "express": "^4.19.2",
     "face-api.js": "^0.22.2",
+    "fetch-base64": "^2.1.2",
     "https": "^1.0.0",
     "js-audio-recorder": "^1.0.7",
     "js-levenshtein": "^1.1.6",
+    "jsforce": "^1.11.1",
     "microsoft-cognitiveservices-speech-sdk": "^1.36.0",
+    "mime-types": "^2.1.35",
     "natural": "^7.0.6",
     "node-mic-record": "^0.0.1",
     "node-record-lpcm16": "^1.0.1",

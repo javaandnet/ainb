@@ -7,6 +7,7 @@ const PassThrough = require('stream').PassThrough;
 const Config = require("./config.js");
 const config = new Config();
 const path = require('path');
+
 const subscriptionKey = config.azure.subscriptionKey;
 const serviceRegion = config.azure.serviceRegion;
 // 创建语音配置
@@ -64,10 +65,8 @@ const toF32Array = (buf) => {
     return new Float32Array(buffer)
 }
 
-
-
 // default config
-module.exports = class {
+module.exports =   class Azure{
     log = (txt) => {
         console.log(txt);
     };
