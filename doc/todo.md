@@ -10,3 +10,8 @@
 10. 配置文件 整理OK
 11. 加入分割 转化语音功能。按句号分隔
 12. vant <!-- https://www.w3cschool.cn/vantlesson/vantlesson-rig235ur.html -->
+## AI
+(参考)[https://qiita.com/nohanaga/items/fa9f5260cf85a7fddc52]
+1. 使用助手
+    1.  服务器实例化，各自Thread
+    2.  Load文件测试
