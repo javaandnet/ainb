@@ -1,38 +1,17 @@
 
-import {Config}  from "./config.js";
+import { Config } from "./config.js";
+import SF from './sf.js';
 import OpenAI from "openai";
 const openai = new OpenAI(Config.openai);
 
 // default config
- class AI{
+class AI {
     constructor() {
         this.MODE = "";
         this.QUERY = "";
         this.TYPE = "";
         this.messages = [];
-    }
-    ask = async function main(q) {
-        const stream = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [{ role: "user", content: q }]
-        });
- 
-        return stream.choices[0].message.content;
-    };
-    func = async function main(messages, tools) {
-        var options = {
-            model: "gpt-3.5-turbo",
-            messages: messages
-        };
-        if (tools) {
-            options.tools = tools;
-            options.tool_choice = "auto";
-        }
-        return await openai.chat.completions.create(options);
-    };
-    company = async function (msg) {
-        //配置，可以改成动态的，或者保存文件 进行热更新 json.parse?
-        const tools = [
+        this.tools = [
             {
                 type: "function",
                 function: {
@@ -77,13 +56,36 @@ const openai = new OpenAI(Config.openai);
                 },
             }
         ];
+    }
+    ask = async function main(q) {
+        const stream = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: q }]
+        });
+
+        return stream.choices[0].message.content;
+    };
+    func = async function main(messages, tools) {
+        var options = {
+            model: "gpt-3.5-turbo",
+            messages: messages
+        };
+        if (tools) {
+            options.tools = tools;
+            options.tool_choice = "auto";
+        }
+        return await openai.chat.completions.create(options);
+    };
+    company = async function (msg) {
+        //配置，可以改成动态的，或者保存文件 进行热更新 json.parse?
+
         this.messages = [];
         this.messages.push({
             role: "user",
             content: msg
         });
         //第一步查询，分流，每次执行一遍
-        var res = await this.func(this.messages, tools);
+        var res = await this.func(this.messages,  this.tools);
         //console.log("#####1");
         //里面应有choices，各种信息
         const responseMessage = res.choices[0].message;
@@ -95,24 +97,24 @@ const openai = new OpenAI(Config.openai);
             console.log(args);
             //上次信息加入
             this.messages.push(responseMessage);
-            var tool = this.createTool(toolCall, name, args);//答案
+            var tool = await this.createTool(toolCall, name, args);//答案
             //这个模式下，清空上下文，并且推送第一次的Message
             this.messages.push(tool);
             //第二次请求，推送东西
             let secondResponse = await this.func(this.messages);
             console.log(secondResponse.choices[0].message.content);
             return secondResponse.choices[0].message.content;
-        }else{
+        } else {
             return await this.ask(msg);//普通
         }
     }
-    createTool = function (toolCall, func, args) {
+    createTool = async function (toolCall, func, args) {
         var content = "";
         if (func == "get_info") {
-            content = this.getInfo(args);
-        } else if(func == "get_number"){
-            content = this.getNumber(args);
-        }else {
+            content = await this.getInfo(args);
+        } else if (func == "get_number") {
+            content = await this.getNumber(args);
+        } else {
             content = "¸¸¸" + args.query;
         }
 
@@ -124,46 +126,37 @@ const openai = new OpenAI(Config.openai);
         };
     }
 
-    getInfo = function (args) {
+    getInfo = async function (args) {
         if ((args.query.includes("name") || args.query.includes("名前"))) {
             return "FSR株式会社"
         } else if (args.query.includes("社長") || args.query.toLowerCase().includes("ceo") || args.query.toLowerCase().includes("president")) {
             return "孫光"
+        } else if (args.query.includes("未稼働") || (args.condition && (args.condition.includes("未稼働") || args.condition.includes("稼働していない") || args.condition.includes("未稼働") || args.condition.includes("inactive")))) {
+
+            var sf = new SF();
+
+            return await sf.noWorkName();
         }
         return "";
     }
-    getNumber = function (args) {
-        if (args.query.includes("未稼働") || args.condition.includes("未稼働") || args.condition.includes("稼働していない") || args.condition.includes("未稼働")|| args.condition.includes("inactive")) {
-            return "11"
+    getNumber = async function (args) {
+        if (args.query.includes("未稼働") || args.condition.includes("未稼働") || args.condition.includes("稼働していない") || args.condition.includes("未稼働") || args.condition.includes("inactive")) {
+
+            var sf = new SF();
+
+            return await sf.noWorkName();
         }
         else if ((args.query.includes("employees") || args.query.includes("社員"))) {
             return "100";
-        } 
+        }
         return "0";
     }
     assistants = async function (msg) {
         const assistant = await openai.beta.assistants.create({
             name: "会社の営業",
-            description: "会社の情報を連携する",
+            description: "FSR株式会社の情報を連携する",
             model: "gpt-3.5-turbo",
-            tools: [
-                {
-                    type: "function",
-                    function: {
-                        name: "set_mode",// 绑定到函数
-                        description: "设定类型",
-                        parameters: {
-                            type: "object",
-                            properties: {//参数说明
-                                name: { description: "什么信息", },
-                                mode: { description: "什么模式," },
-                                kind: { description: "什么种类的模式," },
-                            },
-                            required: ["mode"],//必须
-                        },
-                    },
-                },
-            ]
+            tools:  this.tools
         });
 
         const thread = openai.beta.threads.create();

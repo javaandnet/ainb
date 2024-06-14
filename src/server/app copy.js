@@ -55,6 +55,7 @@ const io = socketio(server, {
 server.listen(port, function () {
     console.log(`AI App listening on port ${port}`);
 });
+
 //初期化
 io.on('connection', (socket) => {
     let wavRate = 48000;

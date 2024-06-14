@@ -12,6 +12,7 @@
       :loading-rooms="false"
       :messages-loaded="true"
       :show-reaction-emojis="false"
+      :auto-scroll="JSON.stringify(autoScroll)"
       :message-actions="JSON.stringify([])"
       @send-message="sendMessage($event.detail[0])"
       @record-voice="record($event.detail[0])"
@@ -28,7 +29,18 @@ register();
 // text-messages
 export default {
   mounted() {
-    this.socket = io("http://localhost:3000");
+    this.socket = io("http://192.168.1.160:3000");
+    this.autoScroll = {
+      send: {
+        new: true,
+        newAfterScrollUp: true,
+      },
+      receive: {
+        new: true,
+        newAfterScrollUp: true,
+      },
+    };
+    //  this.socket = io("https://localhost");
     this.socket.on("message", (message) => {
       console.log(message);
       // this.messages.push(message);
