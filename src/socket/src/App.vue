@@ -55,6 +55,13 @@ export default {
         },
       ];
     });
+
+    this.socket.on("newThread", (thread) => {
+      console.log(thread);
+      // this.messages.push(message);
+      this.canUse = true;
+      this.thread = thread;
+    });
   },
   data() {
     return {
@@ -119,7 +126,7 @@ export default {
       console.log(flag);
     },
     sendMessage(message) {
-      this.socket.emit("message", message);
+      this.socket.emit("message", { thread: this.thread, msg: message });
 
       this.messages = [
         ...this.messages,

@@ -8,7 +8,7 @@ const helper = new Helper();
 class AI {
     constructor() {
         this.DEBUG = true;
-        this.DEBUGRESULT= true;
+        this.DEBUGRESULT = true;
         this.tools = [
             {
                 type: "function",
@@ -107,36 +107,36 @@ class AI {
      * @param {*} lastFlag 返回最后一条信息
      * @returns  返回最后一条信息
      */
-    chat = async function (msg, lastFlag = true) {
+    chat = async function (msg, threadId = this.thread.id, lastFlag = true) {
         //3. Messag:消息
         // ユーザーが入力したクエリを Message として OpenAI API に送信する，往哪一个线程传递，可以管理不同线程
-        await openai.beta.threads.messages.create(this.thread.id, {
+        await openai.beta.threads.messages.create(threadId, {
             role: "user",
             content: msg,
         });
         //4. execute
         let run = await openai.beta.threads.runs.create(
-            this.thread.id,
+            threadId,
             { assistant_id: this.assistant.id }
         );
         //5. 执行完毕
-        let msgs = await this.waitRun(this.thread.id, run.id);
+        let msgs = await this.waitRun(threadId, run.id);
         //信息变化
         msgs = await this.doMsg(msgs);
         //TODO msgを変更する
         if (lastFlag) {
             // console.log(msgs[0].content[0].text);
-            if(msgs.rtn){
-                if(msgs.rtn.out){
+            if (msgs.rtn) {
+                if (msgs.rtn.out) {
                     return msgs.rtn.out;
-                }else{
+                } else {
                     return msgs.data[0].content[0].text;
                 }
-            }else{
+            } else {
                 console.log(msgs);
                 return "情報がありません";
             }
-    
+
         }
         return msgs.data;
     };
@@ -269,13 +269,13 @@ class AI {
                 }
                 //Run Step可获得
                 let doRtn = await this.doFunc(funcName, args);
-    
-                if (this.DEBUG && this.DEBUGRESULT ) {
+
+                if (this.DEBUG && this.DEBUGRESULT) {
                     console.log("実行結果：", doRtn);
                 }
                 //Stringの場合は同じする
-                if(typeof(doRtn) =="string"){
-                    doRtn = {ai:doRtn};
+                if (typeof (doRtn) == "string") {
+                    doRtn = { ai: doRtn };
                 }
                 //提交函数执行完的结果
                 await openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
@@ -307,7 +307,7 @@ class AI {
         }
         catch (e) {
             console.error(e);
-            return {ai:"情報なし",out:""};
+            return { ai: "情報なし", out: "" };
         }
     };
     /**

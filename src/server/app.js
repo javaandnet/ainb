@@ -35,20 +35,23 @@ const io = new Server(server, {
 server.listen(port, function () {
     console.log(`AI App listening on port ${port}`);
 });
-var asstId ="asst_0vl90HXVvBv8T5qsBwXYbsYG";
+var asstId = "asst_0vl90HXVvBv8T5qsBwXYbsYG";
 await ai.getAssistant(asstId);
 ai.updateAssistant();
 var thread = await ai.createThread();
 //初期化
 io.on('connection', (socket) => {
-    //AI
+    //AI 新しいThread
+    ai.createThread()
+        .then(thread => {
+            socket.emit("newThread", { thread: thread.id });
+        });
     socket.on('message', (message) => {
-       // console.log('Message received: ', message);
-        ai.chat(message.content).then(function (ans) {
+        console.log('Message received: ', message);
+        ai.chat(msg.content, thread.thread).then(function (ans) {
             console.log(ans);
             socket.emit("message", { content: ans });
         });
-
     });
     // //VOICE
     // let wavRate = 48000;
