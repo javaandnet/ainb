@@ -1,29 +1,41 @@
 
 import { Config } from "./config.js";
-import SF from './sf.js';
+import { Helper } from './helper.js';
 import OpenAI from "openai";
 const openai = new OpenAI(Config.openai);
-
+const helper = new Helper();
 // default config
 class AI {
     constructor() {
-        this.MODE = "";
-        this.QUERY = "";
-        this.TYPE = "";
+        this.DEBUG = true;
         this.messages = [];
         this.tools = [
             {
                 type: "function",
                 function: {
                     name: "get_info",// 绑定到函数
-                    description: "文字列情報を取得場合",
+                    description: "会社普通情報を取得場合",
                     parameters: {
                         type: "object",
                         properties: {//参数说明
                             query: { description: "質問の範囲" },
                             condition: { description: "質問の条件", type: "string" }
                         },
-                        required: ["query"],//必须
+                        required: ["query", "condition"],//必须
+                    },
+                },
+            }, {
+                type: "function",
+                function: {
+                    name: "get_emp",// 绑定到函数
+                    description: "社員の情報を取得する、説明文、履歴書など、情報はそのまま出力をお願いします",
+                    parameters: {
+                        type: "object",
+                        properties: {//参数说明
+                            query: { description: "質問の範囲" },
+                            condition: { description: "質問の条件", type: "string" }
+                        },
+                        required: ["query", "condition"],//必须
                     },
                 },
             }, {
@@ -44,7 +56,7 @@ class AI {
                 type: "function",
                 function: {
                     name: "do_action",// 绑定到函数
-                    description: "何が操作が行う",
+                    description: "何が操作が行う、",
                     parameters: {
                         type: "object",
                         properties: {//参数说明
@@ -54,17 +66,40 @@ class AI {
                         required: ["query", "condition"],//必须
                     },
                 },
+            }, {
+                type: "function",
+                function: {
+                    name: "send_mail",// 绑定到函数
+                    description: "お客さんにメールを送信する、その前に送信情報を再確認必要です。実際送信または確認フラグを「実際」と「確認」に分けてください。",
+                    parameters: {
+                        type: "object",
+                        properties: {//参数说明
+                            mailto: { description: "送信先", type: "string" },
+                            isConfirm: { description: "実際送信または確認フラグ", type: "string" },
+                            info: { description: "発送内容", type: "string" }
+                        },
+                        required: ["query", "condition", "isConfirm"],//必须
+                    },
+                },
+            }, {
+                type: "function",
+                function: {
+                    name: "confirm_mail",// 绑定到函数
+                    description: "お客さんにメールを送信前確認して、必要な場合は送信する。",
+                    parameters: {
+                        type: "object",
+                        properties: {//参数说明
+                            mailto: { description: "送信先", type: "string" },
+                            isConfirm: { description: "実際送信または確認フラグ", type: "string" },
+                            info: { description: "発送内容", type: "string" }
+                        },
+                        required: ["query", "condition", "isConfirm"],//必须
+                    },
+                },
             }
         ];
     }
-    ask = async function main(q) {
-        const stream = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [{ role: "user", content: q }]
-        });
 
-        return stream.choices[0].message.content;
-    };
     /**
      * 
      * @param {*} msg 
@@ -85,97 +120,61 @@ class AI {
         );
         //5. 执行完毕
         const msgs = await this.waitRun(this.thread.id, run.id);
-        console.log(lastFlag);
+        //TODO msgを変更する
         if (lastFlag) {
-            return msgs;
+            // console.log(msgs[0].content[0].text);
+            var text = msgs[0].content[0].text.value;
+            return text;
         }
         return msgs;
     };
 
-    func = async function main(messages, tools) {
-        var options = {
-            model: "gpt-3.5-turbo",
-            messages: messages
-        };
-        if (tools) {
-            options.tools = tools;
-            options.tool_choice = "auto";
-        }
-        return await openai.chat.completions.create(options);
-    };
-    createTool = async function (toolCall, func, args) {
+
+    doFunc = async function (func, args) {
+        //SELECT Id, Name, Information__c, Resume__c FROM Worker__c
         var content = "";
-        if (func == "get_info") {
-            content = await this.getInfo(args);
-        } else if (func == "get_number") {
-            content = await this.getNumber(args);
-        } else {
-            content = "¸¸¸" + args.query;
-        }
-
-        return {
-            tool_call_id: toolCall.id,
-            role: "tool",
-            name: func,
-            content: content
+        // console.log(args);
+        var funcs = {
+            "get_info": helper.getInfo,
+            "get_number": helper.getNumber,
+            "get_emp": helper.getEmp,
+            "send_mail": helper.sendMail,
+            "confirm_mail": helper.confirmMail
         };
-    }
+        var rtn = await funcs[func](args);
 
-    deleteThread = async function (id) {
-        openai.beta.threads.delete(id)
+        return rtn;
     };
-
-    deleteAssistant = async function (id) {
-        openai.beta.assistants.delete(id);
-    };
-
-    waitRun = async function (threadId, runId) {
-        const run = await openai.beta.threads.runs.retrieve(threadId, runId);
-        if (run.status === "queued" || run.status === "in_progress") {
-            await new Promise((resolve) => setTimeout(resolve, 500))
-            return this.waitRun(threadId, runId);
-        } else if (run.status === "requires_action" && run.required_action) {//需要下一步
-            // NOTE: 複数回の Tools の呼び出しには対応していない
-            const call = run.required_action.submit_tool_outputs.tool_calls[0];
-            // console.log(call.function);
-            const args = JSON.parse(call.function.arguments);
-            //执行
-            // await functionCall[call.function.name](args);
-            //Run Step可获得
-            const doRtn = await this.createTool({ id: 1 }, call.function.name, args);
-            //提交函数执行完的结果
-            await openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
-                tool_outputs: [
-                    {
-                        tool_call_id: call.id,
-                        output: doRtn.content
-                    }
-                ],
-            });
-            //递归调用
-            await this.waitRun(threadId, runId);
-        } else if (run.status === "completed") {
-            let messages = await openai.beta.threads.messages.list(threadId);
-            //注意为逆序操作
-            console.log("return");
-            return messages.data;
+    /**
+     * 個別の処理
+     */
+    doChangeArgs = async function (func, args) {
+        if (func == "send_mail" || func == "confirm_mail") {
+            args.subject = "技術者：" + this.emp.name;
+            args.info = this.emp.information;
+            // console.log("argsを編集する");
+            return args;
         }
-        return run;
+        return args;
     };
-    createAssistant = async () => {
-        const assistant = await openai.beta.assistants.create({
-            name: "会社の営業",
-            instructions: "あなたはFSR株式会社の営業です。会社の情報をお客さんに紹介する。",
-            model: "gpt-3.5-turbo",
-            tools: this.tools
-        });
-        this.assistant = assistant;
-        return assistant;
-    };
-    getAssistant = async (id) => {
-        const assistant = await openai.beta.assistants.retrieve(id);
-        this.assistant = assistant;
-        return assistant;
+
+    /**
+     * 実行後の処理
+     */
+    doAfterFunc = async function (rtn, func, args) {
+        var content = "";
+        // console.log("result");
+        // console.log(rtn);
+        if (func == "get_emp") {
+            //事項あと操作
+            this.emp = rtn;
+            return this.notrans(rtn.information);
+        } else if (func == "confirm_mail") {
+            return this.notrans(rtn); 
+        }
+        else {
+            return rtn;
+        }
     };
     createThread = async () => {
         var thread = await openai.beta.threads.create();
@@ -183,19 +182,110 @@ class AI {
         return thread;
     };
 
+    deleteThread = async function (id) {
+        openai.beta.threads.delete(id)
+    };
+    notrans = function (str) {
+        return "下記の情報をそのまま出力ください。" + "\r\n#######\r\n" + str + "\r\n#######\r\n";
+    };
+    createAssistant = async () => {
+        const assistant = await openai.beta.assistants.create({
+            name: "会社の営業",
+            instructions: "あなたはFSR株式会社の営業です。会社と技術者の情報をお客さんに紹介する。メール送信の操作を行う。関数を呼び出すときに、名前以外パラメータが英語に変換してください。メール送信前再確認必要です。",
+            model: "gpt-3.5-turbo",
+            tools: this.tools
+        });
+
+        // const assistant = await openai.beta.assistants.create({
+        //     name: "飲食店の店員",
+        //     instructions: "あなたは飲食店の店員です。飲食店のメニューを紹介すること、注文すること。",
+        //     model: "gpt-3.5-turbo",
+        //     tools: this.tools
+        // });
+        this.assistant = assistant;
+        return assistant;
+    };
+    deleteAssistant = async function (id) {
+        openai.beta.assistants.delete(id);
+    };
+    updateAssistant = async function (id, options) {
+        id = this.assistant.id;
+        options = {
+            tools: this.tools
+        };
+        openai.beta.assistants.update(id, options);
+    };
+    getAssistant = async (id) => {
+        const assistant = await openai.beta.assistants.retrieve(id);
+        this.assistant = assistant;
+        return assistant;
+    };
+
     deleteAssistants = async (run) => {
 
         var ass = await openai.beta.assistants.list({ limit: 100 });
-        console.log(ass.data.length);
-        // ass.data.every(function (a) {
-        //     console.log(a.id);
-        //     await openai.beta.assistants.del(a.id);
-        //     //   console.log(response);
-        // });
+        // console.log(ass.data.length);
         for await (const a of ass.data) {
-            console.log(a.id);
+            // console.log(a.id);
             openai.beta.assistants.del(a.id);
         }
+
+    };
+    waitRun = async function (threadId, runId) {
+        const run = await openai.beta.threads.runs.retrieve(threadId, runId);
+        if (run.status === "queued" || run.status === "in_progress") {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            return await this.waitRun(threadId, runId);
+        } else if (run.status === "requires_action" && run.required_action) {//需要下一步
+            // NOTE: 複数回の Tools の呼び出しには対応していない
+            const call = run.required_action.submit_tool_outputs.tool_calls[0];
+            //console.log(call.function.name);
+            const funcName = call.function.name;
+            let args = JSON.parse(call.function.arguments);
+            //変数を変更する
+            args = await this.doChangeArgs(funcName, args);
+            if (this.DEBUG) {
+                console.log("########実行条件Start######");
+                console.log(funcName);
+                console.log(args);
+                console.log("########実行条件Start######");
+            }
+            //Run Step可获得
+            let doRtn = await this.doFunc(funcName, args);
+            //特別再処理、無用？
+            doRtn = await this.doAfterFunc(doRtn, funcName, args);
+            if (this.DEBUG) {
+                console.log("########実行結果Start######");
+                console.log(doRtn);
+                console.log("########実行結果End######");
+            }
+            //提交函数执行完的结果
+            await openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
+                tool_outputs: [
+                    {
+                        tool_call_id: call.id,
+                        output: doRtn
+                    }
+                ],
+            });
+            //递归调用
+            return await this.waitRun(threadId, runId);
+        } else if (run.status === "completed") {
+            let messages = await openai.beta.threads.messages.list(threadId);
+            //注意为逆序操作
+            //最後の状態で戻ります
+            // console.log(messages);
+            await this.doMessages(threadId);
+            return messages.data;
+        }
+        return run;
+    };
+    /**
+     * Modify msg 実行後
+     * @param {} threadId 
+     */
+    doMessages = async (threadId) => {
+
 
     };
     //这个比较精确
@@ -212,118 +302,21 @@ class AI {
             console.error("Run did not complete:", run);
         }
     };
-
-    getInfo = async function (args) {
-        if ((args.query.includes("name") || args.query.includes("名前"))) {
-            return "FSR株式会社"
-        } else if (args.query.includes("社長") || args.query.toLowerCase().includes("ceo") || args.query.toLowerCase().includes("president")) {
-            return "孫光"
-        } else if (args.query.includes("未稼働") || (args.condition && (args.condition.includes("未稼働") || args.condition.includes("稼働していない") || args.condition.includes("未稼働") || args.condition.includes("inactive")))) {
-
-            var sf = new SF();
-
-            return await sf.noWorkName();
-        }
-        return "";
-    }
-    getNumber = async function (args) {
-        if (args.query.includes("未稼働") || args.condition.includes("未稼働") || args.condition.includes("稼働していない") || args.condition.includes("未稼働") || args.condition.includes("inactive")) {
-
-            var sf = new SF();
-
-            return await sf.noWorkName();
-        }
-        else if ((args.query.includes("employees") || args.query.includes("社員"))) {
-            return "100";
-        }
-        return "0";
-    }
-
-
-    assistantsSample = async function (msg) {
-
-        // Initial Run status: queued
-        // Run status: queued
-        // Run status: in_progress
-        // Run status: completed
-        // Final Run status: completed
-
-        //助手
-        //1. server起動するときに、作成する
-        const assistant = await openai.beta.assistants.create({
-            name: "会社の営業",
-            instructions: "あなたはFSR株式会社の営業です。会社の情報をお客さんに紹介する。",
+    ask = async function main(q) {
+        const stream = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
-            tools: this.tools
+            messages: [{ role: "user", content: q }]
         });
-        //2. 线程，不同用户新建 New Connect
-        const thread = await openai.beta.threads.create();
 
-        //3. Messag:消息
-        // ユーザーが入力したクエリを Message として OpenAI API に送信する，往哪一个线程传递，可以管理不同线程
-        await openai.beta.threads.messages.create(thread.id, {
-            role: "user",
-            content: msg,
-        });
-        //4. execute
-        let run = await openai.beta.threads.runs.create(
-            thread.id,
-            { assistant_id: assistant.id }
-        );
-        //5. 执行完毕
-        const runToReteive = await this.waitRun(thread.id, run.id)
-
-        return runToReteive;
+        return stream.choices[0].message.content;
     };
 
     createRun = async function () {
 
     };
     todo = async function () {
-        // run = openai.beta.threads.runs.retrieve(
-        //     thread_id = thread.id,
-        //     run_id = run.id
-        // );
-        // openai.beta.threads.runs.retrieve(
-        //     thread_id = thread.id,
-        //     run_id = run.id
-        // );
-        // messages = openai.beta.threads.messages.list(
-        //     thread_id = thread.id
-        // );
     };
 
-    company = async function (msg) {
-        //配置，可以改成动态的，或者保存文件 进行热更新 json.parse?
 
-        this.messages = [];
-        this.messages.push({
-            role: "user",
-            content: msg
-        });
-        //第一步查询，分流，每次执行一遍
-        var res = await this.func(this.messages, this.tools);
-        //console.log("#####1");
-        //里面应有choices，各种信息
-        const responseMessage = res.choices[0].message;
-        if (responseMessage.tool_calls) {
-            var toolCall = responseMessage.tool_calls[0];
-            var name = toolCall.function.name;
-            console.log(name);
-            var args = JSON.parse(toolCall.function.arguments);
-            console.log(args);
-            //上次信息加入
-            this.messages.push(responseMessage);
-            var tool = await this.createTool(toolCall, name, args);//答案
-            //这个模式下，清空上下文，并且推送第一次的Message
-            this.messages.push(tool);
-            //第二次请求，推送东西
-            let secondResponse = await this.func(this.messages);
-            console.log(secondResponse.choices[0].message.content);
-            return secondResponse.choices[0].message.content;
-        } else {
-            return await this.ask(msg);//普通
-        }
-    }
 };
 export { AI };

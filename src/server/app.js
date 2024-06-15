@@ -35,15 +35,17 @@ const io = new Server(server, {
 server.listen(port, function () {
     console.log(`AI App listening on port ${port}`);
 });
-
+var asstId ="asst_0vl90HXVvBv8T5qsBwXYbsYG";
+await ai.getAssistant(asstId);
+ai.updateAssistant();
+var thread = await ai.createThread();
 //初期化
 io.on('connection', (socket) => {
-
     //AI
     socket.on('message', (message) => {
-        console.log('Message received: ', message);
-        ai.company(message.content).then(function (ans) {
-            console.log(ans);
+       // console.log('Message received: ', message);
+        ai.chat(message.content).then(function (ans) {
+            // console.log(ans);
             socket.emit("message", { content: ans });
         });
 
