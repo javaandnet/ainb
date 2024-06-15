@@ -126,9 +126,12 @@ class AI {
         //TODO msgを変更する
         if (lastFlag) {
             // console.log(msgs[0].content[0].text);
-   
             if(msgs.rtn){
-                return msgs.rtn.out;;
+                if(msgs.rtn.out){
+                    return msgs.rtn.out;
+                }else{
+                    return msgs.data[0].content[0].text;
+                }
             }else{
                 console.log(msgs);
                 return "情報がありません";
@@ -272,7 +275,7 @@ class AI {
                 }
                 //Stringの場合は同じする
                 if(typeof(doRtn) =="string"){
-                    doRtn = {ai:doRtn,out:doRtn};
+                    doRtn = {ai:doRtn};
                 }
                 //提交函数执行完的结果
                 await openai.beta.threads.runs.submitToolOutputs(threadId, runId, {

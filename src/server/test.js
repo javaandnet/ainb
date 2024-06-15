@@ -99,7 +99,7 @@ ai.updateAssistant();
 await ai.createThread();
 await ai.chat("会社の名前");
 // //   await ai.chat("社員数は何人ですか？");
-// var text = "未稼働社員で任峰がいますか？";
+// var text = "未稼働社員は教えてください";
 // text = "未稼働一覧は教えてください";
 // text = "劉磊の説明文を教えてください";
 // var msg ="";
