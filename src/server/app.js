@@ -35,7 +35,6 @@ const io = new Server(server, {
 server.listen(port, function () {
     console.log(`AI App listening on port ${port}`);
 });
-var asstId = "asst_0vl90HXVvBv8T5qsBwXYbsYG";
 await ai.getAssistant(asstId);
 ai.updateAssistant();
 var thread = await ai.createThread();

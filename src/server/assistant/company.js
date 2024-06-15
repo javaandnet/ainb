@@ -1,5 +1,5 @@
 class Company {
-    id = "asst_0vl90HXVvBv8T5qsBwXYbsYG";
+    id = "asst_KQsWjF05lR95Z92JwpOMCZBE";
     config = {
         
         name: "会社の営業",

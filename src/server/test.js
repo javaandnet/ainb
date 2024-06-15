@@ -5,13 +5,13 @@ const ai = new AI();
 // const assistant = new Assistant();
 
 // console.log(assistant.get("company"));
-// await ai.deleteAssistants();
+ // await ai.deleteAssistants();
 //var res = await(ai.createAssistant());
-
- await ai.getAssistant("company");
-ai.updateAssistant();
-await ai.createThread();
-var msg = await ai.chat("未稼働一覧は教えてください");
+var res = await(ai.createAssistant("company"));
+//  await ai.getAssistant("company");
+// ai.updateAssistant();
+// await ai.createThread();
+// var msg = await ai.chat("未稼働一覧は教えてください");
 
 // console.log("AIから：\r\n",msg);
 // //   await ai.chat("社員数は何人ですか？");
