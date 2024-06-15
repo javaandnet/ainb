@@ -1,6 +1,8 @@
 
 import { Config } from "./config.js";
 import { Helper } from './helper.js';
+import {AssistantFactory} from './assistantFactory.js';
+const assistantFactory = new AssistantFactory();
 import OpenAI from "openai";
 const openai = new OpenAI(Config.openai);
 const helper = new Helper();
@@ -202,35 +204,24 @@ class AI {
         openai.beta.threads.delete(id)
     };
 
-    createAssistant = async () => {
-        const assistant = await openai.beta.assistants.create({
-            name: "会社の営業",
-            instructions: "あなたはFSR株式会社の営業です。会社と技術者の情報をお客さんに紹介する。メール送信の操作を行う。関数を呼び出すときに、名前以外パラメータが英語に変換してください。メール送信前再確認必要です。",
-            model: "gpt-3.5-turbo",
-            tools: this.tools
-        });
-
-        // const assistant = await openai.beta.assistants.create({
-        //     name: "飲食店の店員",
-        //     instructions: "あなたは飲食店の店員です。飲食店のメニューを紹介すること、注文すること。",
-        //     model: "gpt-3.5-turbo",
-        //     tools: this.tools
-        // });
+    createAssistant = async (id = "company") => {
+        let at = assistantFactory.get(id);
+        const assistant = await openai.beta.assistants.create(at.config);
         this.assistant = assistant;
         return assistant;
     };
     deleteAssistant = async function (id) {
         openai.beta.assistants.delete(id);
     };
+
     updateAssistant = async function (id, options) {
-        id = this.assistant.id;
-        options = {
-            tools: this.tools
-        };
-        openai.beta.assistants.update(id, options);
+        let at = assistantFactory.get(id);
+        openai.beta.assistants.update(at.id, at.config);
     };
+
     getAssistant = async (id) => {
-        const assistant = await openai.beta.assistants.retrieve(id);
+        let at = assistantFactory.get(id);
+        const assistant = await openai.beta.assistants.retrieve(at.id);
         this.assistant = assistant;
         return assistant;
     };

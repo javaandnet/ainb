@@ -25,12 +25,13 @@ export default class SF {
     var jsh = new JSH();
     var sql = "SELECT Id,  Name FROM Worker__c  where SalesStatus__c = '可能'";
     var data = await jsh.query(sql);
-    var str = "";
+ 
+    var names = [];
     if (data.totalSize > 0) {
-      data.records.forEach((element) => { str = str + "," + element.Name });
+      data.records.forEach((element) => {names.push(element.Name )});
     }
-    // console.log(str);
-    return str;
+ 
+    return names.join(",");
 
   }
 }
