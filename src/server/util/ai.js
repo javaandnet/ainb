@@ -130,7 +130,7 @@ class AI {
                 if (msgs.rtn.out) {
                     return msgs.rtn.out;
                 } else {
-                    return msgs.data[0].content[0].text;
+                    return msgs.data[0].content[0].text.value;
                 }
             } else {
                 console.log(msgs);
