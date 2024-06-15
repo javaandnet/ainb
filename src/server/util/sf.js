@@ -16,11 +16,9 @@ export default class SF {
     var str = "";
     if (data.totalSize > 0) {
       var rec = data.records[0];
-      return {"name":rec.Name,"information":rec.Information__c,"link":rec.Resume__c};
+      return {"id":rec.Id,"name":rec.Name,"information":rec.Information__c,"link":rec.Resume__c};
     }
-
-    return {information:""};
-
+    return null;
   }
 
   async noWorkName() {

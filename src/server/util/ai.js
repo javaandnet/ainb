@@ -8,7 +8,7 @@ const helper = new Helper();
 class AI {
     constructor() {
         this.DEBUG = true;
-        this.messages = [];
+        this.DEBUGRESULT= true;
         this.tools = [
             {
                 type: "function",
@@ -76,9 +76,10 @@ class AI {
                         properties: {//参数说明
                             mailto: { description: "送信先", type: "string" },
                             isConfirm: { description: "実際送信または確認フラグ", type: "string" },
-                            info: { description: "発送内容", type: "string" }
+                            emp: { description: "送信の内容と関連する技術者、誰の何場合は誰を設定する", type: "string" },
+                            info: { description: "発送内容の特定する、例えば、誰の何の場合は何を設定する", type: "string" }
                         },
-                        required: ["query", "condition", "isConfirm"],//必须
+                        required: ["mailto", "isConfirm"],//必须
                     },
                 },
             }, {
@@ -119,17 +120,32 @@ class AI {
             { assistant_id: this.assistant.id }
         );
         //5. 执行完毕
-        const msgs = await this.waitRun(this.thread.id, run.id);
+        let msgs = await this.waitRun(this.thread.id, run.id);
+        //信息变化
+        msgs = await this.doMsg(msgs);
         //TODO msgを変更する
         if (lastFlag) {
             // console.log(msgs[0].content[0].text);
-            var text = msgs[0].content[0].text.value;
-            return text;
+   
+            if(msgs.rtn){
+                return msgs.rtn.out;;
+            }else{
+                console.log(msgs);
+                return "情報がありません";
+            }
+    
         }
+        return msgs.data;
+    };
+    /**
+     * 
+     * @param {*} func 
+     * @param {*} args 
+     */
+    //处理实际返回的值，注意存储的与给用户显示的可以不同
+    doMsg = async function (msgs) {
         return msgs;
     };
-
-
     doFunc = async function (func, args) {
         //SELECT Id, Name, Information__c, Resume__c FROM Worker__c
         var content = "";
@@ -150,32 +166,29 @@ class AI {
      */
     doChangeArgs = async function (func, args) {
         if (func == "send_mail" || func == "confirm_mail") {
-            args.subject = "技術者：" + this.emp.name;
-            args.info = this.emp.information;
+            // args.subject = "技術者：" + this.emp.name;
+            // args.info = this.emp.information;
             // console.log("argsを編集する");
             return args;
+        } else if (func == "get_emp") {
+            if (args.condition) {
+                args.condition = args.condition.replace("name:", "");
+            }
+            if (args.query) {
+                if (args.query.name) {
+                    args.query = args.query.name;
+                }
+                try {
+                    args.query = args.query.replace("name:", "");
+                } catch (e) {
+                    console.log("変換不要");
+                }
+            }
+
         }
         return args;
     };
 
-    /**
-     * 実行後の処理
-     */
-    doAfterFunc = async function (rtn, func, args) {
-        var content = "";
-        // console.log("result");
-        // console.log(rtn);
-        if (func == "get_emp") {
-            //事項あと操作
-            this.emp = rtn;
-            return this.notrans(rtn.information);
-        } else if (func == "confirm_mail") {
-            return this.notrans(rtn); 
-        }
-        else {
-            return rtn;
-        }
-    };
     createThread = async () => {
         var thread = await openai.beta.threads.create();
         this.thread = thread;
@@ -185,9 +198,7 @@ class AI {
     deleteThread = async function (id) {
         openai.beta.threads.delete(id)
     };
-    notrans = function (str) {
-        return "下記の情報をそのまま出力ください。" + "\r\n#######\r\n" + str + "\r\n#######\r\n";
-    };
+
     createAssistant = async () => {
         const assistant = await openai.beta.assistants.create({
             name: "会社の営業",
@@ -231,54 +242,70 @@ class AI {
         }
 
     };
-    waitRun = async function (threadId, runId) {
-        const run = await openai.beta.threads.runs.retrieve(threadId, runId);
-        if (run.status === "queued" || run.status === "in_progress") {
-            await new Promise((resolve) => setTimeout(resolve, 100));
-            return await this.waitRun(threadId, runId);
-        } else if (run.status === "requires_action" && run.required_action) {//需要下一步
-            // NOTE: 複数回の Tools の呼び出しには対応していない
-            const call = run.required_action.submit_tool_outputs.tool_calls[0];
-            //console.log(call.function.name);
-            const funcName = call.function.name;
-            let args = JSON.parse(call.function.arguments);
-            //変数を変更する
-            args = await this.doChangeArgs(funcName, args);
-            if (this.DEBUG) {
-                console.log("########実行条件Start######");
-                console.log(funcName);
-                console.log(args);
-                console.log("########実行条件Start######");
+    waitRun = async function (threadId, runId, doRtn) {
+        try {
+            let rtn = {};
+            const run = await openai.beta.threads.runs.retrieve(threadId, runId);
+            if (run.status === "queued" || run.status === "in_progress") {
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                return await this.waitRun(threadId, runId, doRtn);
+            } else if (run.status === "requires_action" && run.required_action) {//需要下一步
+                // NOTE: 複数回の Tools の呼び出しには対応していない
+                const call = run.required_action.submit_tool_outputs.tool_calls[0];
+                //console.log(call.function.name);
+                const funcName = call.function.name;
+                let args = JSON.parse(call.function.arguments);
+                if (this.DEBUG) {
+                    console.log("関数名：", funcName);
+                    console.log("実行変数変更前：", args);
+                }
+                //変数を変更する
+                args = await this.doChangeArgs(funcName, args);
+                if (this.DEBUG) {
+                    console.log("実行変数：", args);
+                }
+                //Run Step可获得
+                let doRtn = await this.doFunc(funcName, args);
+    
+                if (this.DEBUG && this.DEBUGRESULT ) {
+                    console.log("実行結果：", doRtn);
+                }
+                //Stringの場合は同じする
+                if(typeof(doRtn) =="string"){
+                    doRtn = {ai:doRtn,out:doRtn};
+                }
+                //提交函数执行完的结果
+                await openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
+                    tool_outputs: [
+                        {
+                            tool_call_id: call.id,
+                            output: doRtn.ai//AIに発送する
+                        }
+                    ],
+                });
+                doRtn.fun = funcName;
+                doRtn.args = args;
+                //递归调用
+                return await this.waitRun(threadId, runId, doRtn);
+            } else if (run.status === "completed") {
+                let messages = await openai.beta.threads.messages.list(threadId);
+                //注意为逆序操作
+                //最後の状態で戻ります
+                // console.log(messages);
+                await this.doMessages(threadId);
+                //返回值包含计算的信息
+                return {
+                    data: messages.data,
+                    rtn: doRtn
+                };
+
             }
-            //Run Step可获得
-            let doRtn = await this.doFunc(funcName, args);
-            //特別再処理、無用？
-            doRtn = await this.doAfterFunc(doRtn, funcName, args);
-            if (this.DEBUG) {
-                console.log("########実行結果Start######");
-                console.log(doRtn);
-                console.log("########実行結果End######");
-            }
-            //提交函数执行完的结果
-            await openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
-                tool_outputs: [
-                    {
-                        tool_call_id: call.id,
-                        output: doRtn
-                    }
-                ],
-            });
-            //递归调用
-            return await this.waitRun(threadId, runId);
-        } else if (run.status === "completed") {
-            let messages = await openai.beta.threads.messages.list(threadId);
-            //注意为逆序操作
-            //最後の状態で戻ります
-            // console.log(messages);
-            await this.doMessages(threadId);
-            return messages.data;
+            return run;
         }
-        return run;
+        catch (e) {
+            console.error(e);
+            return {ai:"情報なし",out:""};
+        }
     };
     /**
      * Modify msg 実行後
@@ -293,7 +320,6 @@ class AI {
         // Check if the run is completed
         if (run.status === "completed") {
             let messages = await client.beta.threads.messages.list(thread.id);
-            console.log(messages.data);
             return messages.data;
         } else if (run.status === "requires_action") {
             console.log(run.status);

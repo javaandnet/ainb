@@ -97,18 +97,19 @@ var asstId ="asst_0vl90HXVvBv8T5qsBwXYbsYG";
  await ai.getAssistant(asstId);
 ai.updateAssistant();
 await ai.createThread();
-//  await ai.chat("会社の名前");
-//   await ai.chat("社員数は何人ですか？");
-var text = "未稼働社員で任峰がいますか？";
-text = "未稼働一覧は教えてください";
-text = "劉磊の説明文を教えてください";
-var msg ="";
- msg =  await ai.chat(text);
- text = "任峰磊にメール送信します";
- msg =await ai.chat(text);
- console.log(msg);
- text = "送信する";
- await ai.chat(text);
-未稼働一覧は教えてください
-劉磊の説明文を教えてください。
-未稼働社員で劉磊がいますか？
+await ai.chat("会社の名前");
+// //   await ai.chat("社員数は何人ですか？");
+// var text = "未稼働社員で任峰がいますか？";
+// text = "未稼働一覧は教えてください";
+// text = "劉磊の説明文を教えてください";
+// var msg ="";
+//  //msg =  await ai.chat(text);
+//  text = "劉磊の説明文を任峰磊にメール送信します";
+//  msg =await ai.chat(text);
+// //会社の名前は
+//  text = "送信する";
+//  msg =await ai.chat(text);
+//  console.log("AIから：\r\n",msg);
+// 未稼働一覧は教えてください
+// 劉磊の説明文を教えてください。
+// 未稼働社員で劉磊がいますか？
