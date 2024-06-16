@@ -5,7 +5,7 @@ import { Button } from 'vant';
 import { Watermark } from 'vant';
 import { Divider } from 'vant';
 import { Empty } from 'vant';
-
+import { Field, CellGroup } from 'vant';
  
 
  
@@ -14,6 +14,6 @@ app.use(Button);
 app.use(Watermark);
 app.use(Divider);
 app.use(Empty);
+app.use(Field);
+app.use(CellGroup);
 app.mount('#app');
-
-// Vue.prototype.$socket =  io("https://localhost");
