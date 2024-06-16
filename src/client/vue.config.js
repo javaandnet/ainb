@@ -1,5 +1,6 @@
 // vue.config.js
 module.exports = {
+  outputDir:"../server/public/dist",
   chainWebpack: config => {
     config.module
       .rule('vue')
