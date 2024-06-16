@@ -120,6 +120,9 @@ class Company {
             }
             if (name && name != "") {
                 var info = await sf.workByName(name);
+                if(info == null){
+                    return { ai: "情報なし", out: "技術者情報がありません" };
+                }
                 return {
                     ai: JSON.stringify({ id: info.id, emp: info.name }), //只有名字
                     out: info.information

@@ -18,7 +18,7 @@ var res = await ai.getAssistant("company");
 //创建Thread
 await ai.createThread();
 //Sample
-var msg = await ai.chat("こんにちは");
+var msg = await ai.chat("未稼働一覧情報は教えてください");
 
 console.log("AIから：\r\n",msg);
 // //   await ai.chat("社員数は何人ですか？");
