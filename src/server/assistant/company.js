@@ -4,7 +4,7 @@ const mail = new Mail();
 const sf = new SF();
 class Company {
     id = "asst_KQsWjF05lR95Z92JwpOMCZBE";
-    route = {
+    funcs = {
         "get_info": this.getInfo,
         "get_number": this.getNumber,
         "get_emp": this.getEmp,
@@ -107,7 +107,7 @@ class Company {
         ]
     };
 
-    getInfo = async function (args) {
+    get_info = async function (args) {
         if (args.query.includes("社長") || args.query.toLowerCase().includes("ceo") || args.query.toLowerCase().includes("president")) {
             return "孫光です。"
         } else if (args.query.includes("company") || args.query.includes("name") || args.query.includes("名前")) {

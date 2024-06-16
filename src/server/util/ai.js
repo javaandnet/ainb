@@ -71,11 +71,12 @@ class AI {
     doMsg = async function (msgs) {
         return msgs;
     };
+
     doFunc = async function (func, args) {
         var content = "";
         // console.log(args);
-        var funcs = assistantFactory.get(this.assistantName).route;
-        var rtn = await funcs[func](args);
+        var funcs = assistantFactory.get(this.assistantName).funcs;
+        var rtn = await assistantFactory.get(this.assistantName)[func](args);
         return rtn;
     };
     /**
@@ -83,9 +84,6 @@ class AI {
      */
     doChangeArgs = async function (func, args) {
         if (func == "send_mail" || func == "confirm_mail") {
-            // args.subject = "技術者：" + this.emp.name;
-            // args.info = this.emp.information;
-            // console.log("argsを編集する");
             return args;
         } else if (func == "get_emp") {
             if (args.condition) {
@@ -171,7 +169,8 @@ class AI {
                     console.log("実行変数：", args);
                 }
                 //Run Step可获得
-                let doRtn = await this.doFunc(funcName, args);
+                let doRtn =  await assistantFactory.get(this.assistantName)[funcName](args);
+                // let doRtn = await this.doFunc(funcName, args);
 
                 if (this.DEBUG && this.DEBUGRESULT) {
                     console.log("実行結果：", doRtn);
@@ -220,19 +219,6 @@ class AI {
     doMessages = async (threadId) => {
 
 
-    };
-    //这个比较精确
-    handleRunStatus = async (run) => {
-        // Check if the run is completed
-        if (run.status === "completed") {
-            let messages = await client.beta.threads.messages.list(thread.id);
-            return messages.data;
-        } else if (run.status === "requires_action") {
-            console.log(run.status);
-            return await handleRequiresAction(run);
-        } else {
-            console.error("Run did not complete:", run);
-        }
     };
     ask = async function main(q) {
         const stream = await openai.chat.completions.create({
