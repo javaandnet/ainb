@@ -6,8 +6,10 @@ import path from 'path';
 import { Server, Socket } from 'socket.io';
 
 import cors from 'cors'
-// import Azure   from './util/azure.cjs';
+import { Azure } from './util/azure.js';
 import { AI } from './util/ai.js';
+
+//Path 設定
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,67 +54,68 @@ io.on('connection', (socket) => {
             socket.emit("message", { content: ans });
         });
     });
-    // //VOICE
-    // let wavRate = 48000;
-    // let bufferAll = [];
-    // /**
-    //  * 初期化
-    //  */
-    // socket.on('start', (data, ack) => {
-    //     wavRate = data.wavRate;
-    //     console.log(wavRate);
-    //     bufferAll = [];
-    //     //  ack({ info: "ok" });
-    // });
 
-    // /**
-    //  * Add Str
-    //  */
-    // socket.on('recording', (data) => {
-    //     const itr = data.values();
-    //     const buf = new Array(data.length);
-    //     for (var i = 0; i < buf.length; i++) {
-    //         buf[i] = itr.next().value;
-    //     }
-    //     bufferAll = bufferAll.concat(buf);
-    // });
+    //VOICE
+    let wavRate = 48000;
+    let bufferAll = [];
+    /**
+     * 初期化
+     */
+    socket.on('start', (data, ack) => {
+        wavRate = data.wavRate;
+        console.log(wavRate);
+        bufferAll = [];
+        //  ack({ info: "ok" });
+    });
 
-    // socket.on('saveRec', (data, ack) => {
-    //     azure.exportWAV(bufferAll);
-    // });
+    /**
+     * Add Str
+     */
+    socket.on('recording', (data) => {
+        const itr = data.values();
+        const buf = new Array(data.length);
+        for (var i = 0; i < buf.length; i++) {
+            buf[i] = itr.next().value;
+        }
+        bufferAll = bufferAll.concat(buf);
+    });
 
-    // //Stop
-    // socket.on('stop', (data, ack) => {
-    //     //const filename = path.join(__dirname, `/public/222.wav`);
-    //     azure.v2t(bufferAll, 1).then(function (text) {
-    //         //text: 问题
-    //         //ans:回答
-    //         ai.ask(text).then(function (ans) {
-    //             var voiceAns = "";
-    //             if (ans.length > 25) {
-    //                 var ansArr = ans.split("。");
-    //                 if (ansArr.length > 0) {
-    //                     voiceAns = ansArr[0] + "。";
-    //                 } else {
-    //                     voiceAns = ansArr[0];
-    //                 }
-    //                 console.log(voiceAns);
-    //             } else {
-    //                 voiceAns = ans;
-    //             }
-    //             ack({ q: text, a: ans });
-    //             // azure.t2v(voiceAns).then(
-    //             //     //Base64
-    //             //     function (stream) {
-    //             //         ack({ data: stream, q: text, a: ans });
-    //             //     }
-    //             // );
-    //         });
-    //     }).catch((result) => {
-    //         console.log(result);
-    //         ack({ a: "fail" });
-    //     });
-    // });
+    socket.on('saveRec', (data, ack) => {
+        azure.exportWAV(bufferAll);
+    });
+
+    //Stop
+    socket.on('stop', (data, ack) => {
+        //const filename = path.join(__dirname, `/public/222.wav`);
+        azure.v2t(bufferAll, 1).then(function (text) {
+            //text: 问题
+            //ans:回答
+            ai.chat(text).then(function (ans) {
+                var voiceAns = "";
+                if (ans.length > 25) {
+                    var ansArr = ans.split("。");
+                    if (ansArr.length > 0) {
+                        voiceAns = ansArr[0] + "。";
+                    } else {
+                        voiceAns = ansArr[0];
+                    }
+                    console.log(voiceAns);
+                } else {
+                    voiceAns = ans;
+                }
+                ack({ q: text, a: ans });
+                // azure.t2v(voiceAns).then(
+                //     //Base64
+                //     function (stream) {
+                //         ack({ data: stream, q: text, a: ans });
+                //     }
+                // );
+            });
+        }).catch((result) => {
+            console.log(result);
+            ack({ a: "fail" });
+        });
+    });
 });
 
 

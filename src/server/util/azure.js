@@ -1,17 +1,13 @@
 
-const WavEncoder = require('wav-encoder')
-const fs = require('fs');
-const sdk = require("microsoft-cognitiveservices-speech-sdk");
-const { Readable } = require('stream');
-const PassThrough = require('stream').PassThrough;
-const Config = require("./config.js");
-const config = new Config();
-const path = require('path');
+import WavEncoder from 'wav-encoder';
+import fs from 'fs';
+import path from 'path';
+import { Config } from "./config.js";
+import sdk from 'microsoft-cognitiveservices-speech-sdk';
+import { PassThrough,Readable } from 'stream';
 
-const subscriptionKey = config.azure.subscriptionKey;
-const serviceRegion = config.azure.serviceRegion;
 // 创建语音配置
-const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+const speechConfig = sdk.SpeechConfig.fromSubscription(Config.azure.subscriptionKey, Config.azure.serviceRegion);
 // 设置语音合成的语言
 speechConfig.speechSynthesisLanguage = "ja-JP";
 speechConfig.speechRecognitionLanguage = "ja-JP";  // 设置为日语
@@ -66,7 +62,7 @@ const toF32Array = (buf) => {
 }
 
 // default config
-module.exports =   class Azure{
+class Azure{
     log = (txt) => {
         console.log(txt);
     };
@@ -222,4 +218,5 @@ module.exports =   class Azure{
             }
         });
     };
-};
+}
+export { Azure };

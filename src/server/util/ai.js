@@ -1,6 +1,5 @@
 
 import { Config } from "./config.js";
-import { Helper } from './helper.js';
 import { AssistantFactory } from './assistantFactory.js';
 const assistantFactory = new AssistantFactory();
 import OpenAI from "openai";
@@ -19,14 +18,14 @@ class AI {
      * @param {*} lastFlag 返回最后一条信息
      * @returns  返回最后一条信息
      */
-    chat = async function (msg, threadId , lastFlag = true) {
-        
+    chat = async function (msg, threadId, lastFlag = true) {
+
         //确认Thread，本质应该需要每一次都传
-        if(typeof (threadId) == "undefined"){
+        if (typeof (threadId) == "undefined") {
             if (typeof (this.thread) == "undefined") {
                 console.error("Create Thrad First");
                 return "Server Error";
-            }else{
+            } else {
                 threadId = this.thread.id;
             }
         }
@@ -48,17 +47,15 @@ class AI {
         //TODO msgを変更する
         if (lastFlag) {
             // console.log(msgs[0].content[0].text);
-            if (msgs.rtn) {
-                if (msgs.rtn.out) {
-                    return msgs.rtn.out;
-                } else {
-                    return msgs.data[0].content[0].text.value;
-                }
+            if (msgs.rtn && msgs.rtn.out) {
+                return msgs.rtn.out;
             } else {
-                console.log(msgs);
-                return "情報がありません";
+                var rtn = msgs.data[0].content[0].text.value;
+                if (this.DEBUG) {
+                    console.log("nofunc:", rtn);
+                }
+                return rtn;
             }
-
         }
         return msgs.data;
     };
@@ -74,7 +71,7 @@ class AI {
 
 
     createThread = async () => {
-        
+
         const thread = await openai.beta.threads.create();
         this.thread = thread;
         return thread;
@@ -135,14 +132,14 @@ class AI {
                 var assistantConfig = assistantFactory.get(this.assistantName);
                 //変数を変更する
                 //args = await this.doChangeArgs(funcName, args);
-                if((assistantConfig.changeArgs)[funcName]){
+                if ((assistantConfig.changeArgs)[funcName]) {
                     args = await ((assistantConfig.changeArgs)[funcName](args));
                 }
                 if (this.DEBUG) {
                     console.log("変更後実行変数：", args);
                 }
                 //Run Step可获得
-                let doRtn =  await (assistantConfig.func)[funcName](args);
+                let doRtn = await (assistantConfig.func)[funcName](args);
 
                 if (this.DEBUG && this.DEBUGRESULT) {
                     console.log("実行結果：", doRtn);
