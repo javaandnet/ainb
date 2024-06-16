@@ -1,8 +1,7 @@
 # TODO
 
 ## 外包装 
-
-1. - [ ] 定制化答案库 难度太大 
+1. - [ ] 定制化答案库 可行 本地文件 以及数据库搜索
 2. - [ ] 选择语音
 3. - [ ] 设置回答文字限制
 4. - [ ] 设置动画形象 MuseTalk？联动 先弄一张图片
@@ -10,13 +9,13 @@
 6. - [ ] 登录
 7. - [ ] 计数服务
 8. - [ ] 加入分割 转化语音功能。按句号分隔
-9. - [ ] vant <!-- https://www.w3cschool.cn/vantlesson/vantlesson-rig235ur.html -->
+9. - [x] (vant导入}[https://www.w3cschool.cn/vantlesson/vantlesson-rig235ur.html]
 10. - [x] 引入 recorder OK
 11. - [x] 文件夹整理 OK
 12. - [x] 配置文件 整理 OK
 ## AI
 1. - [ ] Load 文件测试
-2. - [ ] 多助手：更换助手
+2. - [x] 多助手：更换助手
 3.  - [x] 服务器实例化，各自 Thread OK
 4.  - [x] 嵌入函数转换 OK
 5.  - [x] 设定不需要 ai OK

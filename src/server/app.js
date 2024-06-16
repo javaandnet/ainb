@@ -20,7 +20,7 @@ var options = {
     key: fs.readFileSync(path.join(__dirname, 'crt/local.key')),
     cert: fs.readFileSync(path.join(__dirname, 'crt/local.crt'))
 };
-app.use('/', express.static(path.join(__dirname, 'public')))
+app.use('/', express.static(path.join(__dirname, 'public/dist')))
 const port = 3000;
 // let server = https.createServer(options, app);
 let server = http.createServer(options, app);
@@ -35,7 +35,7 @@ const io = new Server(server, {
 server.listen(port, function () {
     console.log(`AI App listening on port ${port}`);
 });
-await ai.getAssistant(asstId);
+await ai.getAssistant("company");
 ai.updateAssistant();
 var thread = await ai.createThread();
 //初期化
