@@ -2,27 +2,28 @@ import { AI } from './util/ai.js';
 import { Config } from "./util/config.js";
 import OpenAI from "openai";
 import { Azure } from './util/azure.js';
+import fs from "fs";
 const azure = new Azure();
 const openai = new OpenAI(Config.openai);
 const ai = new AI();
 // const assistant = new Assistant();
- 
+//azure.sample();
 //Delete All Assistants
 // await ai.deleteAssistants();
 //Create a new Assistant
 // var res = await(ai.createAssistant("company"));
 //初始化使用
-var res = await ai.getAssistant("company");
+// var res = await ai.getAssistant("company");
 // console.log(res);
 
 //更新配置
  //ai.updateAssistant("company");
 //创建Thread
-await ai.createThread();
-//Sample
-var msg = await ai.chat("未稼働一覧情報は教えてください");
+// await ai.createThread();
+// //Sample
+// var msg = await ai.chat("未稼働一覧情報は教えてください");
 
-console.log("AIから：\r\n",msg);
+// console.log("AIから：\r\n",msg);
 // //   await ai.chat("社員数は何人ですか？");
 // var text = "未稼働社員は教えてください";
 // text = "未稼働一覧は教えてください";
@@ -38,3 +39,25 @@ console.log("AIから：\r\n",msg);
 // 未稼働一覧は教えてください
 // 劉磊の説明文を教えてください。
 // 未稼働社員で劉磊がいますか？
+
+
+
+import { Readable } from 'stream';
+
+var path = "/Users/fengleiren/git/ainb/src/server/public/wav/1718536871971.wav";
+var buffer = fs.readFileSync(path)
+const stream = Readable.from(buffer);
+
+
+  const transcription = await openai.audio.transcriptions.create({
+    file: await toFile(buffer, "audio.wav", {
+        contentType: "audio/wav",
+      }),
+    model: "whisper-1",
+  });
+
+
+
+
+
+  console.log(transcription.text);

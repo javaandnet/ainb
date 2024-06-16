@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { Config } from "./config.js";
 import sdk from 'microsoft-cognitiveservices-speech-sdk';
-import { PassThrough,Readable } from 'stream';
+import { PassThrough, Readable } from 'stream';
 //Path 設定
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
@@ -34,25 +34,25 @@ class ArrayBufferReadable extends Readable {
 }
 
 
-class PushAudioOutputStreamCallback extends sdk.PushAudioOutputStreamCallback{
+class PushAudioOutputStreamCallback extends sdk.PushAudioOutputStreamCallback {
     constructor(array) {
-      super();
-      this.array = array;
+        super();
+        this.array = array;
     }
-  
-    write(data){
+
+    write(data) {
         // ここでストリーム化したデータを処理
-          console.log(`Received ${data.byteLength} bytes of audio data.`);
-  
-          // encode to base64
-          let buffer = Buffer.from(data);
-          let base64 = buffer.toString('base64');
-          this.array.add(base64);
+        console.log(`Received ${data.byteLength} bytes of audio data.`);
+
+        // encode to base64
+        let buffer = Buffer.from(data);
+        let base64 = buffer.toString('base64');
+        this.array.add(base64);
     }
-    close(){
+    close() {
         console.log('Stream closed.');
     }
-  }
+}
 
 // Convert byte array to Float32Array
 const toF32Array = (buf) => {
@@ -65,7 +65,7 @@ const toF32Array = (buf) => {
 }
 
 // default config
-class Azure{
+class Azure {
     log = (txt) => {
         console.log(txt);
     };
@@ -77,8 +77,8 @@ class Azure{
                 sampleRate: sampleRate,
                 channelData: [f32array]
             }
-            const filename =path.join(__dirname, `../public/wav/${String(Date.now())}.wav`)
-   
+            const filename = path.join(__dirname, `../public/wav/${String(Date.now())}.wav`)
+
             WavEncoder.encode(audioData).then((buffer) => {
                 fs.writeFile(filename, Buffer.from(buffer), (e) => {
                     if (e) {
@@ -151,7 +151,7 @@ class Azure{
         });
         return new Promise((resolve, reject) => {
             me.createStream(obj, type).then(function (stream) {
-                // speechConfig.setProperty(sdk.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "10000"); // 10000ms
+                //speechConfig.setProperty(sdk.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "10000"); // 10000ms
                 // 创建音频配置
                 let audioConfig = sdk.AudioConfig.fromStreamInput(stream);
                 // 创建语音识别器
@@ -159,7 +159,7 @@ class Azure{
 
                 recognizer.recognizeOnceAsync(result => {
                     if (result.reason === sdk.ResultReason.RecognizedSpeech) {
-                        console.log("v2t:"+result.text);
+                        console.log("v2t:" + result.text);
                         resolve(result.text);
                     } else {
                         reject(result);
@@ -169,7 +169,7 @@ class Azure{
             });
         });
     };
-     t2v = (text, type = 0) => {
+    t2v = (text, type = 0) => {
         const bufferStream = new PassThrough();
         const stream = sdk.PushAudioOutputStream.create({
             write: (a) => bufferStream.write(Buffer.from(a)),
@@ -178,21 +178,21 @@ class Azure{
 
         speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3;
         const audioConfig = sdk.AudioConfig.fromStreamOutput(stream);
-       // let callback = new PushAudioOutputStreamCallback(this.array);
+        // let callback = new PushAudioOutputStreamCallback(this.array);
         const synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
 
-        
+
         return new Promise((resolve, reject) => {
             //此处返回，当写数据时 返回给前台
             var str = "";
             bufferStream.on('data', chunk => {
-                str+=chunk.toString('base64');
+                str += chunk.toString('base64');
             });
             //resolve on end
-            bufferStream.on("end",function(){
+            bufferStream.on("end", function () {
                 resolve(str);
             });
-           
+
             synthesizer.speakTextAsync(
                 text,
                 result => {
@@ -223,5 +223,50 @@ class Azure{
             }
         });
     };
+
+    saveStream = (stream) => {
+        const filename = path.join(__dirname, `/${String(Date.now())}.wav`);
+        const dest = fs.createWriteStream(filename);
+        dest.pipe(stream);
+    };
+    sample = function () {
+        var filename = "/Users/fengleiren/git/ainb/src/server/public/wav/1718536871971.wav"; // 16000 Hz, Mono
+
+        // create the push stream we need for the speech sdk.
+        var pushStream = sdk.AudioInputStream.createPushStream();
+
+        // open the file and push it to the push stream.
+        fs.createReadStream(filename).on('data', function (arrayBuffer) {
+            pushStream.write(arrayBuffer.slice());
+        }).on('end', function () {
+            pushStream.close();
+            console.log(pushStream);
+            // we are done with the setup
+            console.log("Now recognizing from: " + filename);
+
+            // now create the audio-config pointing to our stream and
+            // the speech config specifying the language.
+            var audioConfig = sdk.AudioConfig.fromStreamInput(pushStream);
+
+
+            // create the speech recognizer.
+            var recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
+
+            // start the recognizer and wait for a result.
+            recognizer.recognizeOnceAsync(
+                function (result) {
+                    console.log(result.text);
+
+                    recognizer.close();
+                    recognizer = undefined;
+                },
+                function (err) {
+                    console.trace("err - " + err);
+
+                    recognizer.close();
+                    recognizer = undefined;
+                });
+        });
+    }
 }
 export { Azure };

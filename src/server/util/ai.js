@@ -1,8 +1,11 @@
 
 import { Config } from "./config.js";
+import WavEncoder from 'wav-encoder';
 import { AssistantFactory } from './assistantFactory.js';
-const assistantFactory = new AssistantFactory();
 import OpenAI from "openai";
+import { toFile } from "openai/uploads";
+
+const assistantFactory = new AssistantFactory();
 const openai = new OpenAI(Config.openai);
 
 class AI {
@@ -204,6 +207,47 @@ class AI {
     todo = async function () {
     };
 
+    chatInVoice = async function (buffer, threadId,type = 0) {
+        const txt = await this.v2t(buffer, type);
+        const rtn = await this.chat(txt, threadId);
+        return rtn;
+    };
 
+    v2t = async function (buffer, type = 0) {
+        //TODO MP3
+        // const bodyData = JSON.parse(req.body);
+        // const base64Audio = bodyData.audioData;
+        // // Decode Base64 to binary
+        // const audioBuffer = Buffer.from(base64Audio, "base64");
+        // Convert byte array to Float32Array
+        const toF32Array = (buf) => {
+            const buffer = new ArrayBuffer(buf.length)
+            const view = new Uint8Array(buffer)
+            for (var i = 0; i < buf.length; i++) {
+                view[i] = buf[i]
+            }
+            return new Float32Array(buffer)
+        }
+        let sampleRate = 48000;//此处需要修改 是否一致
+        const f32array = toF32Array(buffer);
+        const audioData = {
+            sampleRate: sampleRate,
+            channelData: [f32array]
+        };
+
+        var buffer = await WavEncoder.encode(audioData);
+
+        const transcription = await openai.audio.transcriptions.create({
+            file: await toFile(buffer, "audio.wav", {
+                contentType: "audio/wav",
+            }),
+            model: "whisper-1",
+        });
+        if (this.DEBUG) {
+            console.log("Trans Txt:" + transcription.text);
+        }
+        return transcription.text;
+
+    };
 };
 export { AI };

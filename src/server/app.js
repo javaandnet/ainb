@@ -30,7 +30,7 @@ let server = http.createServer(options, app);
 // cros
 const io = new Server(server, {
     cors: {
-        origin: ["http://192.168.1.160:8080","http://localhost:3000","https://localhost:8080","http://192.168.1.160:3000"],
+        origin: ["http://192.168.1.160:8080", "http://localhost:3000", "https://localhost:8080", "http://192.168.1.160:3000"],
         methods: ["GET", "POST"]
     }
 });
@@ -81,8 +81,23 @@ io.on('connection', (socket) => {
     });
 
     socket.on('saveRec', (data, ack) => {
-        console.log(data);
-        azure.exportWAV(bufferAll);
+        //   console.log(data);
+
+        // const stream = azure.createStream(bufferAll, 1).then(function(stream){
+        //     console.log(stream);
+        //   //  azure.saveStream(stream);
+        // });
+
+
+        // azure.v2t(bufferAll, 1).then(
+        //     //Base64
+        //     function (stream) {
+        //         ack({ data: stream, q: text, a: ans });
+        //     }
+        // );
+        var txt = ai.v2t(bufferAll).then(function(txt){
+            console.log(txt);
+        });
     });
 
     //Stop
