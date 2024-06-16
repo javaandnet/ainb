@@ -5,8 +5,8 @@ import { Restaurant } from "../assistant/restaurant.js";
 class AssistantFactory {
     assistants = {};
     get = function(id = "company"){
-        if(assistants[id]){
-            return assistants[id];
+        if(this.assistants[id]){
+            return this.assistants[id];
         }else{
             var obj = null
             if(id =="company"){          
@@ -16,7 +16,8 @@ class AssistantFactory {
             }else{
                 console.error("no Id:",id);
             }
-            assistants[id] = obj;
+            this.assistants[id] = obj;
+            return obj;
         }
     }
 }

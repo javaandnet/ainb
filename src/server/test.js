@@ -14,13 +14,13 @@ var res = await ai.getAssistant("company");
 // console.log(res);
 
 //更新配置
- ai.updateAssistant();
+ //ai.updateAssistant("company");
 //创建Thread
 await ai.createThread();
 //Sample
 var msg = await ai.chat("未稼働一覧は教えてください");
 
-// console.log("AIから：\r\n",msg);
+console.log("AIから：\r\n",msg);
 // //   await ai.chat("社員数は何人ですか？");
 // var text = "未稼働社員は教えてください";
 // text = "未稼働一覧は教えてください";

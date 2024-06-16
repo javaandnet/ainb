@@ -72,37 +72,6 @@ class AI {
         return msgs;
     };
 
-    doFunc = async function (func, args) {
-        var content = "";
-        // console.log(args);
-        var funcs = assistantFactory.get(this.assistantName).funcs;
-        var rtn = await assistantFactory.get(this.assistantName)[func](args);
-        return rtn;
-    };
-    /**
-     * 個別の処理
-     */
-    doChangeArgs = async function (func, args) {
-        if (func == "send_mail" || func == "confirm_mail") {
-            return args;
-        } else if (func == "get_emp") {
-            if (args.condition) {
-                args.condition = args.condition.replace("name:", "");
-            }
-            if (args.query) {
-                if (args.query.name) {
-                    args.query = args.query.name;
-                }
-                try {
-                    args.query = args.query.replace("name:", "");
-                } catch (e) {
-                    console.log("変換不要");
-                }
-            }
-
-        }
-        return args;
-    };
 
     createThread = async () => {
         
@@ -161,16 +130,19 @@ class AI {
                 let args = JSON.parse(call.function.arguments);
                 if (this.DEBUG) {
                     console.log("関数名：", funcName);
-                    console.log("実行変数変更前：", args);
+                    console.log("変更前実行変数：", args);
                 }
+                var assistantConfig = assistantFactory.get(this.assistantName);
                 //変数を変更する
-                args = await this.doChangeArgs(funcName, args);
+                //args = await this.doChangeArgs(funcName, args);
+                if((assistantConfig.changeArgs)[funcName]){
+                    args = await ((assistantConfig.changeArgs)[funcName](args));
+                }
                 if (this.DEBUG) {
-                    console.log("実行変数：", args);
+                    console.log("変更後実行変数：", args);
                 }
                 //Run Step可获得
-                let doRtn =  await assistantFactory.get(this.assistantName)[funcName](args);
-                // let doRtn = await this.doFunc(funcName, args);
+                let doRtn =  await (assistantConfig.func)[funcName](args);
 
                 if (this.DEBUG && this.DEBUGRESULT) {
                     console.log("実行結果：", doRtn);
