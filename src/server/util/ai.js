@@ -5,13 +5,12 @@ import { AssistantFactory } from './assistantFactory.js';
 const assistantFactory = new AssistantFactory();
 import OpenAI from "openai";
 const openai = new OpenAI(Config.openai);
-const helper = new Helper();
-// default config
+
 class AI {
     constructor() {
         this.DEBUG = true;
         this.DEBUGRESULT = true;
-
+        this.assistantName = "";
     }
 
     /**
@@ -20,7 +19,17 @@ class AI {
      * @param {*} lastFlag 返回最后一条信息
      * @returns  返回最后一条信息
      */
-    chat = async function (msg, threadId = this.thread.id, lastFlag = true) {
+    chat = async function (msg, threadId , lastFlag = true) {
+        
+        //确认Thread，本质应该需要每一次都传
+        if(typeof (threadId) == "undefined"){
+            if (typeof (this.thread) == "undefined") {
+                console.error("Create Thrad First");
+                return "Server Error";
+            }else{
+                threadId = this.thread.id;
+            }
+        }
         //3. Messag:消息
         // ユーザーが入力したクエリを Message として OpenAI API に送信する，往哪一个线程传递，可以管理不同线程
         await openai.beta.threads.messages.create(threadId, {
@@ -63,18 +72,10 @@ class AI {
         return msgs;
     };
     doFunc = async function (func, args) {
-        //SELECT Id, Name, Information__c, Resume__c FROM Worker__c
         var content = "";
         // console.log(args);
-        var funcs = {
-            "get_info": helper.getInfo,
-            "get_number": helper.getNumber,
-            "get_emp": helper.getEmp,
-            "send_mail": helper.sendMail,
-            "confirm_mail": helper.confirmMail
-        };
+        var funcs = assistantFactory.get(this.assistantName).route;
         var rtn = await funcs[func](args);
-
         return rtn;
     };
     /**
@@ -106,7 +107,8 @@ class AI {
     };
 
     createThread = async () => {
-        var thread = await openai.beta.threads.create();
+        
+        const thread = await openai.beta.threads.create();
         this.thread = thread;
         return thread;
     };
@@ -115,8 +117,8 @@ class AI {
         openai.beta.threads.delete(id)
     };
 
-    createAssistant = async (id = "company") => {
-        let at = assistantFactory.get(id);
+    createAssistant = async (name = "company") => {
+        let at = assistantFactory.get(name);
         const assistant = await openai.beta.assistants.create(at.config);
         this.assistant = assistant;
         return assistant;
@@ -125,20 +127,19 @@ class AI {
         openai.beta.assistants.delete(id);
     };
 
-    updateAssistant = async function (id, options) {
-        let at = assistantFactory.get(id);
+    updateAssistant = async function (name = this.assistantName, options) {
+        let at = assistantFactory.get(name);
         openai.beta.assistants.update(at.id, at.config);
     };
 
-    getAssistant = async (id) => {
-        let at = assistantFactory.get(id);
+    getAssistant = async (name) => {
+        let at = assistantFactory.get(name);
         const assistant = await openai.beta.assistants.retrieve(at.id);
+        this.assistantName = name;
         this.assistant = assistant;
         return assistant;
     };
-
     deleteAssistants = async (run) => {
-
         var ass = await openai.beta.assistants.list({ limit: 100 });
         // console.log(ass.data.length);
         for await (const a of ass.data) {

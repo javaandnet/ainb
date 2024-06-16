@@ -1,17 +1,24 @@
 import { AI } from './util/ai.js';
-
-
+import { Config } from "./util/config.js";
+import OpenAI from "openai";
+const openai = new OpenAI(Config.openai);
 const ai = new AI();
 // const assistant = new Assistant();
+ 
+//Delete All Assistants
+// await ai.deleteAssistants();
+//Create a new Assistant
+// var res = await(ai.createAssistant("company"));
+//初始化使用
+var res = await ai.getAssistant("company");
+// console.log(res);
 
-// console.log(assistant.get("company"));
- // await ai.deleteAssistants();
-//var res = await(ai.createAssistant());
-var res = await(ai.createAssistant("company"));
-//  await ai.getAssistant("company");
-// ai.updateAssistant();
-// await ai.createThread();
-// var msg = await ai.chat("未稼働一覧は教えてください");
+//更新配置
+ ai.updateAssistant();
+//创建Thread
+await ai.createThread();
+//Sample
+var msg = await ai.chat("未稼働一覧は教えてください");
 
 // console.log("AIから：\r\n",msg);
 // //   await ai.chat("社員数は何人ですか？");

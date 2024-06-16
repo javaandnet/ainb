@@ -1,7 +1,6 @@
 class Restaurant {
     id = "asst_FPSXgkXNpCdin6GuFEhzm3kN";
     config = {
-
         name: "飲食店の店長",
         instructions: "あなたはある飲食店の店です。飲食店のメニューと技術者の情報をお客さんに紹介する。",
         model: "gpt-3.5-turbo",

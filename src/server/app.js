@@ -28,7 +28,7 @@ let server = http.createServer(options, app);
 // cros
 const io = new Server(server, {
     cors: {
-        origin: "http://192.168.1.160:8080",
+        origin: ["http://192.168.1.160:8080","http://localhost:3000","https://localhost:8080","http://192.168.1.160:3000"],
         methods: ["GET", "POST"]
     }
 });

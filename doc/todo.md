@@ -20,6 +20,7 @@
 4.  - [x] 嵌入函数转换 OK
 5.  - [x] 设定不需要 ai OK
 6.  - [x] Assistant config外置
+7.  - [ ] 函数路由和实际函数外置
 ## Salesforce
  1. - [x] 不能发邮件
  2. - [x] 手机操作慢 　->PC执行

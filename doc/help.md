@@ -21,3 +21,17 @@ emit 往上级激发事件 一层一层传 上一级用@接受
 ## 价格
 1. 今天花了0.4 400 美元
 2.助手API使用  (参考)[https://qiita.com/nohanaga/items/fa9f5260cf85a7fddc52] 
+
+
+const io = require('socket.io')(server, {
+  cors: {
+    origin: (origin, callback) => {
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Origin not allowed"), false);
+      }
+    },
+    methods: ["GET", "POST"]
+  }
+});
