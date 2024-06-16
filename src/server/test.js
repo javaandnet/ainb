@@ -1,6 +1,8 @@
 import { AI } from './util/ai.js';
 import { Config } from "./util/config.js";
 import OpenAI from "openai";
+import { Azure } from './util/azure.js';
+const azure = new Azure();
 const openai = new OpenAI(Config.openai);
 const ai = new AI();
 // const assistant = new Assistant();

@@ -88,7 +88,7 @@ export default {
       if (flag == 1) {
         this.socket.emit("start", "111");
       } else {
-        this.socket.emit("stop", "", (res) => {
+        this.socket.emit("saveRec", "", (res) => {
           if (res.a == "fail") {
             this.messages = [
               ...this.messages,

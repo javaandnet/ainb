@@ -8,7 +8,7 @@ import { Server, Socket } from 'socket.io';
 import cors from 'cors'
 import { Azure } from './util/azure.js';
 import { AI } from './util/ai.js';
-
+const azure = new Azure();
 //Path 設定
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
@@ -81,6 +81,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('saveRec', (data, ack) => {
+        console.log(data);
         azure.exportWAV(bufferAll);
     });
 

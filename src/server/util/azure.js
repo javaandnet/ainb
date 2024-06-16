@@ -5,7 +5,10 @@ import path from 'path';
 import { Config } from "./config.js";
 import sdk from 'microsoft-cognitiveservices-speech-sdk';
 import { PassThrough,Readable } from 'stream';
-
+//Path 設定
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 // 创建语音配置
 const speechConfig = sdk.SpeechConfig.fromSubscription(Config.azure.subscriptionKey, Config.azure.serviceRegion);
 // 设置语音合成的语言
@@ -166,7 +169,7 @@ class Azure{
             });
         });
     };
-     t2v = (text, type) => {
+     t2v = (text, type = 0) => {
         const bufferStream = new PassThrough();
         const stream = sdk.PushAudioOutputStream.create({
             write: (a) => bufferStream.write(Buffer.from(a)),
@@ -177,6 +180,8 @@ class Azure{
         const audioConfig = sdk.AudioConfig.fromStreamOutput(stream);
        // let callback = new PushAudioOutputStreamCallback(this.array);
         const synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
+
+        
         return new Promise((resolve, reject) => {
             //此处返回，当写数据时 返回给前台
             var str = "";
