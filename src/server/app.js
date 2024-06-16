@@ -30,7 +30,7 @@ let server = http.createServer(options, app);
 // cros
 const io = new Server(server, {
     cors: {
-        origin: ["http://192.168.1.160:8080", "http://localhost:3000", "https://localhost:8080", "http://192.168.1.160:3000"],
+        origin: ["http://192.168.1.160:8080", "http://localhost:3000", "http://localhost:8080", "https://localhost:8080", "http://192.168.1.160:3000"],
         methods: ["GET", "POST"]
     }
 });
@@ -45,11 +45,11 @@ io.on('connection', (socket) => {
     //AI 新しいThread
     ai.createThread()
         .then(thread => {
-            socket.emit("newThread", { thread: thread.id });
+            socket.emit("newThread", thread.id);
         });
     socket.on('message', (message) => {
         console.log('Message received: ', message);
-        ai.chat(message.msg.content, message.thread.thread).then(function (ans) {
+        ai.chat(message.msg.content, message.threadId).then(function (ans) {
             console.log(ans);
             socket.emit("message", { content: ans });
         });
@@ -57,14 +57,14 @@ io.on('connection', (socket) => {
 
     //VOICE
     let wavRate = 48000;
-    let bufferAll = [];
+    let bufferAll = {};
     /**
      * 初期化
      */
-    socket.on('start', (data, ack) => {
-        wavRate = data.wavRate;
-        console.log(wavRate);
-        bufferAll = [];
+    socket.on('startRecord', (data, ack) => {
+        const threadId = data.threadId;
+        // console.log(wavRate);
+        bufferAll[threadId] = [];
         //  ack({ info: "ok" });
     });
 
@@ -72,31 +72,31 @@ io.on('connection', (socket) => {
      * Add Str
      */
     socket.on('recording', (data) => {
-        const itr = data.values();
-        const buf = new Array(data.length);
-        for (var i = 0; i < buf.length; i++) {
+        // console.log(data.threadId.thread);
+        const threadId = data.threadId;
+        let voiceData = data.data;
+        const itr = voiceData.values();
+        const buf = new Array(voiceData.length);
+        for (var i = 0; i < voiceData.length; i++) {
             buf[i] = itr.next().value;
         }
-        bufferAll = bufferAll.concat(buf);
+        bufferAll[threadId] = bufferAll[threadId].concat(buf);
     });
 
-    socket.on('saveRec', (data, ack) => {
-        //   console.log(data);
-
+    socket.on('stopRecord', (data, ack) => {
+        // console.log(data.threadId);
+        const threadId = data.threadId;
         // const stream = azure.createStream(bufferAll, 1).then(function(stream){
         //     console.log(stream);
         //   //  azure.saveStream(stream);
         // });
-
-
-        // azure.v2t(bufferAll, 1).then(
-        //     //Base64
-        //     function (stream) {
-        //         ack({ data: stream, q: text, a: ans });
-        //     }
-        // );
-        var txt = ai.v2t(bufferAll).then(function(txt){
+        //放入输入框中 无需转换
+        var txt = ai.v2t(bufferAll[threadId]).then(function (txt) {
             console.log(txt);
+            socket.emit("v2t", txt);
+        }).catch((result) => {
+            console.log(result);
+            ack({ a: "fail" });
         });
     });
 

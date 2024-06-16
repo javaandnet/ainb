@@ -40,10 +40,11 @@ export default {
         newAfterScrollUp: true,
       },
     };
-    //  this.socket = io("https://localhost");
+    this.socket.on("v2t", (txt) => {
+         console.log(txt);
+    });
     this.socket.on("message", (message) => {
       console.log(message);
-      // this.messages.push(message);
       this.messages = [
         ...this.messages,
         {
@@ -56,11 +57,9 @@ export default {
       ];
     });
 
-    this.socket.on("newThread", (thread) => {
-      console.log(thread);
-      // this.messages.push(message);
+    this.socket.on("newThread", (threadId) => {
       this.canUse = true;
-      this.thread = thread;
+      this.thread = threadId;
     });
   },
   data() {
@@ -82,51 +81,62 @@ export default {
   methods: {
     addMessages(reset) {},
     record(data) {
-      this.socket.emit("recording", data.buffer);
+      this.socket.emit("recording", {
+        threadId: this.thread,
+        data: data.buffer,
+      });
     },
     recordStatus(flag) {
       if (flag == 1) {
-        this.socket.emit("start", "111");
-      } else {
-        this.socket.emit("saveRec", "", (res) => {
-          if (res.a == "fail") {
-            this.messages = [
-              ...this.messages,
-              {
-                _id: this.messages.length,
-                content: "我听不清楚",
-                senderId: "9999",
-                timestamp: new Date().toString().substring(16, 21),
-                date: new Date().toDateString(),
-              },
-            ];
-          } else {
-            this.messages = [
-              ...this.messages,
-              {
-                _id: this.messages.length,
-                content: res.q,
-                senderId: "1111",
-                timestamp: new Date().toString().substring(16, 21),
-                date: new Date().toDateString(),
-              },
-              {
-                _id: this.messages.length + 1,
-                content: res.a,
-                senderId: "9999",
-                timestamp: new Date().toString().substring(16, 21),
-                date: new Date().toDateString(),
-              },
-            ];
-          }
-          // document.getElementById("msg").innerHTML = `${res.a}`;
-          // play(res.data);
+        this.socket.emit("startRecord", {
+          threadId: this.thread,
         });
+      } else {
+        this.socket.emit(
+          "stopRecord",
+          {
+            threadId: this.thread,
+          },
+          (res) => {
+            if (res.a == "fail") {
+              this.messages = [
+                ...this.messages,
+                {
+                  _id: this.messages.length,
+                  content: "聞こえません",
+                  senderId: "9999",
+                  timestamp: new Date().toString().substring(16, 21),
+                  date: new Date().toDateString(),
+                },
+              ];
+            } else {
+              this.messages = [
+                ...this.messages,
+                {
+                  _id: this.messages.length,
+                  content: res.q,
+                  senderId: "1111",
+                  timestamp: new Date().toString().substring(16, 21),
+                  date: new Date().toDateString(),
+                },
+                {
+                  _id: this.messages.length + 1,
+                  content: res.a,
+                  senderId: "9999",
+                  timestamp: new Date().toString().substring(16, 21),
+                  date: new Date().toDateString(),
+                },
+              ];
+            }
+            // document.getElementById("msg").innerHTML = `${res.a}`;
+            // play(res.data);
+          }
+        );
       }
       console.log(flag);
     },
     sendMessage(message) {
-      this.socket.emit("message", { thread: this.thread, msg: message });
+      this.socket.emit("message", { threadId: this.thread, msg: message });
 
       this.messages = [
         ...this.messages,
