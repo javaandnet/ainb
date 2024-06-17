@@ -48,7 +48,7 @@ io.on('connection', (socket) => {
             socket.emit("newThread", thread.id);
         });
     socket.on('message', (message) => {
-        console.log('Message received: ', message);
+        // console.log('Message received: ', message);
         ai.chat(message.msg.content, message.threadId).then(function (ans) {
             console.log(ans);
             socket.emit("message", { content: ans });
@@ -94,6 +94,7 @@ io.on('connection', (socket) => {
         var txt = ai.v2t(bufferAll[threadId]).then(function (txt) {
             console.log(txt);
             socket.emit("v2t", txt);
+            bufferAll[threadId] = [];//删除
         }).catch((result) => {
             console.log(result);
             ack({ a: "fail" });

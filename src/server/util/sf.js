@@ -8,29 +8,48 @@ export default class SF {
   constructor(x) {
 
   }
-
-  async workByName(name) {
+  async projectByCondition(name) {
     var jsh = new JSH();
-    var sql = "SELECT Id, Name, Information__c, Resume__c FROM Worker__c where name =  '" + name +"'";
+
+    var sql = "SELECT Id, Name, Status__c,AutoNo__c FROM Project__c where status__c = '" + name + "'";
+    var data = await jsh.query(sql);
+
+    return data;
+  }
+  async projectByNo(no) {
+    var jsh = new JSH();
+    var sql = "SELECT Id, Name, Status__c,AutoNo__c,Detail__c FROM Project__c where AutoNo__c = '" + no + "'";
     var data = await jsh.query(sql);
     var str = "";
     if (data.totalSize > 0) {
       var rec = data.records[0];
-      return {"id":rec.Id,"name":rec.Name,"information":rec.Information__c,"link":rec.Resume__c};
+      return { "id": rec.Id, "name": rec.Name, "no": rec.AutoNo__c, "detail": rec.Detail__c };
+    }
+    return null;
+
+  }
+  async workByName(name) {
+    var jsh = new JSH();
+    var sql = "SELECT Id, Name, Information__c, Resume__c FROM Worker__c where name =  '" + name + "'";
+    var data = await jsh.query(sql);
+    var str = "";
+    if (data.totalSize > 0) {
+      var rec = data.records[0];
+      return { "id": rec.Id, "name": rec.Name, "information": rec.Information__c, "link": rec.Resume__c };
     }
     return null;
   }
 
-  async noWorkName() {
+  async workerNoWork() {
     var jsh = new JSH();
     var sql = "SELECT Id,  Name FROM Worker__c  where SalesStatus__c = '可能'";
     var data = await jsh.query(sql);
- 
+
     var names = [];
     if (data.totalSize > 0) {
-      data.records.forEach((element) => {names.push(element.Name )});
+      data.records.forEach((element) => { names.push(element.Name) });
     }
- 
+
     return names.join(",");
 
   }

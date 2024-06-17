@@ -1,4 +1,6 @@
 import { AI } from './util/ai.js';
+import Util from './util/util.js';
+const util = new Util();
 import { Config } from "./util/config.js";
 import OpenAI from "openai";
 import { Azure } from './util/azure.js';
@@ -14,19 +16,19 @@ const ai = new AI();
 // var res = await(ai.createAssistant("company"));
 //初始化使用
 // var res = await ai.getAssistant("company");
-// console.log(res);
 
-//更新配置
- //ai.updateAssistant("company");
-//创建Thread
-// await ai.createThread();
+// //更新配置
+// ai.updateAssistant("company");
+// //创建Thread
+//  await ai.createThread();
 // //Sample
-// var msg = await ai.chat("未稼働一覧情報は教えてください");
-
-// console.log("AIから：\r\n",msg);
-// //   await ai.chat("社員数は何人ですか？");
+// var msg = await ai.chat("未完了案件一覧を教えてください");
+// var msg = await ai.chat("FSR-0048");
+  //var msg = await ai.chat("稼働社員一覧は教えてください");
+ //console.log("AIから：\r\n",msg);
+//   await ai.chat("社員数は何人ですか？");
 // var text = "未稼働社員は教えてください";
-// text = "未稼働一覧は教えてください";
+// text = "未稼働社員一覧は教えてください";
 // text = "劉磊の説明文を教えてください";
 // var msg ="";
 //  //msg =  await ai.chat(text);
@@ -42,22 +44,59 @@ const ai = new AI();
 
 
 
-import { Readable } from 'stream';
+// import { Readable } from 'stream';
 
-var path = "/Users/fengleiren/git/ainb/src/server/public/wav/1718536871971.wav";
-var buffer = fs.readFileSync(path)
-const stream = Readable.from(buffer);
-
-
-  const transcription = await openai.audio.transcriptions.create({
-    file: await toFile(buffer, "audio.wav", {
-        contentType: "audio/wav",
-      }),
-    model: "whisper-1",
-  });
+// var path = "/Users/fengleiren/git/ainb/src/server/public/wav/1718536871971.wav";
+// var buffer = fs.readFileSync(path)
+// const stream = Readable.from(buffer);
 
 
+//   const transcription = await openai.audio.transcriptions.create({
+//     file: await toFile(buffer, "audio.wav", {
+//         contentType: "audio/wav",
+//       }),
+//     model: "whisper-1",
+//   });
 
 
+var args =  { query: 'active', condition: 'list' };
 
-  console.log(transcription.text);
+function getEmp(args) {
+
+    var status = util.getArg([args], "status", {
+        "未稼働": "inactive",
+        "inactive": "inactive",
+        "unassigned": "inactive",
+        "稼働していない": "inactive",
+        "working": "active",
+        "active": "active"
+        , "稼働中": "active"
+    }
+    );
+
+
+    if (status == null) {
+        status = util.getArg([args], "employment_status", {
+            "未稼働": "inactive",
+            "inactive": "inactive",
+            "unassigned": "inactive",
+            "稼働していない": "inactive",
+            "working": "active",
+            "active": "active"
+            , "稼働中": "active"
+        }
+        );
+    }
+    if (status != null) {
+        args.status = status;
+        return args;
+    }
+
+    var name = util.getArg([args], "name", null, "name=");
+    if (name != null) {
+        args.name = name;
+    }
+    return args;
+}
+
+console.log(getEmp(args));

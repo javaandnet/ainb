@@ -762,27 +762,57 @@ function markRaw(value) {
 }
 const toReactive = (value) => isObject$2(value) ? reactive(value) : value;
 const toReadonly = (value) => isObject$2(value) ? readonly(value) : value;
-function trackRefValue(ref) {
+function trackRefValue(ref2) {
   if (shouldTrack && activeEffect) {
-    ref = toRaw(ref);
+    ref2 = toRaw(ref2);
     {
-      trackEffects(ref.dep || (ref.dep = createDep()));
+      trackEffects(ref2.dep || (ref2.dep = createDep()));
     }
   }
 }
-function triggerRefValue(ref, newVal) {
-  ref = toRaw(ref);
-  if (ref.dep) {
+function triggerRefValue(ref2, newVal) {
+  ref2 = toRaw(ref2);
+  if (ref2.dep) {
     {
-      triggerEffects(ref.dep);
+      triggerEffects(ref2.dep);
     }
   }
 }
 function isRef(r) {
   return !!(r && r.__v_isRef === true);
 }
-function unref(ref) {
-  return isRef(ref) ? ref.value : ref;
+function ref(value) {
+  return createRef(value, false);
+}
+function createRef(rawValue, shallow) {
+  if (isRef(rawValue)) {
+    return rawValue;
+  }
+  return new RefImpl(rawValue, shallow);
+}
+class RefImpl {
+  constructor(value, __v_isShallow) {
+    this.__v_isShallow = __v_isShallow;
+    this.dep = void 0;
+    this.__v_isRef = true;
+    this._rawValue = __v_isShallow ? value : toRaw(value);
+    this._value = __v_isShallow ? value : toReactive(value);
+  }
+  get value() {
+    trackRefValue(this);
+    return this._value;
+  }
+  set value(newVal) {
+    newVal = this.__v_isShallow ? newVal : toRaw(newVal);
+    if (hasChanged$1(newVal, this._rawValue)) {
+      this._rawValue = newVal;
+      this._value = this.__v_isShallow ? newVal : toReactive(newVal);
+      triggerRefValue(this);
+    }
+  }
+}
+function unref(ref2) {
+  return isRef(ref2) ? ref2.value : ref2;
 }
 const shallowUnwrapHandlers = {
   get: (target, key, receiver) => unref(Reflect.get(target, key, receiver)),
@@ -2977,11 +3007,11 @@ function setRef(rawRef, oldRawRef, parentSuspense, vnode, isUnmount = false) {
   }
   const refValue = vnode.shapeFlag & 4 ? getExposeProxy(vnode.component) || vnode.component.proxy : vnode.el;
   const value = isUnmount ? null : refValue;
-  const { i: owner, r: ref } = rawRef;
+  const { i: owner, r: ref2 } = rawRef;
   const oldRef = oldRawRef && oldRawRef.r;
   const refs = owner.refs === EMPTY_OBJ ? owner.refs = {} : owner.refs;
   const setupState = owner.setupState;
-  if (oldRef != null && oldRef !== ref) {
+  if (oldRef != null && oldRef !== ref2) {
     if (isString$1(oldRef)) {
       refs[oldRef] = null;
       if (hasOwn(setupState, oldRef)) {
@@ -2991,40 +3021,40 @@ function setRef(rawRef, oldRawRef, parentSuspense, vnode, isUnmount = false) {
       oldRef.value = null;
     }
   }
-  if (isFunction$1(ref)) {
-    callWithErrorHandling(ref, owner, 12, [value, refs]);
+  if (isFunction$1(ref2)) {
+    callWithErrorHandling(ref2, owner, 12, [value, refs]);
   } else {
-    const _isString = isString$1(ref);
-    const _isRef = isRef(ref);
+    const _isString = isString$1(ref2);
+    const _isRef = isRef(ref2);
     if (_isString || _isRef) {
       const doSet = () => {
         if (rawRef.f) {
-          const existing = _isString ? refs[ref] : ref.value;
+          const existing = _isString ? refs[ref2] : ref2.value;
           if (isUnmount) {
             isArray$1(existing) && remove(existing, refValue);
           } else {
             if (!isArray$1(existing)) {
               if (_isString) {
-                refs[ref] = [refValue];
-                if (hasOwn(setupState, ref)) {
-                  setupState[ref] = refs[ref];
+                refs[ref2] = [refValue];
+                if (hasOwn(setupState, ref2)) {
+                  setupState[ref2] = refs[ref2];
                 }
               } else {
-                ref.value = [refValue];
+                ref2.value = [refValue];
                 if (rawRef.k)
-                  refs[rawRef.k] = ref.value;
+                  refs[rawRef.k] = ref2.value;
               }
             } else if (!existing.includes(refValue)) {
               existing.push(refValue);
             }
           }
         } else if (_isString) {
-          refs[ref] = value;
-          if (hasOwn(setupState, ref)) {
-            setupState[ref] = value;
+          refs[ref2] = value;
+          if (hasOwn(setupState, ref2)) {
+            setupState[ref2] = value;
           }
         } else if (_isRef) {
-          ref.value = value;
+          ref2.value = value;
           if (rawRef.k)
             refs[rawRef.k] = value;
         } else
@@ -3060,7 +3090,7 @@ function baseCreateRenderer(options, createHydrationFns) {
       optimized = false;
       n2.dynamicChildren = null;
     }
-    const { type, ref, shapeFlag } = n2;
+    const { type, ref: ref2, shapeFlag } = n2;
     switch (type) {
       case Text:
         processText(n1, n2, container, anchor);
@@ -3088,8 +3118,8 @@ function baseCreateRenderer(options, createHydrationFns) {
         } else
           ;
     }
-    if (ref != null && parentComponent) {
-      setRef(ref, n1 && n1.ref, parentSuspense, n2 || n1, !n2);
+    if (ref2 != null && parentComponent) {
+      setRef(ref2, n1 && n1.ref, parentSuspense, n2 || n1, !n2);
     }
   };
   const processText = (n1, n2, container, anchor) => {
@@ -3687,9 +3717,9 @@ function baseCreateRenderer(options, createHydrationFns) {
     }
   };
   const unmount = (vnode, parentComponent, parentSuspense, doRemove = false, optimized = false) => {
-    const { type, props, ref, children, dynamicChildren, shapeFlag, patchFlag, dirs } = vnode;
-    if (ref != null) {
-      setRef(ref, null, parentSuspense, vnode, true);
+    const { type, props, ref: ref2, children, dynamicChildren, shapeFlag, patchFlag, dirs } = vnode;
+    if (ref2 != null) {
+      setRef(ref2, null, parentSuspense, vnode, true);
     }
     if (shapeFlag & 256) {
       parentComponent.ctx.deactivate(vnode);
@@ -3940,8 +3970,8 @@ function isSameVNodeType(n1, n2) {
 }
 const InternalObjectKey = `__vInternal`;
 const normalizeKey = ({ key }) => key != null ? key : null;
-const normalizeRef = ({ ref, ref_key, ref_for }) => {
-  return ref != null ? isString$1(ref) || isRef(ref) || isFunction$1(ref) ? { i: currentRenderingInstance, r: ref, k: ref_key, f: !!ref_for } : ref : null;
+const normalizeRef = ({ ref: ref2, ref_key, ref_for }) => {
+  return ref2 != null ? isString$1(ref2) || isRef(ref2) || isFunction$1(ref2) ? { i: currentRenderingInstance, r: ref2, k: ref_key, f: !!ref_for } : ref2 : null;
 };
 function createBaseVNode(type, props = null, children = null, patchFlag = 0, dynamicProps = null, shapeFlag = type === Fragment ? 0 : 1, isBlockNode = false, needFullChildrenNormalization = false) {
   const vnode = {
@@ -4029,7 +4059,7 @@ function guardReactiveProps(props) {
   return isProxy(props) || InternalObjectKey in props ? extend$1({}, props) : props;
 }
 function cloneVNode(vnode, extraProps, mergeRef = false) {
-  const { props, ref, patchFlag, children } = vnode;
+  const { props, ref: ref2, patchFlag, children } = vnode;
   const mergedProps = extraProps ? mergeProps(props || {}, extraProps) : props;
   const cloned = {
     __v_isVNode: true,
@@ -4037,7 +4067,7 @@ function cloneVNode(vnode, extraProps, mergeRef = false) {
     type: vnode.type,
     props: mergedProps,
     key: mergedProps && normalizeKey(mergedProps),
-    ref: extraProps && extraProps.ref ? mergeRef && ref ? isArray$1(ref) ? ref.concat(normalizeRef(extraProps)) : [ref, normalizeRef(extraProps)] : normalizeRef(extraProps) : ref,
+    ref: extraProps && extraProps.ref ? mergeRef && ref2 ? isArray$1(ref2) ? ref2.concat(normalizeRef(extraProps)) : [ref2, normalizeRef(extraProps)] : normalizeRef(extraProps) : ref2,
     scopeId: vnode.scopeId,
     slotScopeIds: vnode.slotScopeIds,
     children,
@@ -32082,6 +32112,10 @@ const _sfc_main$a = {
     this.stopRecorder();
   },
   methods: {
+    setInput(txt) {
+      console.log(txt);
+      return this.$refs.roomTextarea.val(txt);
+    },
     getTextareaRef() {
       return this.$refs.roomTextarea;
     },
@@ -32890,11 +32924,11 @@ const _sfc_main$7 = {
     }
   },
   mounted() {
-    const ref = this.$refs["imageRef" + this.index];
-    if (ref) {
+    const ref2 = this.$refs["imageRef" + this.index];
+    if (ref2) {
       this.imageResponsive = {
-        maxHeight: ref.clientWidth - 18,
-        loaderTop: ref.clientHeight / 2 - 9
+        maxHeight: ref2.clientWidth - 18,
+        loaderTop: ref2.clientHeight / 2 - 9
       };
     }
   },
@@ -33976,6 +34010,9 @@ const _sfc_main$2 = {
     this.newMessages = [];
   },
   methods: {
+    setInput(txt) {
+      $refs.footer.setInput(txt);
+    },
     updateLoadingMessages(val) {
       this.loadingMessages = val;
       if (!val) {
@@ -34076,10 +34113,10 @@ const _sfc_main$2 = {
         (message) => message._id !== messageId
       );
     },
-    onMessageAdded({ message, index, ref }) {
+    onMessageAdded({ message, index, ref: ref2 }) {
       if (index !== this.messages.length - 1)
         return;
-      const autoScrollOffset = ref.offsetHeight + 60;
+      const autoScrollOffset = ref2.offsetHeight + 60;
       setTimeout(() => {
         const scrollContainer = this.$refs.scrollContainer;
         let scrolledUp = false;
@@ -34403,6 +34440,8 @@ function _sfc_render$2(_ctx, _cache, $props, $setup, $data, $options) {
       })
     ])) : createCommentVNode("", true),
     createVNode(_component_room_footer, {
+      id: "footer",
+      ref: "footer",
       room: $options.room,
       "room-id": $props.roomId,
       "room-message": $props.roomMessage,
@@ -34952,6 +34991,7 @@ const _sfc_main = {
     Room,
     MediaPreview
   },
+  expose: ["setInput"],
   props: {
     height: { type: String, default: "600px" },
     theme: { type: String, default: "light" },
@@ -35003,7 +35043,10 @@ const _sfc_main = {
     showFiles: { type: [Boolean, String], default: true },
     showAudio: { type: [Boolean, String], default: true },
     audioBitRate: { type: Number, default: 128 },
-    audioSampleRate: { type: Number, default: new (window.AudioContext || window.webkitAudioContext)().sampleRate },
+    audioSampleRate: {
+      type: Number,
+      default: new (window.AudioContext || window.webkitAudioContext)().sampleRate
+    },
     showEmojis: { type: [Boolean, String], default: true },
     showReactionEmojis: { type: [Boolean, String], default: true },
     showNewMessagesDivider: { type: [Boolean, String], default: true },
@@ -35059,6 +35102,12 @@ const _sfc_main = {
     "record-status",
     "message-selection-action-handler"
   ],
+  setup() {
+    const roomComp = ref(0);
+    return {
+      roomComp
+    };
+  },
   data() {
     return {
       slots: [],
@@ -35268,6 +35317,10 @@ const _sfc_main = {
     }
   },
   methods: {
+    setInput(txt) {
+      console.log(111);
+      return this.$refs.roomComp;
+    },
     castBoolean(val) {
       return val === "true" || val === true;
     },
@@ -35427,6 +35480,8 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         })
       ]), 1032, ["current-user-id", "rooms", "loading-rooms", "rooms-loaded", "room", "room-actions", "custom-search-room-enabled", "text-messages", "show-search", "show-add-room", "show-rooms-list", "text-formatting", "link-options", "is-mobile", "scroll-distance", "onFetchRoom", "onFetchMoreRooms", "onAddRoom", "onSearchRoom", "onRoomActionHandler"])) : createCommentVNode("", true),
       createVNode(_component_room, {
+        id: "roomComp",
+        ref: "roomComp",
         "current-user-id": $props.currentUserId,
         rooms: $options.roomsCasted,
         "room-id": $data.room.roomId || "",

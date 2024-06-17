@@ -1,6 +1,8 @@
 <template>
   <div>
     <vue-advanced-chat
+      id="chat"
+      ref="chat"
       height="calc(100vh - 20px)"
       :single-room="true"
       :current-user-id="currentUserId"
@@ -23,11 +25,21 @@
 </template>
 
 <script>
+
 import { register } from "./js/vue-advanced-chat.es";
+import VueAdvancedChat from "./js/vue-advanced-chat.es";
+
+import { defineComponent, ref } from 'vue'
 import io from "socket.io-client";
 register();
+const chat = ref(null) // 通过 ref 绑定子组件
 // text-messages
 export default {
+    //注册组件
+  components: {
+     VueAdvancedChat
+  },
+ 
   mounted() {
     this.socket = io("http://192.168.1.160:3000");
     this.autoScroll = {
@@ -41,7 +53,7 @@ export default {
       },
     };
     this.socket.on("v2t", (txt) => {
-         console.log(txt);
+      console.log(txt);
     });
     this.socket.on("message", (message) => {
       console.log(message);
@@ -79,6 +91,14 @@ export default {
   },
 
   methods: {
+        onClick: function () {
+      //获取到 子组件的  数据
+   //this.$refs.chat.setInput(11);
+      //执行了子组件的 play方法
+      console.log(this.$refs.chat.roomComp);
+      
+      this.$refs.childComp.play();
+    },
     addMessages(reset) {},
     record(data) {
       this.socket.emit("recording", {
@@ -87,6 +107,7 @@ export default {
       });
     },
     recordStatus(flag) {
+      console.log(flag);
       if (flag == 1) {
         this.socket.emit("startRecord", {
           threadId: this.thread,
@@ -136,6 +157,9 @@ export default {
       console.log(flag);
     },
     sendMessage(message) {
+
+      //this.$refs.chat.$refs.room.$refs.footer.$refs.roomTextarea.getData("aaa"); //传给子组件的数据
+    
       this.socket.emit("message", { threadId: this.thread, msg: message });
 
       this.messages = [
