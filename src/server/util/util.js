@@ -79,20 +79,17 @@ export default class Util {
      * @param {*} replaceStr name=
      * @returns 
      */
-    getArgByKeyInValue(objs, key, replaceStr = "") {
+    getArgByKeyInValue(obj, key, replaceStr = "") {
         let rtn = null;
-        for (const obj of objs) {
-            if (this.undefined(obj)) {//Next
-                break;
-            }
-            const values = Object.values(obj);
-            for (const val of values) {//All values
-                //key in value
-                if (this.isString(val) && val.toLowerCase().includes(key)) {
-                    return val.toLowerCase().replace(replaceStr, "");
-                }
+
+        const values = Object.values(obj);
+        for (const val of values) {//All values
+            //key in value
+            if (this.isString(val) && val.toLowerCase().includes(key)) {
+                return val.toLowerCase().replace(replaceStr, "");
             }
         }
+
         return rtn;
     }
 
@@ -104,26 +101,23 @@ export default class Util {
      * @param {*} replaceStr 
      * @returns 
      */
-    getArgByValueInValue(objs, keyMap, replaceStr = "") {
+    getArgByValueInValue(obj, keyMap, replaceStr = "") {
         let rtn = null;
         if (keyMap == null) {
             return null;
         }
-        for (const obj of objs) {
-            if (this.undefined(obj)) {//Next
-                break;
-            }
-            const keys = Object.keys(keyMap);
-            const values = Object.values(obj);
-            for (let val of values) {//All values
-                if (this.isString(val)) {
-                    val = val.toLowerCase(); //Active => active
-                    if (keyMap.hasOwnProperty(val)) {//value中含有已知的值
-                        return val;
-                    }
+
+        const keys = Object.keys(keyMap);
+        const values = Object.values(obj);
+        for (let val of values) {//All values
+            if (this.isString(val)) {
+                val = val.toLowerCase(); //Active => active
+                if (keyMap.hasOwnProperty(val)) {//value中含有已知的值
+                    return val;
                 }
             }
         }
+
         return rtn;
     }
 
@@ -135,19 +129,16 @@ export default class Util {
      * @param {*} replaceStr 
      * @returns 
      */
-    getArgByKeyInKey(objs, key, replaceStr = "") {
+    getArgByKeyInKey(obj, key, replaceStr = "") {
         let rtn = null;
-        for (const obj of objs) {
-            if (this.undefined(obj)) {//Next
-                break;
-            }
-            const keys = Object.keys(obj);
-            for (const objKey of keys) {
-                if (objKey == key) {
-                    return obj[key].replace(replaceStr, "");
-                }
+
+        const keys = Object.keys(obj);
+        for (const objKey of keys) {
+            if (objKey == key) {
+                return obj[key].replace(replaceStr, "");
             }
         }
+
         return rtn;
     }
 
@@ -159,15 +150,21 @@ export default class Util {
      * @param {*} replaceStr 
      * @returns 
      */
-    getArg(objs, key, keyMap, replaceStr = "") {
-        var rtn = this.getArgByKeyInValue(objs, key, replaceStr);
-        if (rtn == null) {
-            rtn = this.getArgByKeyInKey(objs, key, replaceStr);
+    getArg(obj, keys, keyMap, replaceStr = "") {
+        for (const key of keys) {
+            var rtn = this.getArgByKeyInValue(obj, key, replaceStr);
+            if (rtn == null) {
+                rtn = this.getArgByKeyInKey(obj, key, replaceStr);
+            }
+            if (rtn == null) {
+                rtn = this.getArgByValueInValue(obj, keyMap, replaceStr);
+            }
+            if (rtn != null) {
+                return rtn;
+            }
         }
-        if (rtn == null) {
-            rtn = this.getArgByValueInValue(objs, keyMap, replaceStr);
-        }
-        return rtn;
+
+        return null;
     }
 
     repalceStr(objs, replaceStr) {

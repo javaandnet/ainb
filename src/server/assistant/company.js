@@ -290,8 +290,7 @@ class Company {
             return args;
         },
         getEmp: async function (args) {
-
-            var status = util.getArg([args], "status", {
+            var status = util.getArg(args, ["status","employment_status"], {
                 "未稼働": "inactive",
                 "inactive": "inactive",
                 "unassigned": "inactive",
@@ -301,26 +300,12 @@ class Company {
                 , "稼働中": "active"
             }
             );
-
-
-            if (status == null) {
-                status = util.getArg([args], "employment_status", {
-                    "未稼働": "inactive",
-                    "inactive": "inactive",
-                    "unassigned": "inactive",
-                    "稼働していない": "inactive",
-                    "working": "active",
-                    "active": "active"
-                    , "稼働中": "active"
-                }
-                );
-            }
             if (status != null) {
                 args.status = status;
                 return args;
             }
-
-            var name = util.getArg([args], "name", null, "name=");
+        
+            var name = util.getArg(args, ["name"], null, "name=");
             if (name != null) {
                 args.name = name;
             }
