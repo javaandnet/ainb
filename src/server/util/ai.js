@@ -51,11 +51,14 @@ class AI {
         if (lastFlag) {
             // console.log(msgs[0].content[0].text);
             if (msgs.rtn && msgs.rtn.out) {
+                if (this.DEBUG) {
+                    console.log("Out:", msgs.rtn.out);
+                }
                 return msgs.rtn.out;
             } else {
                 var rtn = msgs.data[0].content[0].text.value;
                 if (this.DEBUG) {
-                    console.log("nofunc:", rtn);
+                    console.log("AI String:", rtn);
                 }
                 return rtn;
             }
@@ -207,7 +210,7 @@ class AI {
     todo = async function () {
     };
 
-    chatInVoice = async function (buffer, threadId,type = 0) {
+    chatInVoice = async function (buffer, threadId, type = 0) {
         const txt = await this.v2t(buffer, type);
         const rtn = await this.chat(txt, threadId);
         return rtn;
