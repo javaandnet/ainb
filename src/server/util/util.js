@@ -106,14 +106,15 @@ export default class Util {
         if (keyMap == null) {
             return null;
         }
-
         const keys = Object.keys(keyMap);
         const values = Object.values(obj);
         for (let val of values) {//All values
             if (this.isString(val)) {
-                val = val.toLowerCase(); //Active => active
+                val = val.toLowerCase(); //Active => active condition: 'status:未稼働'
+                val = val.replace(replaceStr,"");
                 if (keyMap.hasOwnProperty(val)) {//value中含有已知的值
-                    return val;
+                    rtn = keyMap[val];
+                    break;
                 }
             }
         }
@@ -151,20 +152,23 @@ export default class Util {
      * @returns 
      */
     getArg(obj, keys, keyMap, replaceStr = "") {
+        var rtn = null;
         for (const key of keys) {
-            var rtn = this.getArgByKeyInValue(obj, key, replaceStr);
-            if (rtn == null) {
-                rtn = this.getArgByKeyInKey(obj, key, replaceStr);
-            }
+            //Map 最优先
             if (rtn == null) {
                 rtn = this.getArgByValueInValue(obj, keyMap, replaceStr);
             }
+            if (rtn == null) {
+                rtn = this.getArgByKeyInValue(obj, key, replaceStr);
+            }
+            if (rtn == null) {
+                rtn = this.getArgByKeyInKey(obj, key, replaceStr);
+            }
             if (rtn != null) {
-                return rtn;
+                break;
             }
         }
-
-        return null;
+        return rtn;
     }
 
     repalceStr(objs, replaceStr) {

@@ -29,7 +29,7 @@ class Company {
                 type: "function",
                 function: {
                     name: "getEmp",// 绑定到函数
-                    description: "社員の情報を取得する、説明文、履歴書など",
+                    description: "社員の情報を取得する、説明文、履歴書など、一覧の場合は番号を付けて出力してください",
                     parameters: {
                         type: "object",
                         properties: {//参数说明
@@ -56,8 +56,8 @@ class Company {
             }, {
                 type: "function",
                 function: {
-                    name: "slelectInfo",// 绑定到函数
-                    description: "内容を選択する",
+                    name: "selectInfo",// 绑定到函数
+                    description: "内容を選択して、そのまま出力する",
                     parameters: {
                         type: "object",
                         properties: {//参数说明
@@ -77,7 +77,7 @@ class Company {
                             query: { description: "質問の対象", type: "string" },
                             condition: { description: "検索の范围", type: "string" },
                         },
-                        required: ["query", "condition"],//必须
+                        required: ["project", "worker"],//必须
                     },
                 },
             }, {
@@ -115,6 +115,9 @@ class Company {
         ]
     };
     func = {
+        doProjectWithWorker: async function (args) {
+            return "情報がありません";
+        },
         getInfo: async function (args) {
             if (args.query.includes("社長") || args.query.toLowerCase().includes("ceo") || args.query.toLowerCase().includes("president")) {
                 return "孫光です。"
@@ -163,7 +166,7 @@ class Company {
 
         },
 
-        slelectInfo: async function (args) {
+        selectInfo: async function (args) {
             return args.info;
         },
 
@@ -290,6 +293,7 @@ class Company {
             return args;
         },
         getEmp: async function (args) {
+
             var status = util.getArg(args, ["status","employment_status"], {
                 "未稼働": "inactive",
                 "inactive": "inactive",
@@ -298,7 +302,7 @@ class Company {
                 "working": "active",
                 "active": "active"
                 , "稼働中": "active"
-            }
+            },"status:"
             );
             if (status != null) {
                 args.status = status;

@@ -71,7 +71,7 @@ function getEmp(args) {
         "working": "active",
         "active": "active"
         , "稼働中": "active"
-    }
+    },"status:"
     );
     if (status != null) {
         args.status = status;
@@ -85,9 +85,14 @@ function getEmp(args) {
     return args;
 }
 //TEST
-console.log(getEmp({ query: 'active', condition: 'list' }));
-console.log(getEmp({ query: 'aaa', condition: 'active' }));
-console.log(getEmp({ query: 'all', condition: 'inactive' }));
-console.log(getEmp({query: 'employees', condition: {status:'inactive'}}));
-console.log(getEmp({query: 'employees', condition: {employment_status:'inactive'}}));
-console.log(getEmp({condition: 'name=XXX ', query: {}}));
+// console.log(getEmp({ query: 'active', condition: 'list' }));
+// console.log(getEmp({ query: 'aaa', condition: 'active' }));
+// console.log(getEmp({ query: 'all', condition: 'inactive' }));
+// console.log(getEmp({query: 'employees', condition: {status:'inactive'}}));
+// console.log(getEmp({query: 'employees', condition: {employment_status:'inactive'}}));
+// console.log(getEmp({condition: 'name=XXX ', query: {}}));
+// console.log(getEmp({ query: {}, condition: '未稼働' }));
+// console.log(getEmp({ query: {}, condition: 'status:未稼働' }));
+console.log(getEmp( { query: '未稼働', condition: '案件' }));
+
+
