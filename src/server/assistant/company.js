@@ -107,11 +107,11 @@ class Company {
             return "情報がありません";
         },
         getInfo: async function (args) {
-            if (args.query.includes("社長") || args.query.toLowerCase().includes("ceo") || args.query.toLowerCase().includes("president")) {
-                return "孫光です。"
-            } else if (args.query.includes("company") || args.query.includes("name") || args.query.includes("名前")) {
-                return "会社の名前はFSR株式会社です。"
-            } else if (args.query.includes("未稼働") || args.query.includes("inactive") || (args.condition && (args.condition.includes("未稼働") || args.condition.includes("稼働していない") || args.condition.includes("未稼働") || args.condition.includes("inactive")))) {
+            if(args.name == "ceo"){
+                 return "孫光です。"
+            }else if(args.name == "ceo"){
+                  return "会社の名前はFSR株式会社です。"
+            }else if(args.name == "inactive"){
                 return await sf.workerNoWork();
             }
             return "情報がありません";
@@ -149,7 +149,7 @@ class Company {
         },
 
         selectInfo: async function (args) {
-            return  JSON.stringify(args);
+            return JSON.stringify(args);
         },
 
         getEmp: async function (args) {
@@ -235,13 +235,33 @@ class Company {
         }
     };
     changeArgs = {
+
+        getInfo: async function (args) {
+            var name = util.getArg(args, [""], {
+                "社長": "ceo"
+                , "ceo": "ceo"
+                , "president": "ceo"
+                , "company": "name"
+                , "name": "name"
+                , "名前": "name"
+                , "未稼働": "inactive"
+                , "inactive": "inactive"
+                , "未稼働": "inactive"
+                , "稼働していない": "inactive"
+            });
+            name = util.getNullStr(name,"");
+            args.name = name;
+            return args;
+        },
+
         getProject: async function (args) {
             var status = util.getArg(args, ["status"], {
-                "未完了": "uncomplete"
+                "未完了": "incomplete",
+                "incomplete": "incomplete"
             }, "status:"
             );
             if (status != null) {
-                if (status == "uncomplete") {
+                if (status == "incomplete") {
                     args.status = "0";
                 } else {
                     args.status = "9";
