@@ -1,8 +1,3 @@
-
-
-import { AssistantFactory } from './assistantFactory.js';
-const assistantFactory = new AssistantFactory();
-
 export default class Util {
     copy(obj) {
         return JSON.parse(JSON.stringify(obj));
@@ -147,31 +142,7 @@ export default class Util {
 
         return rtn;
     }
-    /**
-     * 
-     * @param {*} objs 配置Map
-     * @param {*} rtn AI返回值
-     * @param {*} obj  exe Object
-     * @returns 
-     */
-    // func: 'selectInfo',
-    // args: { type: '案件', flag: '1', info: 'FSR-0048' },
-    //{company:["selectInfo","sendMail"]}
-    exe = async function (objs, rtn, obj) {
-        const keys = Object.keys(objs);
-        let doRtn = null;
-        for (const objKey of keys) {
-            let at = assistantFactory.get(objKey);
-            if (objs[objKey].indexOf(rtn.func) >= 0) {//数组中存在
-                if (at != null) {
-                    //関数実行
-                    doRtn = await (at.func)[rtn.func](JSON.parse(rtn.args), obj);
-                    break;
-                }
-            }
-        }
-        return doRtn;
-    };
+
     /**
      * { query: { employee_status: 'active' }, condition: 'list', name: null }
      * @param {*} objs 

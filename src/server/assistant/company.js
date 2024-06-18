@@ -102,16 +102,28 @@ class Company {
             }
         ]
     };
+    out = {
+        /**
+         * 添加技术者到返回Json
+         * @param {*} args 
+         * @param {*} obj 
+         * @returns 
+         */
+        selectInfo: async function (args, obj) {
+            obj.option = args;
+            return args;
+        },
+    };
     func = {
         doProjectWithWorker: async function (args) {
             return "情報がありません";
         },
         getInfo: async function (args) {
-            if(args.name == "ceo"){
-                 return "孫光です。"
-            }else if(args.name == "ceo"){
-                  return "会社の名前はFSR株式会社です。"
-            }else if(args.name == "inactive"){
+            if (args.name == "ceo") {
+                return "孫光です。"
+            } else if (args.name == "ceo") {
+                return "会社の名前はFSR株式会社です。"
+            } else if (args.name == "inactive") {
                 return await sf.workerNoWork();
             }
             return "情報がありません";
@@ -249,7 +261,7 @@ class Company {
                 , "未稼働": "inactive"
                 , "稼働していない": "inactive"
             });
-            name = util.getNullStr(name,"");
+            name = util.getNullStr(name, "");
             args.name = name;
             return args;
         },

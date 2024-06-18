@@ -53,7 +53,7 @@ io.on('connection', (socket) => {
         ai.chat(message.msg.content, message.threadId, false).then(function (rtn) {
             var json = { content: rtn.rtn.str };
             //外在插件执行
-            let rtn = util.exe({ "company": ["selectInfo"] }, rtn, json);
+            let rtnB = ai.exe({ "company": ["selectInfo"] }, rtn, json);
             socket.emit("message", json);
         });
     });
