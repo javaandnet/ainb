@@ -24,3 +24,6 @@ src/webrecord/util/config.js
 src/webrecord/util/config.js
 src/socket/src/js/vue-advanced-chat.umd.js
 src/socket/src/js/vue-advanced-chat.es.js
+src/server/test.js
+.gitignore
+src/server/test.js
