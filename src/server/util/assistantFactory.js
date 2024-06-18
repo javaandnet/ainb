@@ -1,6 +1,5 @@
 
 import { Company } from "../assistant/company.js";
-
 import { Restaurant } from "../assistant/restaurant.js";
 class AssistantFactory {
     assistants = {};

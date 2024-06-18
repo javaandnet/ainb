@@ -15,21 +15,21 @@ const ai = new AI();
 //Create a new Assistant
 // var res = await(ai.createAssistant("company"));
 //初始化使用
-var res = await ai.getAssistant("company");
+//var res = await ai.getAssistant("company");
 //更新配置
-ai.updateAssistant("company");
+//ai.updateAssistant("company");
 //创建Thread
-await ai.createThread();
+//await ai.createThread();
 // //Sample
-var msg = "";
-msg = await ai.chat("未完了案件一覧を教えてください");
+//var msg = "";
+//msg = await ai.chat("未完了案件一覧を教えてください");
 //  msg = await ai.chat("FSR-0048");
- msg = await ai.chat("FSR-0048");
- await ai.chat("選択する");
- await ai.chat("選択する");
- await ai.chat("選択する");
-  //var msg = await ai.chat("稼働社員一覧は教えてください");
- //console.log("AIから：\r\n",msg);
+//msg = await ai.chat("FSR-0048");
+//  await ai.chat("選択する");
+//  await ai.chat("選択する");
+//  await ai.chat("選択する");
+//var msg = await ai.chat("稼働社員一覧は教えてください");
+//console.log("AIから：\r\n",msg);
 //   await ai.chat("社員数は何人ですか？");
 // var text = "未稼働社員は教えてください";
 // text = "未稼働社員一覧は教えてください";
@@ -61,5 +61,21 @@ msg = await ai.chat("未完了案件一覧を教えてください");
 //       }),
 //     model: "whisper-1",
 //   });
+function testUtil_01() {
+    var rtn = {
+        rtn: {
+            ai: '{"type":"案件","flag":"1","info":"FSR-0048"}',
+            func: 'selectInfo',
+            args: { type: '案件', flag: '1', info: 'FSR-0048' },
+            type: 'AI',
+            str: '案件FSR-0048が選択されました。何かほかにお手伝いできることがあればお知らせください。'
+        }
+    };
 
+    var json = { content: rtn.rtn.str };
+    //外在插件执行
+    ai.exe({ "company": ["selectInfo"] }, rtn.rtn, json);
+    console.log(json);
+}
 
+testUtil_01();
