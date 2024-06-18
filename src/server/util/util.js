@@ -111,7 +111,7 @@ export default class Util {
         for (let val of values) {//All values
             if (this.isString(val)) {
                 val = val.toLowerCase(); //Active => active condition: 'status:未稼働'
-                val = val.replace(replaceStr,"");
+                val = val.replace(replaceStr, "");
                 if (keyMap.hasOwnProperty(val)) {//value中含有已知的值
                     rtn = keyMap[val];
                     break;
@@ -170,6 +170,14 @@ export default class Util {
         }
         return rtn;
     }
+
+    getNullStr(str, nullStr) {
+        if (str && str != null) {
+            return str;
+        } else {
+            return nullStr;
+        }
+    };
 
     repalceStr(objs, replaceStr) {
         let str = "";

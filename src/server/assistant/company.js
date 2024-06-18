@@ -47,37 +47,25 @@ class Company {
                     parameters: {
                         type: "object",
                         properties: {//参数说明
-                            query: { description: "質問の対象", type: "string" },
-                            condition: { description: "検索の范围", type: "string" },
+                            no: { description: "案件の番号", type: "string" },
+                            condition: { description: "検索の条件", type: "string" },
                         },
-                        required: ["query", "condition"],//必须
+                        required: ["condition"],//必须
                     },
                 },
             }, {
                 type: "function",
                 function: {
                     name: "selectInfo",// 绑定到函数
-                    description: "内容を選択して、そのまま出力する",
+                    description: "案件または技術者を選択します。あるいは既存の選択したものから外す",
                     parameters: {
                         type: "object",
                         properties: {//参数说明
-                            info: { description: "選択の内容", type: "string" }
+                            type: { description: "選択のタイプ、案件か技術者か", type: "string" },
+                            flag: { description: "選択または外すフラグ、選択の場合は１とする、その以外は０とする", type: "string" },
+                            info: { description: "選択と外すの内容", type: "string" }
                         },
-                        required: ["info"],//必须
-                    },
-                },
-            }, {
-                type: "function",
-                function: {
-                    name: "doProjectWithWorker",// 绑定到函数
-                    description: "技術者をとある案件関連して、提案します",
-                    parameters: {
-                        type: "object",
-                        properties: {//参数说明
-                            query: { description: "質問の対象", type: "string" },
-                            condition: { description: "検索の范围", type: "string" },
-                        },
-                        required: ["project", "worker"],//必须
+                        required: ["type", "info", "flag"],//必须
                     },
                 },
             }, {
@@ -135,21 +123,15 @@ class Company {
                 if (data.totalSize == 0) {
                     return { ai: "情報なし", out: "案件情報がありません" };
                 } else {
-                    var str = "";
-                    var ais = [];
-                    var projects = [];
+                    var project = {};
+                    var ai = {};
                     data.records.forEach((element, index) => {
-                        str += (element.AutoNo__c) + ":" + element.Name + "\r\n";
-                        // projects.push({
-                        // no:index,
-                        // name:element.name }); 
-                        ais.push({
-                            no: element.AutoNo__c
-                        });
+                        project[element.AutoNo__c] = element.Name;
+                        ai[index + 1] = element.AutoNo__c;
                     });
                     return {
-                        ai: JSON.stringify(ais), //只有名字
-                        out: str
+                        ai: util.objToStr(ai), //只有名字
+                        out: util.objToStr(project)
                     };
                 }
             } else if (util.defined(args.no)) {
@@ -167,7 +149,7 @@ class Company {
         },
 
         selectInfo: async function (args) {
-            return args.info;
+            return  JSON.stringify(args);
         },
 
         getEmp: async function (args) {
@@ -250,40 +232,26 @@ class Company {
                     };
                 }
             }
-        },
-        getNumber: async function (args) {
-            if (args.query.includes("未稼働") || args.condition.includes("未稼働") || args.condition.includes("稼働していない") || args.condition.includes("未稼働") || args.condition.includes("inactive")) {
-                var sf = new SF();
-                return await sf.workerNoWork();
-            }
-            else if ((args.query.includes("employees") || args.query.includes("社員"))) {
-                return "100";
-            }
-            return "0";
         }
     };
     changeArgs = {
         getProject: async function (args) {
-            var status = 9;
-            var con = "";
-            if (util.isString(args.query)) {
-                con = args.query;
-            } else {
-                con = args.query.name;
-            }
-            if (con && con != "") {
-                if (con.includes("未完了")) {
-                    status = 0;
-                    args.status = status;
+            var status = util.getArg(args, ["status"], {
+                "未完了": "uncomplete"
+            }, "status:"
+            );
+            if (status != null) {
+                if (status == "uncomplete") {
+                    args.status = "0";
                 } else {
-                    if (util.isNumeric(con.replace("FSR-", ""))) {
-                        args.no = con;
-                    } else {
-                        status = 9;
-                    }
+                    args.status = "9";
                 }
+                return args;
             }
-
+            var name = util.getArg(args, ["name"], null, "name=");
+            if (name != null) {
+                args.name = name;
+            }
             return args;
         },
         sendMail: async function (args) {
@@ -294,7 +262,7 @@ class Company {
         },
         getEmp: async function (args) {
 
-            var status = util.getArg(args, ["status","employment_status"], {
+            var status = util.getArg(args, ["status", "employment_status"], {
                 "未稼働": "inactive",
                 "inactive": "inactive",
                 "unassigned": "inactive",
@@ -302,13 +270,13 @@ class Company {
                 "working": "active",
                 "active": "active"
                 , "稼働中": "active"
-            },"status:"
+            }, "status:"
             );
             if (status != null) {
                 args.status = status;
                 return args;
             }
-        
+
             var name = util.getArg(args, ["name"], null, "name=");
             if (name != null) {
                 args.name = name;

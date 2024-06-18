@@ -15,15 +15,16 @@ const ai = new AI();
 //Create a new Assistant
 // var res = await(ai.createAssistant("company"));
 //初始化使用
-// var res = await ai.getAssistant("company");
-
-// //更新配置
-// ai.updateAssistant("company");
-// //创建Thread
-//  await ai.createThread();
+var res = await ai.getAssistant("company");
+//更新配置
+ai.updateAssistant("company");
+//创建Thread
+await ai.createThread();
 // //Sample
-// var msg = await ai.chat("未完了案件一覧を教えてください");
-// var msg = await ai.chat("FSR-0048");
+var msg = "";
+msg = await ai.chat("未完了案件一覧を教えてください");
+//  msg = await ai.chat("FSR-0048");
+ msg = await ai.chat("FSR-0048を選択してください");
   //var msg = await ai.chat("稼働社員一覧は教えてください");
  //console.log("AIから：\r\n",msg);
 //   await ai.chat("社員数は何人ですか？");
