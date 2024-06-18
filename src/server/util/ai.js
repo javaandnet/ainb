@@ -27,7 +27,7 @@ class AI {
      *    { 
      *       data: messages,        //OpenAI に保存する　messages
      *        rtn: { 
-     *                fun: "funcname", //関数名
+     *                func: "funcname", //関数名
      *                args: "args", 　   //パラメータ
      *                ai: "AI",             //AIに渡す情報
      *    　         type: "AI/FUNC" //出力タイプ　AIの場合はaiを生成する
@@ -61,8 +61,8 @@ class AI {
             { assistant_id: this.assistant.id }
         );
         //5. 执行
-        if(this.DEBUG){
-            console.log("TOAI:",msg);
+        if (this.DEBUG) {
+            console.log("TOAI:", msg);
         }
         let result = await this.waitRun(threadId, run.id);
 
@@ -73,7 +73,7 @@ class AI {
         let rtnType = "AI";
         let rtnStr = "";
 
-        if (util.undefined(result.rtn)){
+        if (util.undefined(result.rtn)) {
             result.rtn = {};
         }
         if (result.rtn && result.rtn.out) {
@@ -209,7 +209,7 @@ class AI {
                     ],
                 });
 
-                doRtn.fun = funcName;
+                doRtn.func = funcName;
                 doRtn.args = args;
                 //递归调用
                 return await this.waitRun(threadId, runId, doRtn);
@@ -254,6 +254,7 @@ class AI {
         const rtn = await this.chat(txt, threadId);
         return rtn;
     };
+
 
     v2t = async function (buffer, type = 0) {
         //TODO MP3

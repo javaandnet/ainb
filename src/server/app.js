@@ -4,7 +4,8 @@ import https from 'https';
 import fs from 'fs';
 import path from 'path';
 import { Server, Socket } from 'socket.io';
-
+import Util from './util/util.js';
+const util = new Util();
 import cors from 'cors'
 import { Azure } from './util/azure.js';
 import { AI } from './util/ai.js';
@@ -49,9 +50,11 @@ io.on('connection', (socket) => {
         });
     socket.on('message', (message) => {
         // console.log('Message received: ', message);
-        ai.chat(message.msg.content, message.threadId,false).then(function (rtn) {
-            // console.log(rtn.rtn);
-            socket.emit("message", { content: rtn.rtn.str });
+        ai.chat(message.msg.content, message.threadId, false).then(function (rtn) {
+            var json = { content: rtn.rtn.str };
+            //外在插件执行
+            let rtn = util.exe({ "company": ["selectInfo"] }, rtn, json);
+            socket.emit("message", json);
         });
     });
 
