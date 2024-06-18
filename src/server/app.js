@@ -49,9 +49,9 @@ io.on('connection', (socket) => {
         });
     socket.on('message', (message) => {
         // console.log('Message received: ', message);
-        ai.chat(message.msg.content, message.threadId).then(function (ans) {
-            console.log(ans);
-            socket.emit("message", { content: ans });
+        ai.chat(message.msg.content, message.threadId).then(function (rtn) {
+            console.log(rtn.rtn);
+            socket.emit("message", { content: rtn.rtn.str });
         });
     });
 
