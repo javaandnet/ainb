@@ -153,11 +153,12 @@ export default class Util {
      */
     getArg(obj, keys, keyMap, replaceStr = "") {
         var rtn = null;
+        //Map 最优先
+        rtn = this.getArgByValueInValue(obj, keyMap, replaceStr);
+        if (rtn != null) {
+            return rtn;
+        }
         for (const key of keys) {
-            //Map 最优先
-            if (rtn == null) {
-                rtn = this.getArgByValueInValue(obj, keyMap, replaceStr);
-            }
             if (rtn == null) {
                 rtn = this.getArgByKeyInValue(obj, key, replaceStr);
             }
