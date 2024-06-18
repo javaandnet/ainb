@@ -60,8 +60,10 @@ class AI {
             threadId,
             { assistant_id: this.assistant.id }
         );
-        //5. 执行完毕
-
+        //5. 执行
+        if(this.DEBUG){
+            console.log("TOAI:",msg);
+        }
         let result = await this.waitRun(threadId, run.id);
 
         //6.信息变化,必要な場合前のMessageを変更する
@@ -70,7 +72,11 @@ class AI {
         //7.戻り値を処理する
         let rtnType = "AI";
         let rtnStr = "";
-        if (result.rtn.out) {
+
+        if (util.undefined(result.rtn)){
+            result.rtn = {};
+        }
+        if (result.rtn && result.rtn.out) {
             rtnType = "FUNC";
             rtnStr = result.rtn.out;
         } else {
@@ -165,13 +171,14 @@ class AI {
         try {
             let rtn = {};
             const run = await openai.beta.threads.runs.retrieve(threadId, runId);
+            // console.log(run.status);
             if (run.status === "queued" || run.status === "in_progress") {
-                await new Promise((resolve) => setTimeout(resolve, 100));
+                await new Promise((resolve) => setTimeout(resolve, 200));
                 return await this.waitRun(threadId, runId, doRtn);
             } else if (run.status === "requires_action" && run.required_action) {//需要下一步
                 // NOTE: 複数回の Tools の呼び出しには対応していない
                 const call = run.required_action.submit_tool_outputs.tool_calls[0];
-                //console.log(call.function.name);
+
                 const funcName = call.function.name;
                 let args = JSON.parse(call.function.arguments);
                 if (this.DEBUG) {
@@ -211,6 +218,7 @@ class AI {
                 //最後の状態で戻ります
                 // console.log(messages);
                 let messages = await openai.beta.threads.messages.list(threadId);
+
                 //返回值包含计算的信息
                 return {
                     messages: messages,
