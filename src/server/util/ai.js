@@ -46,24 +46,30 @@ class AI {
                 threadId = this.thread.id;
             }
         }
+        //2. do what hahaha
+
         //3. Messag:消息
         // ユーザーが入力したクエリを Message として OpenAI API に送信する，往哪一个线程传递，可以管理不同线程
         await openai.beta.threads.messages.create(threadId, {
             role: "user",
             content: msg,
         });
+
         //4. execute
         let run = await openai.beta.threads.runs.create(
             threadId,
             { assistant_id: this.assistant.id }
         );
         //5. 执行完毕
+
         let result = await this.waitRun(threadId, run.id);
+
         //6.信息变化,必要な場合前のMessageを変更する
         // Todo serverにrequest assitant中で処理など
         const msgs = await this.doMessages(threadId, result);
+        //7.戻り値を処理する
         let rtnType = "AI";
-        let rtnStr = "AI";
+        let rtnStr = "";
         if (result.rtn.out) {
             rtnType = "FUNC";
             rtnStr = result.rtn.out;
@@ -174,17 +180,15 @@ class AI {
                 }
                 var assistantConfig = assistantFactory.get(this.assistantName);
                 //変数を変更する
-                //args = await this.doChangeArgs(funcName, args);
                 if ((assistantConfig.changeArgs)[funcName]) {
                     args = await ((assistantConfig.changeArgs)[funcName](args));
                 }
                 if (this.DEBUG) {
                     console.log("変更後実行変数：", args);
                 }
-                //Run Step可获得,To Update
+                //Exe
                 let doRtn = await (assistantConfig.func)[funcName](args);
-
-                //Stringの場合は同じする、生成StringをRequestする
+                //Stringの場合生成StringをRequestする
                 if (typeof (doRtn) == "string") {
                     doRtn = { ai: doRtn };
                 }
@@ -197,6 +201,7 @@ class AI {
                         }
                     ],
                 });
+
                 doRtn.fun = funcName;
                 doRtn.args = args;
                 //递归调用
