@@ -6,7 +6,6 @@ import WavEncoder from 'wav-encoder';
 import { AssistantFactory } from './assistantFactory.js';
 import OpenAI from "openai";
 import { toFile } from "openai/uploads";
-
 const assistantFactory = new AssistantFactory();
 const openai = new OpenAI(Config.openai);
 
@@ -37,7 +36,6 @@ class AI {
      *        }
      */
     chat = async function (msg, threadId, strFlg = true) {
-
         //1. 确认Thread，本质应该需要每一次都传
         if (util.undefined(threadId)) {
             //TODO Test
@@ -62,32 +60,42 @@ class AI {
         //5. 执行完毕
         let result = await this.waitRun(threadId, run.id);
         //6.信息变化,必要な場合前のMessageを変更する
-        const msgs = await this.doMsg(result.data);
-        //TODO serverにrequest
+        // Todo serverにrequest assitant中で処理など
+        const msgs = await this.doMessages(threadId, result);
         let rtnType = "AI";
+        let rtnStr = "AI";
         if (result.rtn.out) {
             rtnType = "FUNC";
             rtnStr = result.rtn.out;
         } else {
-            rtnStr = msgs.data[0].content[0].text.value;
+            try {
+                rtnStr = msgs.messages.data[0].content[0].text.value;
+            } catch (e) {
+                console.error(e);
+                rtnStr = "Serve error";
+            }
         }
         result.rtn.type = rtnType;
         result.rtn.str = rtnStr;
+
         //data 設定前に出力する
         if (this.DEBUG) {
             console.log("Rtn:", result.rtn);
+        }
+        if (strFlg) {
+            return result.rtn.str;
         }
         result.data = msgs;
         return result;
     };
     /**
      * 
-     * @param {*} func 
-     * @param {*} args 
+     * @param {*} threadId 
+     * @param {*} message 
      */
     //处理实际返回的值，注意存储的与给用户显示的可以不同
-    doMsg = async function (msgs) {
-        return msgs;
+    doMessages = async function (threadId, message) {
+        return message;
     };
 
     /**
@@ -176,9 +184,6 @@ class AI {
                 //Run Step可获得,To Update
                 let doRtn = await (assistantConfig.func)[funcName](args);
 
-                if (this.DEBUG && this.DEBUGRESULT) {
-                    console.log("実行結果：", doRtn);
-                }
                 //Stringの場合は同じする、生成StringをRequestする
                 if (typeof (doRtn) == "string") {
                     doRtn = { ai: doRtn };
@@ -197,14 +202,13 @@ class AI {
                 //递归调用
                 return await this.waitRun(threadId, runId, doRtn);
             } else if (run.status === "completed") {
-                let messages = await openai.beta.threads.messages.list(threadId);
                 //注意为逆序操作
                 //最後の状態で戻ります
                 // console.log(messages);
-                await this.doMessages(threadId);
+                let messages = await openai.beta.threads.messages.list(threadId);
                 //返回值包含计算的信息
                 return {
-                    data: messages.data,
+                    messages: messages,
                     rtn: doRtn
                 };
 
@@ -216,14 +220,7 @@ class AI {
             return { ai: "情報なし", out: "" };
         }
     };
-    /**
-     * Modify msg 実行後
-     * @param {} threadId 
-     */
-    doMessages = async (threadId) => {
 
-
-    };
     ask = async function main(q) {
         const stream = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
