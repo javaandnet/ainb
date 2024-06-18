@@ -1,5 +1,7 @@
 
 import { Config } from "./config.js";
+import Util from '../util/util.js';
+const util = new Util();
 import WavEncoder from 'wav-encoder';
 import { AssistantFactory } from './assistantFactory.js';
 import OpenAI from "openai";
@@ -12,22 +14,36 @@ class AI {
     constructor() {
         this.DEBUG = true;
         this.DEBUGRESULT = true;
+        this.DEBUGRTN = true;
         this.assistantName = "";
     }
 
     /**
      * 
+     * 
      * @param {*} msg 
-     * @param {*} lastFlag 返回最后一条信息
-     * @returns  返回最后一条信息
+     * @param {*} threadId threadId
+     * @param {*} strFlg Trueの場合、Stringに戻す
+     * @returns 
+     *    { 
+     *       data: messages,        //OpenAI に保存する　messages
+     *        rtn: { 
+     *                fun: "funcname", //関数名
+     *                args: "args", 　   //パラメータ
+     *                ai: "AI",             //AIに渡す情報
+     *    　         type: "AI/FUNC" //出力タイプ　AIの場合はaiを生成する
+     *                str: "BBB" 　　  //出力文字列
+     *            }
+     *        }
      */
-    chat = async function (msg, threadId, lastFlag = true) {
+    chat = async function (msg, threadId, strFlg = true) {
 
-        //确认Thread，本质应该需要每一次都传
-        if (typeof (threadId) == "undefined") {
-            if (typeof (this.thread) == "undefined") {
-                console.error("Create Thrad First");
-                return "Server Error";
+        //1. 确认Thread，本质应该需要每一次都传
+        if (util.undefined(threadId)) {
+            //TODO Test
+            if (util.undefined(this.thread)) {
+                console.error("Create Thread First");
+                return {};
             } else {
                 threadId = this.thread.id;
             }
@@ -44,26 +60,25 @@ class AI {
             { assistant_id: this.assistant.id }
         );
         //5. 执行完毕
-        let msgs = await this.waitRun(threadId, run.id);
-        //信息变化
-        msgs = await this.doMsg(msgs);
-        //TODO msgを変更する
-        if (lastFlag) {
-            // console.log(msgs[0].content[0].text);
-            if (msgs.rtn && msgs.rtn.out) {
-                if (this.DEBUG) {
-                    console.log("Out:", msgs.rtn.out);
-                }
-                return msgs.rtn.out;
-            } else {
-                var rtn = msgs.data[0].content[0].text.value;
-                if (this.DEBUG) {
-                    console.log("AI String:", rtn);
-                }
-                return rtn;
-            }
+        let result = await this.waitRun(threadId, run.id);
+        //6.信息变化,必要な場合前のMessageを変更する
+        const msgs = await this.doMsg(result.data);
+        //TODO serverにrequest
+        let rtnType = "AI";
+        if (result.rtn.out) {
+            rtnType = "FUNC";
+            rtnStr = result.rtn.out;
+        } else {
+            rtnStr = msgs.data[0].content[0].text.value;
         }
-        return msgs.data;
+        result.rtn.type = rtnType;
+        result.rtn.str = rtnStr;
+        //data 設定前に出力する
+        if (this.DEBUG) {
+            console.log("Rtn:", result.rtn);
+        }
+        result.data = msgs;
+        return result;
     };
     /**
      * 
@@ -75,9 +90,11 @@ class AI {
         return msgs;
     };
 
-
+    /**
+     * 
+     * @returns thread
+     */
     createThread = async () => {
-
         const thread = await openai.beta.threads.create();
         this.thread = thread;
         return thread;
@@ -93,6 +110,7 @@ class AI {
         this.assistant = assistant;
         return assistant;
     };
+
     deleteAssistant = async function (id) {
         openai.beta.assistants.delete(id);
     };
@@ -109,6 +127,10 @@ class AI {
         this.assistant = assistant;
         return assistant;
     };
+    /**
+     * 全てAssistantを削除する
+     * @param {*} run 
+     */
     deleteAssistants = async (run) => {
         var ass = await openai.beta.assistants.list({ limit: 100 });
         // console.log(ass.data.length);
@@ -118,6 +140,13 @@ class AI {
         }
 
     };
+    /**
+     *  実行する
+     * @param {*} threadId 
+     * @param {*} runId 
+     * @param {*} doRtn 
+     * @returns 
+     */
     waitRun = async function (threadId, runId, doRtn) {
         try {
             let rtn = {};
@@ -144,13 +173,13 @@ class AI {
                 if (this.DEBUG) {
                     console.log("変更後実行変数：", args);
                 }
-                //Run Step可获得
+                //Run Step可获得,To Update
                 let doRtn = await (assistantConfig.func)[funcName](args);
 
                 if (this.DEBUG && this.DEBUGRESULT) {
                     console.log("実行結果：", doRtn);
                 }
-                //Stringの場合は同じする
+                //Stringの場合は同じする、生成StringをRequestする
                 if (typeof (doRtn) == "string") {
                     doRtn = { ai: doRtn };
                 }
