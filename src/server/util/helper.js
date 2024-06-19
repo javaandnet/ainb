@@ -25,7 +25,7 @@ class Helper {
             name = args.query.name;
         }
         if (name && name != "") {
-            var info = await sf.workByName(name);
+            var info = await sf.empByName(name);
             return {
                 ai: JSON.stringify({ id: info.id, emp: info.name }), //只有名字
                 out: info.information
@@ -52,7 +52,7 @@ class Helper {
         };
         var emp = {};
         if (args.emp) {
-            emp = await sf.workByName(args.emp);
+            emp = await sf.empByName(args.emp);
         } else {
             return { ai: "送信内容を不明です", out: "どうの内容を不明です" };
         }

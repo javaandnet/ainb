@@ -48,6 +48,7 @@ class JSH {
                 .limit(limit)
                 .execute((err, records) => {
                     if (err) {
+                        console.log(err);
                         resolve(null);
                     } else {
                         resolve(records);
