@@ -39,21 +39,52 @@ export default class SF {
     }
     return null;
   }
+
+
+  async findProject(status) {
+    var jsh = new JSH();
+    var con = {};
+    if (status) {
+      con.status = status;
+    }
+    var obj = await jsh.find("Project__c", con, "No", "Id", "Name", 50);
+    if (obj.length > 0) {
+      return obj;
+    }
+    return null;
+  }
+  async find(name, condition, fields, limit) {
+    var jsh = new JSH();
+    return await jsh.find(name, condition, fields, limit);
+  }
   async updateStatus(name, status) {
     var jsh = new JSH();
-    var obj = await jsh.find("worker__c", { 'Name': name },[ "Id"]);
+    var obj = await jsh.find("worker__c", { 'Name': name }, "Id");
     if (obj.length > 0) {
       await jsh.update("worker__c", { Id: obj[0].Id, 'Name': name, 'ArriveinJP__c': status });
+      return "OK";
     }
-    return "OK";
+    return "NG";
   }
+
+
+  async update(objName, condition, updateObj) {
+    var jsh = new JSH();
+    var obj = await jsh.find(objName, condition, "Id");
+    if (obj.length > 0) {
+      updateObj.Id = obj[0].Id;
+      return await jsh.update(objName, updateObj);
+    }
+    return {id:-1};
+  }
+
   async workerNoWork() {
     var jsh = new JSH();
     var sql = "SELECT Id,  Name FROM Worker__c  where SalesStatus__c = '可能'";
     var data = await jsh.query(sql);
 
     var names = [];
-    if (data.totalSize > 0) {
+    if (data != null && data.totalSize > 0) {
       data.records.forEach((element) => { names.push(element.Name) });
     }
 

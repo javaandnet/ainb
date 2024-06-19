@@ -37,16 +37,22 @@ class JSH {
         if (me.conn == null) {
             await me.login();
         }
+        var fieldsArr = fields.split(",");
         return new Promise((resolve, reject) => {
             const records = me.conn.sobject(objectName)
                 .find(condition,
-                    fields // fields can be string of comma-separated field names
+                    fieldsArr // fields can be string of comma-separated field names
                     // or array of field names (e.g. [ 'Id', 'Name', 'CreatedDate' ])
                 )
-                .sort(fields[0]) // if "-" is prefixed to field name, considered as descending.
+                .sort(fieldsArr[0]) // if "-" is prefixed to field name, considered as descending.
                 .limit(limit)
                 .execute((err, records) => {
-                    resolve(records);
+                    if (err) {
+                        resolve(null);
+                    } else {
+                        resolve(records);
+                    }
+
                 });
             //console.log(records);
         });
@@ -143,9 +149,9 @@ class JSH {
             me.conn.sobject(objectName).update(rec, function (err, res) {
                 if (err) {
                     console.error(err);
-                    resolve(err);
+                    resolve({ err: err.errorCode, id: "-1" });
                 } else {
-                    resolve(res);
+                    resolve({ id: res.id });
                 }
             });
         });
