@@ -144,7 +144,7 @@ class Company {
         },
         addInfo: async function (args, obj) {
             obj.option = args;
-            console.log("addInfo:", obj.KEYWORDSTR);
+            console.log("addInfo out func:", args.KEYWORDSTR);
             return args;
         }
     };

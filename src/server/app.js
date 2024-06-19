@@ -40,6 +40,9 @@ server.listen(port, function () {
 });
 await ai.getAssistant(ASSISITANT_NAME);
 ai.updateAssistant();
+var keyWordMap = { "#Add#": "案件を追加する" };
+var outFuncMap = {};
+outFuncMap[ASSISITANT_NAME] = ["selectInfo", "addInfo"];
 //初期化
 io.on('connection', (socket) => {
     //AI 新しいThread
@@ -48,9 +51,9 @@ io.on('connection', (socket) => {
             socket.emit("newThread", thread.id);
         });
     socket.on('message', (message) => {
-        ai.chat(message.msg.content, { "#Add#": "案件を追加する" }, message.threadId, false).then(function (rtn) {
+        ai.chat(message.msg.content, keyWordMap, message.threadId, false).then(function (rtn) {
             var json = { content: rtn.rtn.str };
-            ai.exe({ ASSISITANT_NAME: ["selectInfo", "addInfo"] }, rtn, json).then(function (data) {
+            ai.exe(outFuncMap, rtn, json).then(function (data) {
                 socket.emit("message", json);
             });
         });

@@ -96,11 +96,11 @@ async function testCompany_002() {
 async function testAI_001() {
     var msg = "#Add# 案件名：テスト案件\r\n案件内容\r\n案件内容2行テスト"
     await ai.chat(msg, { "#Add#": "案件を追加する" }, "", false).then(function (rtn) {
-        var json = { content: rtn.rtn.str, msg: msg };
+        var json = { content: rtn.rtn.str};
         var outMap = {};
-        outMap[ASSISITANT_NAME] = ["selectInfo", "addInfo"] ;
-        ai.exe(outMap, rtn, json).then(function (data) {
-            console.log("testAI_001",json);
+        outMap[ASSISITANT_NAME] = ["selectInfo", "addInfo"];
+        ai.exe(outMap, rtn.rtn, json).then(function (data) {
+            console.log("testAI_001", json);
         });
     });
 }
