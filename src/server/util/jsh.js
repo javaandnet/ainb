@@ -32,6 +32,28 @@ class JSH {
             }
         });
     }
+    async find(objectName, condition, fields, limit = 1) {
+        var me = this;
+        if (me.conn == null) {
+            await me.login();
+        }
+        return new Promise((resolve, reject) => {
+            const records = me.conn.sobject(objectName)
+                .find(condition,
+                    fields // fields can be string of comma-separated field names
+                    // or array of field names (e.g. [ 'Id', 'Name', 'CreatedDate' ])
+                )
+                .sort(fields[0]) // if "-" is prefixed to field name, considered as descending.
+                .limit(limit)
+                .execute((err, records) => {
+                    resolve(records);
+                });
+            //console.log(records);
+        });
+        return records;
+    }
+
+
     async query(sql) {
         var me = this;
         if (me.conn == null) {

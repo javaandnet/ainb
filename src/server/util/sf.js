@@ -39,7 +39,14 @@ export default class SF {
     }
     return null;
   }
-
+  async updateStatus(name, status) {
+    var jsh = new JSH();
+    var obj = await jsh.find("worker__c", { 'Name': name },[ "Id"]);
+    if (obj.length > 0) {
+      await jsh.update("worker__c", { Id: obj[0].Id, 'Name': name, 'ArriveinJP__c': status });
+    }
+    return "OK";
+  }
   async workerNoWork() {
     var jsh = new JSH();
     var sql = "SELECT Id,  Name FROM Worker__c  where SalesStatus__c = '可能'";
