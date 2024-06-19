@@ -81,13 +81,32 @@ function testUtil_01() {
 async function testCompany_001() {
     await ai.chat("劉磊営業停止");
 }
+
 /**
  *  案件一覧、状態変更
  * */
 async function testCompany_002() {
     await ai.chat("案件一覧を教えてください");
-    await ai.chat("案件FSR-0048停止");
+    await ai.chat("案件FSR-004停止");
+}
 
+
+/**
+ *  案件一覧、状態変更
+ * */
+async function testCompany_004() {
+    await ai.chat("未稼働技術者一覧は教えてください");
+    await ai.chat("FSR-TW607の技術者");
+
+}
+
+/**
+ *  测试修改单价内容
+ * */
+async function testCompany_003() {
+    // await ai.chat("未稼働技術者一覧は教えてください");
+    await ai.chat("未稼働社員一覧は教えてください");
+    // await ai.chat("単価修正100");
 }
 
 /**
@@ -95,15 +114,33 @@ async function testCompany_002() {
  */
 async function testAI_001() {
     var msg = "#Add# 案件名：テスト案件 ADDED FROM AI  \r\n案件内容\r\n案件内容2行テスト";
-    var fitstLine =util.firstLine(msg);
+    var fitstLine = util.firstLine(msg);
     await ai.chat(msg, { "#Add#": "案件:{0}を追加する" }, "", false).then(function (rtn) {
-        var json = { content: rtn.rtn.str};
-        var outMap = {};
-        outMap[ASSISITANT_NAME] = ["selectInfo", "addInfo"];
-        ai.exe(outMap, rtn.rtn, json).then(function (data) {
+        var json = { content: rtn.rtn.str };
+        var outFuncMap = {};
+        outFuncMap[ASSISITANT_NAME] = ["selectInfo", "addInfo"];
+        ai.exe(outFuncMap, rtn.rtn, json).then(function (data) {
             console.log("testAI_001", json);
         });
     });
 }
+//
 
+// await ai.chat("1+3");
+
+// #Add# 案件名：テス
+// あsだ
+
+
+// あsdあsd
+
+// あsd
+/**
+ *  案件一覧、状態変更
+ * */
+async function testCompany_005() {
+    await ai.chat("案件一覧を教えてください");
+    await ai.chat("案件FSR-0004の情報");
+}
+// testCompany_005();
 testAI_001();
