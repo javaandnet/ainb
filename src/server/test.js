@@ -15,11 +15,11 @@ const ai = new AI();
 //Create a new Assistant
 // var res = await(ai.createAssistant("company"));
 //初始化使用
-//var res = await ai.getAssistant("company");
+var res = await ai.getAssistant("company");
 //更新配置
-//ai.updateAssistant("company");
+ai.updateAssistant("company");
 //创建Thread
-//await ai.createThread();
+await ai.createThread();
 // //Sample
 //var msg = "";
 //msg = await ai.chat("未完了案件一覧を教えてください");
@@ -77,5 +77,16 @@ function testUtil_01() {
     ai.exe({ "company": ["selectInfo"] }, rtn.rtn, json);
     console.log(json);
 }
-
-testUtil_01();
+async function testCompany_001(){
+    await ai.chat("劉磊営業停止");
+}
+/**
+ *  案件情報
+ * */
+async function testCompany_002(){
+    await ai.chat("案件一覧を教えてください");
+    await ai.chat("案件FSR-0048停止");
+   
+}
+//testUtil_01();
+testCompany_002();

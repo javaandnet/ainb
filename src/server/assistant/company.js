@@ -71,6 +71,21 @@ class Company {
             }, {
                 type: "function",
                 function: {
+                    name: "changeStatus",// 绑定到函数
+                    description: "案件または技術者の状態を変更する。あるいは既存の選択したものから外す",
+                    parameters: {
+                        type: "object",
+                        properties: {//参数说明
+                            type: { description: "選択のタイプ、案件か技術者か", type: "string" },
+                            flag: { description: "開始または停止フラグ、開始の場合は１とする、その以外は０とする", type: "string" },
+                            info: { description: "操作の内容、名前、番号など", type: "string" }
+                        },
+                        required: ["type", "info", "flag"],//必须
+                    },
+                },
+            }, {
+                type: "function",
+                function: {
                     name: "sendMail",// 绑定到函数
                     description: "お客さんにメールを送信する、その前に送信情報を再確認必要です。実際送信または確認フラグを「実際」と「確認」に分けてください。",
                     parameters: {
@@ -121,23 +136,57 @@ class Company {
         getInfo: async function (args) {
             if (args.name == "ceo") {
                 return "孫光です。"
-            } else if (args.name == "ceo") {
+            } else if (args.name == "name") {
                 return "会社の名前はFSR株式会社です。"
             } else if (args.name == "inactive") {
                 return await sf.workerNoWork();
             }
             return "情報がありません";
         },
-
+        changeStatus: async function (args) {
+            let doFlg = false;
+            if (args.type == "WORKER__c") {
+                args.condition = { "Name": args.info };
+                if (args.flag == 0) {
+                    args.updateObj = { "SalesStatus__c": "不可" };
+                } else {
+                    args.updateObj = { "SalesStatus__c": "可能" };
+                }
+                doFlg = true;
+            } else if (args.type == "PROJECT__C") {
+                args.condition = { "AutoNo__c": args.info };
+                if (args.flag == 0) {
+                    args.updateObj = { "Status__c": "9" };
+                } else {
+                    args.updateObj = { "Status__c": "0" };
+                }
+                doFlg = true;
+            }
+            if (doFlg) {
+                var rtn = sf.update(args.type, args.condition, args.updateObj);
+                if (rtn.id == "-1") {
+                    return "NG";
+                } else {
+                    return "OK";
+                }
+            }
+            else {
+                return { ai: "情報なし", out: "変更種類がありません" };
+            }
+        },
         getProject: async function (args) {
             if (util.defined(args.status)) {
-                var data = await sf.projectByCondition(args.status);
-                if (data.totalSize == 0) {
+                var status = {};
+                if (args.status != "-1") {
+                    status.Status__c = args.status;
+                }
+                var data = await sf.find("Project__c", status, "Id, Name, Status__c, AutoNo__c", 50);
+                if (data == null || data.totalSize == 0) {
                     return { ai: "情報なし", out: "案件情報がありません" };
                 } else {
                     var project = {};
                     var ai = {};
-                    data.records.forEach((element, index) => {
+                    data.forEach((element, index) => {
                         project[element.AutoNo__c] = element.Name;
                         ai[index + 1] = element.AutoNo__c;
                     });
@@ -247,7 +296,15 @@ class Company {
         }
     };
     changeArgs = {
-
+        changeStatus: async function (args) {
+            var type = util.getArg(args, [""], {
+                "employee": "WORKER__c"
+                , "技術者": "WORKER__c"
+                , "案件": "PROJECT__C"
+            });
+            args.type = type;
+            return args;
+        },
         getInfo: async function (args) {
             var name = util.getArg(args, [""], {
                 "社長": "ceo"
@@ -268,16 +325,15 @@ class Company {
 
         getProject: async function (args) {
             var status = util.getArg(args, ["status"], {
-                "未完了": "incomplete",
-                "incomplete": "incomplete"
+                "未完了": "0",
+                "一覧": "-1",
+                "all": "-1",
+                "incomplete": "0"
+                , "complete": "9"
             }, "status:"
             );
             if (status != null) {
-                if (status == "incomplete") {
-                    args.status = "0";
-                } else {
-                    args.status = "9";
-                }
+                args.status = status;
                 return args;
             }
             var name = util.getArg(args, ["name"], null, "name=");
