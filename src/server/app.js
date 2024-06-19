@@ -27,7 +27,7 @@ app.use('/', express.static(path.join(__dirname, 'public/dist')))
 const port = 3000;
 // let server = https.createServer(options, app);
 let server = http.createServer(options, app);
-
+const ASSISITANT_NAME = "company";
 // cros
 const io = new Server(server, {
     cors: {
@@ -38,9 +38,8 @@ const io = new Server(server, {
 server.listen(port, function () {
     console.log(`AI App listening on port ${port}`);
 });
-await ai.getAssistant("company");
+await ai.getAssistant(ASSISITANT_NAME);
 ai.updateAssistant();
-var thread = await ai.createThread();
 //初期化
 io.on('connection', (socket) => {
     //AI 新しいThread
@@ -49,12 +48,11 @@ io.on('connection', (socket) => {
             socket.emit("newThread", thread.id);
         });
     socket.on('message', (message) => {
-        // console.log('Message received: ', message);
-        ai.chat(message.msg.content, message.threadId, false).then(function (rtn) {
+        ai.chat(message.msg.content, { "#Add#": "案件を追加する" }, message.threadId, false).then(function (rtn) {
             var json = { content: rtn.rtn.str };
-            //外在插件执行
-            let rtnB = ai.exe({ "company": ["selectInfo"] }, rtn, json);
-            socket.emit("message", json);
+            ai.exe({ ASSISITANT_NAME: ["selectInfo", "addInfo"] }, rtn, json).then(function (data) {
+                socket.emit("message", json);
+            });
         });
     });
 

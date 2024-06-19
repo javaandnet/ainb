@@ -71,6 +71,20 @@ class Company {
             }, {
                 type: "function",
                 function: {
+                    name: "addInfo",// 绑定到函数
+                    description: "案件または技術者を追加する",
+                    parameters: {
+                        type: "object",
+                        properties: {//参数说明
+                            type: { description: "選択のタイプ、案件か技術者か", type: "string" },
+                            info: { description: "追加内容", type: "string" }
+                        },
+                        required: ["type", "info"],//必须
+                    },
+                },
+            }, {
+                type: "function",
+                function: {
                     name: "changeStatus",// 绑定到函数
                     description: "案件または技術者の状態を変更する。あるいは既存の選択したものから外す",
                     parameters: {
@@ -128,10 +142,18 @@ class Company {
             obj.option = args;
             return args;
         },
+        addInfo: async function (args, obj) {
+            obj.option = args;
+            console.log("addInfo:", obj.KEYWORDSTR);
+            return args;
+        }
     };
     func = {
         doProjectWithWorker: async function (args) {
             return "情報がありません";
+        },
+        addInfo: async function (args) {
+            return "OK";
         },
         getInfo: async function (args) {
             if (args.name == "ceo") {

@@ -8,6 +8,7 @@ import fs from "fs";
 const azure = new Azure();
 const openai = new OpenAI(Config.openai);
 const ai = new AI();
+const ASSISITANT_NAME = "company";
 // const assistant = new Assistant();
 //azure.sample();
 //Delete All Assistants
@@ -19,7 +20,7 @@ var res = await ai.getAssistant("company");
 //更新配置
 ai.updateAssistant("company");
 //创建Thread
-await ai.createThread();
+//await ai.createThread();
 // //Sample
 //var msg = "";
 //msg = await ai.chat("未完了案件一覧を教えてください");
@@ -77,16 +78,31 @@ function testUtil_01() {
     ai.exe({ "company": ["selectInfo"] }, rtn.rtn, json);
     console.log(json);
 }
-async function testCompany_001(){
+async function testCompany_001() {
     await ai.chat("劉磊営業停止");
 }
 /**
- *  案件情報
+ *  案件一覧、状態変更
  * */
-async function testCompany_002(){
+async function testCompany_002() {
     await ai.chat("案件一覧を教えてください");
     await ai.chat("案件FSR-0048停止");
-   
+
 }
-//testUtil_01();
-testCompany_002();
+
+/**
+ *  外部実行サンプル
+ */
+async function testAI_001() {
+    var msg = "#Add# 案件名：テスト案件\r\n案件内容\r\n案件内容2行テスト"
+    await ai.chat(msg, { "#Add#": "案件を追加する" }, "", false).then(function (rtn) {
+        var json = { content: rtn.rtn.str, msg: msg };
+        var outMap = {};
+        outMap[ASSISITANT_NAME] = ["selectInfo", "addInfo"] ;
+        ai.exe(outMap, rtn, json).then(function (data) {
+            console.log("testAI_001",json);
+        });
+    });
+}
+
+testAI_001();

@@ -21,8 +21,9 @@ class AI {
      * 
      * 
      * @param {*} msg 
-     * @param {*} threadId threadId
+     * @param {*} threadId threadId Null 一次性
      * @param {*} strFlg Trueの場合、Stringに戻す
+     * @param {*} keyWords {"#ADD#":"案件を追加する"}
      * @returns 
      *    { 
      *       data: messages,        //OpenAI に保存する　messages
@@ -35,16 +36,29 @@ class AI {
      *            }
      *        }
      */
-    chat = async function (msg, threadId, strFlg = true) {
-        //1. 确认Thread，本质应该需要每一次都传
-        if (util.undefined(threadId)) {
-            //TODO Test
-            if (util.undefined(this.thread)) {
-                console.error("Create Thread First");
-                return {};
-            } else {
-                threadId = this.thread.id;
+    chat = async function (msg, keyWords = {}, threadId, strFlg = true) {
+
+        //0.Key Word处理 Once
+        let keys = Object.keys(keyWords);
+        let beforeMsg = "";
+        for (const key of keys) {
+            if (msg.indexOf(key) >=0) {
+                beforeMsg = msg;
+                threadId = null;
+                msg = keyWords[key];
+                //元のMSGを一時退避する
+                
             }
+        }
+        //1. 确认Thread，本质应该需要每一次都传
+        if (util.undefined(threadId)) {//ForTest
+            if (util.undefined(this.thread)) {//FIRST
+                this.thread = await this.createThread();
+            }
+            threadId = this.thread.id;
+        } else if (threadId == null) {//一次性
+            let _thread = await this.createThread();
+             threadId = _thread.id;
         }
         //2. do what hahaha
 
@@ -62,7 +76,7 @@ class AI {
         );
         //5. 执行
         if (this.DEBUG) {
-            console.log("TOAI:", msg);
+            console.log("To AI:", msg);
         }
         let result = await this.waitRun(threadId, run.id);
 
@@ -91,8 +105,10 @@ class AI {
                 rtnStr = "Serve error";
             }
         }
+        //8.一次性处理？
         result.rtn.type = rtnType;
         result.rtn.str = rtnStr;
+        result.threadId = threadId;
 
         //data 設定前に出力する
         if (this.DEBUG) {
@@ -102,6 +118,13 @@ class AI {
             return result.rtn.str;
         }
         result.data = msgs;
+
+        for (const key of keys) {
+            if (beforeMsg.indexOf(key) >=0) {
+                result.rtn.args.KEYWORDSTR = beforeMsg;
+            }
+        }
+
         return result;
     };
 
@@ -118,7 +141,7 @@ class AI {
     exe = async function (objs, rtn, obj) {
         const keys = Object.keys(objs);
         let doRtn = null;
-        for (const objKey of keys) {
+        for await (const objKey of keys) {
             let at = assistantFactory.get(objKey);
             if (objs[objKey].indexOf(rtn.func) >= 0) {//数组中存在
                 if (at != null) {
@@ -128,7 +151,8 @@ class AI {
                 }
             }
         }
-        return doRtn;
+        return (doRtn);
+
     };
 
     /**
@@ -147,7 +171,6 @@ class AI {
      */
     createThread = async () => {
         const thread = await openai.beta.threads.create();
-        this.thread = thread;
         return thread;
     };
 
