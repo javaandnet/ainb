@@ -94,8 +94,9 @@ async function testCompany_002() {
  *  外部実行サンプル
  */
 async function testAI_001() {
-    var msg = "#Add# 案件名：テスト案件\r\n案件内容\r\n案件内容2行テスト"
-    await ai.chat(msg, { "#Add#": "案件を追加する" }, "", false).then(function (rtn) {
+    var msg = "#Add# 案件名：テスト案件 ADDED FROM AI  \r\n案件内容\r\n案件内容2行テスト";
+    var fitstLine =util.firstLine(msg);
+    await ai.chat(msg, { "#Add#": "案件:{0}を追加する" }, "", false).then(function (rtn) {
         var json = { content: rtn.rtn.str};
         var outMap = {};
         outMap[ASSISITANT_NAME] = ["selectInfo", "addInfo"];

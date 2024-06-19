@@ -77,9 +77,9 @@ class Company {
                         type: "object",
                         properties: {//参数说明
                             type: { description: "選択のタイプ、案件か技術者か", type: "string" },
-                            info: { description: "追加内容", type: "string" }
+                            name: { description: "案件名または技術者の名前", type: "string" }
                         },
-                        required: ["type", "info"],//必须
+                        required: ["type", "name"],//必须
                     },
                 },
             }, {
@@ -144,7 +144,10 @@ class Company {
         },
         addInfo: async function (args, obj) {
             obj.option = args;
-            console.log("addInfo out func:", args.KEYWORDSTR);
+            var insertObj = { Name: args.name, Detail__c: args.KEYWORDSTR, status__c: 0 };
+            var rtn = await sf.insert("Project__c", insertObj);
+            console.log(rtn);
+            console.log("addInfo out func:", rtn);
             return args;
         }
     };
