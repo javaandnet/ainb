@@ -156,9 +156,17 @@ class JSH {
             });
         });
     }
-    insert() {
 
+    async insert(objectName, rec) {
+        var me = this;
+        if (me.conn == null) {
+            await me.login();
+        }
+        const ret = await me.conn.sobject(objectName).create(rec);
+        //console.log(`Created record id : ${ret.id}`);
+        return ret.id;
     }
+
     async delete(objectName, where) {
         var me = this;
         var util = new Util();

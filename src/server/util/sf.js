@@ -40,7 +40,6 @@ export default class SF {
     return null;
   }
 
-
   async findProject(status) {
     var jsh = new JSH();
     var con = {};
@@ -53,10 +52,12 @@ export default class SF {
     }
     return null;
   }
+
   async find(name, condition, fields, limit) {
     var jsh = new JSH();
     return await jsh.find(name, condition, fields, limit);
   }
+
   async updateStatus(name, status) {
     var jsh = new JSH();
     var obj = await jsh.find("worker__c", { 'Name': name }, "Id");
@@ -67,7 +68,6 @@ export default class SF {
     return "NG";
   }
 
-
   async update(objName, condition, updateObj) {
     var jsh = new JSH();
     var obj = await jsh.find(objName, condition, "Id");
@@ -75,8 +75,15 @@ export default class SF {
       updateObj.Id = obj[0].Id;
       return await jsh.update(objName, updateObj);
     }
-    return {id:-1};
+    return { id: -1 };
   }
+
+
+  async insert(objName, insertObj) {
+    var jsh = new JSH();
+    return await jsh.insert(objName, insertObj);
+  }
+
 
   async workerNoWork() {
     var jsh = new JSH();
@@ -87,8 +94,6 @@ export default class SF {
     if (data != null && data.totalSize > 0) {
       data.records.forEach((element) => { names.push(element.Name) });
     }
-
     return names.join(",");
-
   }
 }
