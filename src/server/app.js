@@ -1,4 +1,4 @@
-import express from 'express';
+import express from 'express'; 
 import http from 'http';
 import https from 'https';
 import fs from 'fs';
@@ -40,7 +40,7 @@ server.listen(port, function () {
 });
 await ai.getAssistant(ASSISITANT_NAME);
 ai.updateAssistant();
-var keyWordMap = { "#Add#": "案件を追加する" };
+var keyWordMap = { "#Add#": "案件:{0}を追加する" };
 var outFuncMap = {};
 outFuncMap[ASSISITANT_NAME] = ["selectInfo", "addInfo"];
 //初期化
@@ -53,7 +53,7 @@ io.on('connection', (socket) => {
     socket.on('message', (message) => {
         ai.chat(message.msg.content, keyWordMap, message.threadId, false).then(function (rtn) {
             var json = { content: rtn.rtn.str };
-            ai.exe(outFuncMap, rtn, json).then(function (data) {
+            ai.exe(outFuncMap, rtn.rtn, json).then(function (data) {
                 socket.emit("message", json);
             });
         });
