@@ -76,10 +76,14 @@ class AI {
         if (util.undefined(result.rtn)) {
             result.rtn = {};
         }
-        if (result.rtn && result.rtn.out) {
+        if (result.rtn.out) {
             rtnType = "FUNC";
             rtnStr = result.rtn.out;
-        } else {
+        } else if (result.rtn.server) {
+            rtnType = "SERVER";
+            rtnStr = result.rtn.server;
+        }
+        else {
             try {
                 rtnStr = msgs.messages.data[0].content[0].text.value;
             } catch (e) {
@@ -218,14 +222,35 @@ class AI {
                     args = await ((assistantConfig.changeArgs)[funcName](args));
                 }
                 if (this.DEBUG) {
-                    console.log("変更後実行変数：", args);
+                    console.log("変更後実行変数", args);
                 }
                 //Exe
+                if (util.undefined((assistantConfig.func)[funcName])) {
+                    console.error("No Func" + funcName + ": ,Pls fix it.");
+                    return {
+                        messages: null,
+                        rtn: {
+                            server: "No Func Rtn,Pls Fix it",
+                            func: funcName,
+                            args: args
+                        }
+                    };
+                }
                 let doRtn = await (assistantConfig.func)[funcName](args);
-                //Stringの場合生成StringをRequestする
-                if (typeof (doRtn) == "string") {
+                if (util.undefined(doRtn)) {
+                    console.error("Asssitant関数" + funcName + ": No Rtn ,Pls fix it.");
+                    return {
+                        messages: null,
+                        rtn: {
+                            server: "No Func Rtn,Pls Fix it",
+                            func: funcName,
+                            args: args
+                        }
+                    };
+                } else if (typeof (doRtn) == "string") {  //Stringの場合生成StringをRequestする
                     doRtn = { ai: doRtn };
                 }
+
                 //提交函数执行完的结果
                 await openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
                     tool_outputs: [
