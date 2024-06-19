@@ -14,6 +14,11 @@ export default class Util {
             return obj;
         }
     }
+    firstLine(str) {
+        const firstLineEndIndex = str.indexOf('\n');
+        const firstLine = firstLineEndIndex !== -1 ? str.substring(0, firstLineEndIndex) : str;
+        return firstLine;
+    }
     isObject(obj) {
         return typeof obj === "object";
     }
