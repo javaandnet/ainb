@@ -21,9 +21,9 @@ class AI {
      * 
      * 
      * @param {*} msg 
+     * @param {*} keyWords {"#ADD#":"案件を追加する"}　交換要　Keyword,1の場合は第一行
      * @param {*} threadId threadId Null 一次性
      * @param {*} strFlg Trueの場合、Stringに戻す
-     * @param {*} keyWords {"#ADD#":"案件を追加する"}
      * @returns 
      *    { 
      *       data: messages,        //OpenAI に保存する　messages
@@ -42,12 +42,18 @@ class AI {
         let keys = Object.keys(keyWords);
         let beforeMsg = "";
         for (const key of keys) {
-            if (msg.indexOf(key) >=0) {
+            if (msg.indexOf(key) >= 0) {
+                //元のMSGを一時退避する               
                 beforeMsg = msg;
+                //KeyWord を削除する
+                msg = msg.replace("#Add#", "");
                 threadId = null;
-                msg = keyWords[key];
-                //元のMSGを一時退避する
-                
+                //1の場合は第一行                
+                if (keyWords[key].indexOf("{0}") >= 0) {
+                    msg = keyWords[key].replace("{0}", util.firstLine(msg));
+                } else {
+                    msg = keyWords[key];
+                }
             }
         }
         //1. 确认Thread，本质应该需要每一次都传
@@ -58,7 +64,7 @@ class AI {
             threadId = this.thread.id;
         } else if (threadId == null) {//一次性
             let _thread = await this.createThread();
-             threadId = _thread.id;
+            threadId = _thread.id;
         }
         //2. do what hahaha
 
@@ -120,8 +126,8 @@ class AI {
         result.data = msgs;
 
         for (const key of keys) {
-            if (beforeMsg.indexOf(key) >=0) {
-                result.rtn.args.KEYWORDSTR = beforeMsg;
+            if (beforeMsg.indexOf(key) >= 0) {
+                result.rtn.args.KEYWORDSTR = beforeMsg.replace(key, "");
             }
         }
 
