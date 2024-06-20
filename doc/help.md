@@ -35,3 +35,4 @@ const io = require('socket.io')(server, {
     methods: ["GET", "POST"]
   }
 });
+//【Text Embedding 3】OpenAIの最新Embeddingモデルの使い方~実際の性能を検証してみた

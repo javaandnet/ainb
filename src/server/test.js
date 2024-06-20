@@ -16,9 +16,9 @@ const ASSISITANT_NAME = "company";
 //Create a new Assistant
 // var res = await(ai.createAssistant("company"));
 //初始化使用
-var res = await ai.getAssistant("company");
+var res = await ai.getAssistant(ASSISITANT_NAME);
 //更新配置
-ai.updateAssistant("company");
+ai.updateAssistant(ASSISITANT_NAME);
 //创建Thread
 //await ai.createThread();
 // //Sample
@@ -96,8 +96,7 @@ async function testCompany_002() {
  * */
 async function testCompany_004() {
     await ai.chat("未稼働技術者一覧は教えてください");
-    await ai.chat("FSR-TW607の技術者");
-
+    await ai.chat("FSR-TW607の技術者")
 }
 
 /**

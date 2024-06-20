@@ -10,7 +10,7 @@ class Company {
     config = {
         name: "会社の営業",
         instructions: "あなたはFSR株式会社の営業です。会社、技術者、案件情報、面接の情報をお客さんに紹介する。メール送信前再確認必要です。",
-        model: "gpt-3.5-turbo",
+        model: "gpt-3.5-turbo",//gpt-4o//gpt-3.5-turbo
         tools: [{
             type: "function",
             function: {
@@ -30,7 +30,7 @@ class Company {
             type: "function",
             function: {
                 name: "getInfo",// 绑定到函数
-                description: "会社情報を取得する、会社の名前、社長、社員数",
+                description: "会社情報を取得する、会社の名前、社長、社員数、技術者社員数",
                 parameters: {
                     type: "object",
                     properties: {//参数说明
@@ -422,7 +422,8 @@ class Company {
             return args;
         },
         getEmp: async function (args) {
-            var status = util.getArg(args, ["status", "employment_status"], {
+            var status = util.getArg(args, ["status", "employment_status", "name"], {
+                "待机": "inactive",
                 "未稼働": "inactive",
                 "inactive": "inactive",
                 "unassigned": "inactive",
