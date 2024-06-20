@@ -8,7 +8,7 @@ class Restaurant {
         {
             type: "function",
             function: {
-                name: "get_info",// 绑定到函数
+                name: "getInfo",// 绑定到函数
                 description: "飲食店の取得場合、店名、住所、電話番号など",
                 parameters: {
                     type: "object",
@@ -22,24 +22,25 @@ class Restaurant {
         }, {
             type: "function",
             function: {
-                name: "get_menu",// 绑定到函数
+                name: "getMenu",// 绑定到函数
                 description: "メニューの情報を取得する",
                 parameters: {
                     type: "object",
                     properties: {//参数说明
                         query: { description: "質問の範囲" },
+                        no: { description: "番号など", type: "string" },
                         price: { description: "値段の設定", type: "string" },
                         like: { description: "おすすめの", type: "string" },
-                        isForbidden: { description: "不要のメニュー", type: "string" },
+                        isForbidden: { description: "不要の内容", type: "string" },
                     },
-                    required: ["query", "condition"],//必须
+                    required: ["query", "no", "like"],//必须
                 },
             },
         }, {
             type: "function",
             function: {
                 name: "order",// 绑定到函数
-                description: "注文",
+                description: "選択したメニューが注文する",
                 parameters: {
                     type: "object",
                     properties: {//参数说明
@@ -51,6 +52,9 @@ class Restaurant {
             },
         }
         ]
-    }
+    };
+    out = {};
+    func = {};
+    changeArgs = {};
 }
 export { Restaurant };
