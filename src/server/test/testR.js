@@ -11,4 +11,4 @@ const ASSISITANT_NAME = "restaurant";
 var res = await ai.getAssistant(ASSISITANT_NAME);
 //更新配置
 ai.updateAssistant(ASSISITANT_NAME);
-await ai.chat("菜单一览");
+await ai.chat("鸡肉做的菜单一览");

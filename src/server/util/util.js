@@ -148,6 +148,21 @@ export default class Util {
         return rtn;
     }
 
+
+    recordsToStr(records, key, value) {
+        var ele = {};
+        records.forEach((element, index) => {
+            if (key == "#INDEX#") {
+                ele[index + 1] = element[value]; ;
+            }else{
+                ele[element[key]] = element[value];
+            }
+            
+        });
+        return this.objToStr(ele);
+    }
+
+
     /**
      * { query: { employee_status: 'active' }, condition: 'list', name: null }
      * @param {*} objs 
