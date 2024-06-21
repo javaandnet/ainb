@@ -1,16 +1,22 @@
 <template>
-<div>
-<Rec/>
- <div class="padding">
+  <div>
+    <Rec ref="rec" />
+    <div class="padding">
       <!-- 两端对齐 -->
       <van-row justify="space-between">
-        <van-col span="2"><van-button type="primary" @click="startDialog" icon="service"></van-button></van-col>
-        <van-col span="13">
+        <van-col span="1"
+          ><van-button
+            type="primary"
+            @click="startRecord"
+            icon="service"
+          ></van-button
+        ></van-col>
+        <van-col span="16">
           <van-field
             v-model="message"
             placeholder="情報を入力してください"
             rows="1"
-            autosize
+            
             type="textarea"
             show-word-limit
         /></van-col>
@@ -18,15 +24,13 @@
           ><van-button type="primary" icon="chat"></van-button
         ></van-col>
       </van-row>
- </div>
-</div>
+    </div>
+  </div>
 </template>
 <style scoped>
- 
 .padding {
- padding: 5px;
+  padding: 5px;
 }
- 
 </style>
 <script>
 import { Space, Button, Field } from "vant";
@@ -49,6 +53,10 @@ export default {
       show: true,
     };
   },
-  methods: {},
+  methods: {
+    startRecord() {
+      this.$refs.rec.startRecord();
+    },
+  },
 };
 </script>

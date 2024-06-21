@@ -37,17 +37,21 @@
 
 <script>
 export default {
+  emits: ["stopRecording", "recording"],
   data() {
     return {
-      show: true,
+      show: false,
     };
   },
   methods: {
-    startDialog() {
+    startRecord() {
       this.show = true;
     },
 
     stopRecording() {
+      this.$emit("stopRecording", {
+        ok: "ok",
+      });
       this.show = false;
     },
   },

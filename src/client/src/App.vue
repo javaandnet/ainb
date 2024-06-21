@@ -1,16 +1,16 @@
 <template>
-    <InputMessage/>
+    <ChatWindow/>
 </template>
 
 <script>
 
-import InputMessage from './components/InputMessage.vue';
+import ChatWindow from './components/ChatWindow.vue';
 
 
 export default {
   name: 'App',
   components: {
-    InputMessage
+    ChatWindow
   }
 }
 </script>
