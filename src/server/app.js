@@ -23,7 +23,8 @@ var options = {
     key: fs.readFileSync(path.join(__dirname, 'crt/local.key')),
     cert: fs.readFileSync(path.join(__dirname, 'crt/local.crt'))
 };
-app.use('/', express.static(path.join(__dirname, 'public/dist')))
+console.log(path.join(__dirname, '../client/public'));
+app.use('/', express.static(path.join(__dirname, '../client/public')))
 const port = 3000;
 // let server = https.createServer(options, app);
 let server = http.createServer(options, app);
