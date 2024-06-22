@@ -1,13 +1,17 @@
 <template>
   <div class="chat-container">
-    <van-list v-model="loading" finished="finished" finished-text="没有更多了">
-      <div
-        v-for="(message, index) in messages"
-        :key="index"
-        :class="['chat-item', message.isMine ? 'mine' : 'theirs']"
-      >
-        <div class="chat-content">
-          <p>{{ message.text }}</p>
+    <van-list v-model="loading" finished="finished" finished-text="">
+      <div v-if="mode == 'text'">
+        <div
+          v-for="(message, index) in messages"
+          :key="index"
+          :class="['chat-item', message.userId == userId ? 'mine' : 'theirs']"
+        >
+          <div class="chat-content">
+            <p class="chat-txt">
+              {{ message.text }}
+            </p>
+          </div>
         </div>
       </div>
     </van-list>
@@ -22,46 +26,39 @@ export default {
   components: {
     VanList: List,
   },
+  props: {},
+  methods: {
+    addMessage(message) {
+      this.messages = [...this.messages, message];
+    },
+  },
   data() {
     return {
-      messages: [
-        { text: "你好", isMine: false },
-        { text: "你好！有什么需要帮助的吗？", isMine: true },
-        { text: "我想了解一下你们的产品。", isMine: false },
-        { text: "好的，请问您对哪方面感兴趣？", isMine: true },
-                { text: "你好", isMine: false },
-        { text: "你好！有什么需要帮助的吗？", isMine: true },
-        { text: "我想了解一下你们的产品。", isMine: false },
-        { text: "好的，请问您对哪方面感兴趣？", isMine: true },
-                { text: "你好", isMine: false },
-        { text: "你好！有什么需要帮助的吗？", isMine: true },
-        { text: "我想了解一下你们的产品。", isMine: false },
-        { text: "好的，请问您对哪方面感兴趣？", isMine: true },
-                { text: "你好", isMine: false },
-        { text: "你好！有什么需要帮助的吗？", isMine: true },
-        { text: "我想了解一下你们的产品。", isMine: false },
-        { text: "好的，请问您对哪方面感兴趣？", isMine: true },
-                { text: "你好", isMine: false },
-        { text: "你好！有什么需要帮助的吗？", isMine: true },
-        { text: "我想了解一下你们的产品。", isMine: false },
-        { text: "好的，请问您对哪方面感兴趣？", isMine: true },
-                { text: "你好", isMine: false },
-        { text: "你好！有什么需要帮助的吗？", isMine: true },
-        { text: "我想了解一下你们的产品。", isMine: false },
-        { text: "好的，请问您对哪方面感兴趣？", isMine: true },
-      ],
+      userId: "9999",
+      mode: "list",
+      model: "project",
+      msg: {
+        text: "",
+        value: "",
+        time: "",
+        userId: "",
+        link: "",
+      },
+      messages: [],
       loading: false,
       finished: true,
     };
   },
 };
+//Message =>Json 点击执行啥动作
 </script>
 
 <style scoped>
 .chat-container {
+  overflow-y: auto;
   /* max-width: 600px; */
-  height:70vh;
-    max-height:90%;
+  height: 80vh;
+  max-height: 90%;
   margin: 0 auto;
   padding: 10px;
   background-color: #f9f9f9;
@@ -71,6 +68,10 @@ export default {
 .chat-item {
   display: flex;
   margin: 5px 0; /* 减小上下空白 */
+}
+.chat-txt {
+  margin-bottom: 2px;
+  margin-top: 2px;
 }
 
 .chat-item.theirs {
@@ -91,7 +92,6 @@ export default {
   margin-top: 4px;
   padding-left: 4px;
   padding-right: 3px;
-
   border-radius: 10px;
   background-color: #e0e0e0;
   color: #000;

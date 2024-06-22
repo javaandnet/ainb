@@ -1,6 +1,11 @@
 <template>
   <div>
-    <Rec ref="rec" />
+    <Rec
+      ref="rec"
+      @recording="recording"
+      @startRecord="onStartRecord"
+      @stopRecord="onStopRecord"
+    />
     <div class="padding">
       <!-- 两端对齐 -->
       <van-row justify="space-between">
@@ -16,12 +21,11 @@
             v-model="message"
             placeholder="情報を入力してください"
             rows="1"
-            
             type="textarea"
             show-word-limit
         /></van-col>
         <van-col span=""
-          ><van-button type="primary" icon="chat"></van-button
+          ><van-button type="primary" icon="chat" @click="sendMsg"></van-button
         ></van-col>
       </van-row>
     </div>
@@ -38,13 +42,13 @@ import { Col, Row } from "vant";
 import Rec from "./Rec.vue";
 
 export default {
+  emits: ["sendMsg", "recording", "startRecord", "stopRecord"],
   components: {
     Field: Field,
     Space: Space,
     VanButton: Button,
     VanCol: Col,
     VanRow: Row,
-
     Rec: Rec,
   },
   data() {
@@ -54,8 +58,30 @@ export default {
     };
   },
   methods: {
+    recording(data) {
+      this.$emit("recording", data);
+    },
     startRecord() {
       this.$refs.rec.startRecord();
+    },
+    onStartRecord() {
+      this.$emit("startRecord");
+    },
+    stopRecord() {
+      this.$refs.rec.stopRecord();
+    },
+    onStopRecord() {
+      this.$emit("stopRecord");
+    },
+
+    setInput(txt) {
+      this.message = txt;
+    },
+    sendMsg() {
+      this.$emit("sendMsg", {
+        message: this.message,
+      });
+      this.message = "";
     },
   },
 };

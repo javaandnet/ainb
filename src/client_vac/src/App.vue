@@ -42,7 +42,7 @@ export default {
  
   mounted() {
      //this.socket = io("http://160.16.216.251:8379");
-    this.socket = io("http://192.168.1.160:3000");
+    this.socket = io("http://localhost:3000");
     this.autoScroll = {
       send: {
         new: true,

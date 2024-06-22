@@ -1,18 +1,26 @@
 <template>
-    <ChatWindow/>
+  <ChatWindow
+    ref="chatWindow"
+    url="http://localhost:3000"
+    @onMessage="onMessage"
+  />
 </template>
 
 <script>
-
-import ChatWindow from './components/ChatWindow.vue';
-
+import ChatWindow from "./components/ChatWindow.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    ChatWindow
-  }
-}
+    ChatWindow,
+  },
+  methods: {
+    //Logic これ
+    onMessage(data) {
+      this.$refs.chatWindow.addMessage(data);
+    },
+  },
+};
 </script>
 
 <style>

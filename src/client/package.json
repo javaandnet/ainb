@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "core-js": "^3.8.3",
+    "socket.io-client": "^4.7.5",
     "vant": "^4.9.1",
     "vue": "^3.2.13"
   },
@@ -36,6 +37,7 @@
     "rules": {
       "vue/multi-word-component-names": "off",
       "vue/no-unused-components": "off",
+      "vue/no-unused-vars": "off",
       "vue/no-multiple-template-root": "off"
     }
   },

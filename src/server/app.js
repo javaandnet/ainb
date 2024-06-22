@@ -1,4 +1,4 @@
-import express from 'express'; 
+import express from 'express';
 import http from 'http';
 import https from 'https';
 import fs from 'fs';
@@ -23,8 +23,8 @@ var options = {
     key: fs.readFileSync(path.join(__dirname, 'crt/local.key')),
     cert: fs.readFileSync(path.join(__dirname, 'crt/local.crt'))
 };
-console.log(path.join(__dirname, '../client/public'));
-app.use('/', express.static(path.join(__dirname, '../client/public')))
+console.log(path.join(__dirname, '../server/public'));
+app.use('/', express.static(path.join(__dirname, '../server/public/dist')))
 const port = 3000;
 // let server = https.createServer(options, app);
 let server = http.createServer(options, app);
@@ -68,7 +68,7 @@ io.on('connection', (socket) => {
      */
     socket.on('startRecord', (data, ack) => {
         const threadId = data.threadId;
-        // console.log(wavRate);
+        console.log("startRecord");
         bufferAll[threadId] = [];
         //  ack({ info: "ok" });
     });
@@ -77,9 +77,10 @@ io.on('connection', (socket) => {
      * Add Str
      */
     socket.on('recording', (data) => {
-        // console.log(data.threadId.thread);
+        console.log("recording");
         const threadId = data.threadId;
         let voiceData = data.data;
+        console.log(threadId);
         const itr = voiceData.values();
         const buf = new Array(voiceData.length);
         for (var i = 0; i < voiceData.length; i++) {
@@ -89,7 +90,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('stopRecord', (data, ack) => {
-        // console.log(data.threadId);
+        console.log("stopRecord");
         const threadId = data.threadId;
         // const stream = azure.createStream(bufferAll, 1).then(function(stream){
         //     console.log(stream);

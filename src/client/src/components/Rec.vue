@@ -20,11 +20,7 @@
                 style="opacity: 0.9"
               />
             </div>
-            <van-button
-              type="primary"
-              @click="stopRecording"
-              icon="stop-circle-o"
-            >
+            <van-button type="primary" @click="stopRecord" icon="stop-circle-o">
               クリック停止</van-button
             >
           </div>
@@ -36,20 +32,39 @@
 </template>
 
 <script>
+import Recorder from "../js/recorder.js";
+let recorder = new Recorder();
 export default {
-  emits: ["stopRecording", "recording"],
+  components: {},
+  emits: ["stopRecord", "recording", "startRecord"],
   data() {
     return {
       show: false,
     };
   },
+  mounted() {
+    // 组件挂载后调用的方法
+    this.loaded();
+  },
   methods: {
-    startRecord() {
+    loaded() {
+      var me = this;
+      recorder.onprogress = function (data) {
+        me.$emit("recording", data);
+      };
+    },
+    startRecord: async function () {
       this.show = true;
+      await recorder.startRecord();
+      this.$emit("startRecord", {
+        ok: "ok",
+      });
     },
 
-    stopRecording() {
-      this.$emit("stopRecording", {
+    stopRecord() {
+      console.log("stopRecord");
+      recorder.stopRecord();
+      this.$emit("stopRecord", {
         ok: "ok",
       });
       this.show = false;
