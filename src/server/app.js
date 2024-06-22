@@ -7,18 +7,25 @@ import { Server, Socket } from 'socket.io';
 import Util from './util/util.js';
 const util = new Util();
 import cors from 'cors'
-import { Azure } from './util/azure.js';
+import bodyParser from 'body-parser'
 import { AI } from './util/ai.js';
-const azure = new Azure();
+const ai = new AI();
+
+
+
 //Path 設定
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const ai = new AI();
+
 
 const app = express();
 app.use(cors());
+// 使用 body-parser 中间件来解析 JSON 请求体
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 var options = {
     key: fs.readFileSync(path.join(__dirname, 'crt/local.key')),
     cert: fs.readFileSync(path.join(__dirname, 'crt/local.crt'))
@@ -26,7 +33,7 @@ var options = {
 console.log(path.join(__dirname, '../server/public'));
 app.use('/', express.static(path.join(__dirname, '../server/public/dist')))
 const port = 3000;
-// let server = https.createServer(options, app);
+
 let server = http.createServer(options, app);
 const ASSISITANT_NAME = "company";
 // cros
@@ -36,10 +43,23 @@ const io = new Server(server, {
         methods: ["GET", "POST"]
     }
 });
+
 server.listen(port, function () {
     console.log(`AI App listening on port ${port}`);
 });
-await ai.getAssistant(ASSISITANT_NAME);
+const assistant = await ai.getAssistant(ASSISITANT_NAME);
+/**
+ * 定义一个 POST 路由来接收前台的 AJAX 请求
+ */
+app.post('/model', (req, res) => {
+    const data = req.body;
+    console.log('Received data:', data);
+  
+    // 返回响应
+    res.json({ data: data });
+});
+
+
 ai.updateAssistant();
 var keyWordMap = { "#Add#": "案件:{0}を追加する" };
 var outFuncMap = {};
@@ -74,7 +94,7 @@ io.on('connection', (socket) => {
     });
 
     /**
-     * Add Str
+     * 读取中
      */
     socket.on('recording', (data) => {
         console.log("recording");
@@ -92,15 +112,11 @@ io.on('connection', (socket) => {
     socket.on('stopRecord', (data, ack) => {
         console.log("stopRecord");
         const threadId = data.threadId;
-        // const stream = azure.createStream(bufferAll, 1).then(function(stream){
-        //     console.log(stream);
-        //   //  azure.saveStream(stream);
-        // });
         //放入输入框中 无需转换
         var txt = ai.v2t(bufferAll[threadId]).then(function (txt) {
             console.log(txt);
             socket.emit("v2t", txt);
-            bufferAll[threadId] = [];//删除
+            bufferAll[threadId] = [];//Clear
         }).catch((result) => {
             console.log(result);
             ack({ a: "fail" });
@@ -109,35 +125,7 @@ io.on('connection', (socket) => {
 
     //Stop
     socket.on('stop', (data, ack) => {
-        //const filename = path.join(__dirname, `/public/222.wav`);
-        azure.v2t(bufferAll, 1).then(function (text) {
-            //text: 问题
-            //ans:回答
-            ai.chat(text).then(function (ans) {
-                var voiceAns = "";
-                if (ans.length > 25) {
-                    var ansArr = ans.split("。");
-                    if (ansArr.length > 0) {
-                        voiceAns = ansArr[0] + "。";
-                    } else {
-                        voiceAns = ansArr[0];
-                    }
-                    console.log(voiceAns);
-                } else {
-                    voiceAns = ans;
-                }
-                ack({ q: text, a: ans });
-                // azure.t2v(voiceAns).then(
-                //     //Base64
-                //     function (stream) {
-                //         ack({ data: stream, q: text, a: ans });
-                //     }
-                // );
-            });
-        }).catch((result) => {
-            console.log(result);
-            ack({ a: "fail" });
-        });
+
     });
 });
 

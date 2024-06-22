@@ -5,7 +5,7 @@ const mail = new Mail();
 const sf = new SF();
 const util = new Util();
 class Company {
-    DEBUG=false;
+    DEBUG = false;
     id = "asst_KQsWjF05lR95Z92JwpOMCZBE";
     config = {
         name: "会社の営業",
@@ -255,13 +255,34 @@ class Company {
                         out: project_str
                     };
                 }
+            } else if (util.defined(args.id)) {
+                var data = await sf.find("Project__c", { id: id }, "Id, Name, Status__c,AutoNo__c,Detail__c", 1);
+                return data;
             }
 
             return { ai: "情報なし", out: "案件情報がありません" };
 
 
         },
-
+        getModelById: async function (args) {
+            let object = "";
+            let field = "";
+            let map = {};
+            if (args.model == "project") {
+                object = "Project__c";
+                field = "Id, Name, Status__c,AutoNo__c,Detail__c";
+                map = { "Id": "id", "Name": "name", "Status__c": "status", "AutoNo__c": "no", "Detail__c": "detail" };
+            } else {
+                object = "Worker__c";
+                field = "Id, Name, Status__c, AutoNo__c, Information__c, Resume__c";
+                map = { "Id": "id", "Name": "name", "Status__c": "status", "AutoNo__c": "no", "Information__c": "information", "Resume__c": "resume" };
+            }
+            let data = await sf.find(object, { id: args.id }, field, 1);
+            if (data.length > 0) {
+                return util.objToObj(data[0], map);
+            }
+            return {};
+        },
         selectInfo: async function (args) {
             return JSON.stringify(args);
         },
@@ -448,7 +469,7 @@ class Company {
             if (args.name.indexOf("FSR") >= 0) {
                 args.no = args.name;
             }
-            if( args.no.indexOf("FSR") >= 0){
+            if (args.no.indexOf("FSR") >= 0) {
                 delete args.name;
             }
             //FSR-TW654
