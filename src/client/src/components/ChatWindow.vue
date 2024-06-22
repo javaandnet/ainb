@@ -1,7 +1,7 @@
 <template>
   <div style="padding: 5px">
     <div>
-      <List ref="list" />
+      <List ref="list" @onClickListCell="onClickListCell" />
     </div>
     <div>
       <InputMessage
@@ -26,7 +26,7 @@ export default {
     InputMessage,
     List,
   },
-  emits: ["onMessage"],
+  emits: ["onMessage", "onClickListCell"],
   props: {
     userId: { type: String, default: "9999" },
     url: { type: String, default: "" },
@@ -48,7 +48,9 @@ export default {
         threadId: this.thread,
       });
     },
-
+    onClickListCell(obj) {
+      this.$emit("onClickListCell", obj);
+    },
     stopRecord() {
       this.socket.emit(
         "stopRecord",
@@ -68,12 +70,20 @@ export default {
     },
 
     addMessage(message) {
-      console.log(message);
-      const msg = message.message;
-      this.$refs.list.addMessage({
-        text: msg.content,
-        userId: this.thread,
-      });
+      if (message.mode && message.mode == "list") {
+        console.log("list22", message);
+        this.$refs.list.addMessage({
+          model: message.model,
+          list: message.list,
+          userId: this.thread,
+        });
+      } else {
+        const msg = message.message;
+        this.$refs.list.addMessage({
+          text: msg.content,
+          userId: this.thread,
+        });
+      }
     },
 
     sendMsg(message) {
