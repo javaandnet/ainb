@@ -85,13 +85,21 @@ export default {
       //     link: "",
       //   }
       var me = this;
-      this.socket.emit("message", {
-        threadId: me.thread,
-        msg: { content: message.message },
-      });
+      var _message = message.message;
+      if (message.message == "#TEST#") {
+        _message = message.message;
+        this.$emit("onMessage", {
+          message: _message,
+        });
+      } else {
+        this.socket.emit("message", {
+          threadId: me.thread,
+          msg: { content: _message },
+        });
+      }
       //Listに追加
       this.$refs.list.addMessage({
-        text: message.message,
+        text: _message,
         userId: this.userId,
       });
     },

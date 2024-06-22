@@ -17,6 +17,10 @@ export default {
   methods: {
     //Logic これ
     onMessage(data) {
+      //Test処理
+      if (data.message == "#TEST#") {
+        console.log(111);
+      }
       this.$refs.chatWindow.addMessage(data);
     },
   },

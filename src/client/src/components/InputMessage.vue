@@ -55,6 +55,7 @@ export default {
     return {
       message: "",
       show: true,
+      TEST: true,
     };
   },
   methods: {
@@ -78,8 +79,12 @@ export default {
       this.message = txt;
     },
     sendMsg() {
+      let message = this.message;
+      if (this.TEST == true) {
+        message = "#TEST#";
+      }
       this.$emit("sendMsg", {
-        message: this.message,
+        message: message,
       });
       this.message = "";
     },
