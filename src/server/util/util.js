@@ -41,6 +41,14 @@ export default class Util {
         });
         return strs.join("\r\n");
     }
+
+    objToObj(obj,map){
+        let rtn = {};
+        Object.keys(map).forEach((k) => {
+            rtn[map[k]] = obj[k];
+        });
+        return rtn;
+    }
     /**
      * 
      * @param {*} obj 

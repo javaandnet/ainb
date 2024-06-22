@@ -68,6 +68,11 @@ export default class SF {
     return await jsh.find(name, condition, fields, limit);
   }
 
+  async retrieve(model, id) {
+    // Single record retrieval
+    return await conn.sobject(model).retrieve(id);
+  }
+
   async updateStatus(name, status) {
     var jsh = new JSH();
     var obj = await jsh.find("worker__c", { 'Name': name }, "Id");
