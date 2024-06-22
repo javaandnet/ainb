@@ -1,7 +1,7 @@
 export default class TestData {
     listMsg = function () {
         return {
-            mode: "list", model: "project", list: [{
+            mode: "list", model: "worker", list: [{
                 text: "高大芳",
                 value: "a05F300000HYu46IAD"//Id,   
             },{

@@ -10,6 +10,8 @@ import cors from 'cors'
 import bodyParser from 'body-parser'
 import { AI } from './util/ai.js';
 const ai = new AI();
+import { AssistantFactory } from './util/assistantFactory.js';
+const assistantFactory = new AssistantFactory();
 
 
 
@@ -47,16 +49,21 @@ const io = new Server(server, {
 server.listen(port, function () {
     console.log(`AI App listening on port ${port}`);
 });
-const assistant = await ai.getAssistant(ASSISITANT_NAME);
+ 
+let assistant = assistantFactory.get(ASSISITANT_NAME);
 /**
  * 定义一个 POST 路由来接收前台的 AJAX 请求
  */
-app.post('/model', (req, res) => {
+app.post('/model', async (req, res) => {
     const data = req.body;
     console.log('Received data:', data);
-  
+    var rtn = await assistant.func.getModelById({
+        model: data.model,
+        id: data.id
+    });
+    console.log(rtn);
     // 返回响应
-    res.json({ data: data });
+    res.json(rtn);
 });
 
 

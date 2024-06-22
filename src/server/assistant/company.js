@@ -278,7 +278,7 @@ class Company {
                 map = { "Id": "id", "Name": "name", "Status__c": "status", "AutoNo__c": "no", "Information__c": "information", "Resume__c": "resume" };
             }
             let data = await sf.find(object, { id: args.id }, field, 1);
-            if (data.length > 0) {
+            if (data.length > 0) {          
                 return util.objToObj(data[0], map);
             }
             return {};
