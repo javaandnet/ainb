@@ -1,13 +1,20 @@
 <template>
-  <ChatWindow
-    ref="chatWindow"
-    url="http://localhost:3000"
-    @onMessage="onMessage"
-    @onClickListCell="onClickListCell"
-  />
+  <div>
+    <ProjectMatch ref="userList" />
+    <div>
+      <ChatWindow
+        ref="chatWindow"
+        url="http://localhost:3000"
+        @onMessage="onMessage"
+        @onClickListCell="onClickListCell"
+      />
+    </div>
+  </div>
 </template>
 
 <script>
+import ProjectMatch from "./components/ProjectMatch.vue";
+
 import ChatWindow from "./components/ChatWindow.vue";
 import { showDialog } from "vant";
 import TestData from "./js/testData.js";
@@ -17,11 +24,17 @@ export default {
   name: "App",
   components: {
     ChatWindow,
+    ProjectMatch,
+  },
+  mounted() {
+    // 组件挂载后调用的方法
+    this.loaded();
   },
   methods: {
+    loaded: function () {},
+
     onClickListCell: async function (data) {
       //先弹Modal，显示详细信息
-
       try {
         const response = await this.$axios.post(
           "http://localhost:3000/model",
