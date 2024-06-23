@@ -1,17 +1,28 @@
 <template>
   <div>
     <DynamicList ref="senderList" />
+    <van-space>
+      <Select
+        ref="senderTypeList"
+        :list="sendTypeList"
+        label="送りタイプ"
+        :selectedValue="initSelect"
+      />
+      <van-button type="primary" @click="onAddSender">宛先追加</van-button>
+    </van-space>
     <van-divider>技術者一覧</van-divider>
-    <DynamicList ref="workerList" />
-    <van-button type="primary" @click="send">発送</van-button>
+    <DynamicList ref="workerList" /><!--:isChecker="true"-->
+    <van-button type="primary" @click="send">発送確認</van-button>
   </div>
 </template>
 
 <script>
 import DynamicList from "../components/DynamicList.vue";
+import Select from "../components/Select.vue";
 import TestData from "../js/testData.js";
 import { Divider } from "vant";
 import { showDialog } from "vant";
+import { Space } from "vant";
 let testData = new TestData();
 /**
  * 上部为一个案件 不是必须
@@ -22,18 +33,60 @@ let testData = new TestData();
 export default {
   name: "App",
   components: {
+    VanSpace: Space,
     VanDivider: Divider,
     DynamicList,
+    Select,
   },
   mounted() {
     // 组件挂载后调用的方法
     this.loaded();
   },
-  methods: {
-    send: function () {
-        
-    },
+  data() {
+    return {
+      initSelect: [1],
+      selectedValues: {
+        value: 1,
+        text: "案件",
+      },
+      sendTypeList: [
+        {
+          value: 0,
+          text: "企業",
+        },
+        {
+          value: 1,
+          text: "案件",
+        },
+        {
+          value: 2,
+          text: "メール",
+        },
+        {
+          value: 3,
+          text: "企業Wechat",
+        },
+        {
+          value: 4,
+          text: "個人",
+        },
+      ],
+    };
+  },
 
+  methods: {
+    send: function () {},
+    onAddSender: function () {
+      this.addSender({ type: "4", text: "FSR会社", value: "13" });
+    },
+    addSender: function (obj) {
+      obj.icon = this.getIcon(obj.type);
+      this.$refs.senderList.addObj(obj);
+    },
+    addWorker: function (obj) {
+      obj.icon = this.getIcon(obj.type);
+      this.$refs.workerList.addObj(obj);
+    },
     getIcon: function (type) {
       //企業
       if (type == 0) {
@@ -64,6 +117,11 @@ export default {
     loaded: function () {
       this.$refs.senderList.setList(this.changeIcon(testData.getSenderList()));
       this.$refs.workerList.setList(this.changeIcon(testData.getWorkerList()));
+
+      this.$refs.senderTypeList.setInitValue({
+        value: 1,
+        text: "案件",
+      });
     },
 
     onClickListCell: async function (data) {

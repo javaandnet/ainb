@@ -14,15 +14,21 @@ export default class TestData {
             { type: "9", text: "高大芳", value: "11" },
             { type: "9", text: "王瀚達", value: "11" }]
     };
+    //a05F300000HZBJ7IAP
     listMsg = function () {
         return {
             mode: "list", model: "worker", list: [{
                 text: "高大芳",
                 value: "a05F300000HYu46IAD"//Id,   
             }, {
+                text: "任テスト用",
+                value: "a05F300000HZBJ7IAP"//Id,   
+            }, {
                 text: "王瀚達",
                 value: "a05F300000HYu68IAD"//Id,   
-            }]
+            }], isChecker: true, button: {
+                left: { label: "営業停止" }, right: { label: "宛先追加" }
+            }
         };
     }
 }
