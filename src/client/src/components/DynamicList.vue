@@ -7,9 +7,7 @@
         <van-icon name="close" @click="removeItem(index)" />
       </div>
     </van-list>
-    <van-field v-model="newItem" placeholder="输入新项" clearable />
-    <van-button type="primary" @click="addItem">添加</van-button>
-  </div>
+   </div>
 </template>
 
 <script>
