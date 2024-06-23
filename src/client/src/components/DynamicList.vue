@@ -1,27 +1,143 @@
 <template>
   <div>
-    <van-list v-model="list">
-      <div v-for="(item, index) in list" :key="index" class="list-item">
-        <van-icon :name="item.icon" />
-        <span class="span-left">{{ item.text }}</span>
-        <van-icon name="close" @click="removeItem(index)" />
+    <van-list>
+      <div v-if="isChecker != true">
+        <div v-for="(item, index) in list" :key="index" class="list-item">
+          <van-icon :name="item.icon" />
+          <span class="span-left">{{ item.text }}</span>
+          <van-icon name="close" @click="removeItem(index)" />
+        </div>
+      </div>
+      <div v-else>
+        <van-cell class="checkbox-cell" v-for="item in list" :key="item">
+          <template #icon>
+            <van-checkbox
+              class="checkbox-checkbox"
+              v-model="item.checked"
+              @change="onCheckboxChangeInList(item, index)"
+            >
+            </van-checkbox>
+          </template>
+          <!-- 使用 right-icon 插槽来自定义右侧图标 -->
+          <div
+            class="div_list_cell"
+            @click="onClickListCell(model, item.value)"
+          >
+            {{ item.text }}
+          </div>
+        </van-cell>
       </div>
     </van-list>
-   </div>
+    <!--底部按钮-->
+    <van-space>
+      <van-button
+        :type="button.left.type || 'success'"
+        @click="onClickLeftButtonInList"
+        size="small"
+        v-if="button && button.left"
+        >{{ button.left.label }}</van-button
+      >
+      <van-button
+        :type="button.left.type || 'primary'"
+        @click="onClickRightButtonInList"
+        size="small"
+        v-if="button && button.right"
+        >{{ button.right.label }}</van-button
+      >
+    </van-space>
+  </div>
 </template>
-
 <script>
+import { List, Cell, Checkbox } from "vant";
+import "vant/lib/index.css";
 export default {
+  components: {
+    VanCell: Cell,
+    VanList: List,
+    VanCheckbox: Checkbox,
+  },
+  emits: [
+    "onClickListCell",
+    "onClickLeftButtonInList",
+    "onClickRightButtonInList",
+    "onCheckboxChangeInList",
+  ],
+  props: {
+    model: { type: String, default: "" },
+    isChecker: { type: Boolean, default: false },
+    button: { type: Object, "default": () => {} },
+    initList: { type: Object, "default": () => [] },
+  },
   data() {
     return {
       list: [],
-      newItem: "",
     };
   },
+  mounted() {
+    // 组件挂载后调用的方法
+    this.loaded();
+  },
   methods: {
+    loaded() {
+      this.list = this.initList;
+      console.log(this.initList);
+    },
+
+    onClickLeftButtonInList() {
+      this.$emit("onClickLeftButtonInList", {
+        model: this.model,
+        ids: this.getListSelect(),
+        type: "left",
+      });
+    },
+    onClickRightButtonInList() {
+      this.$emit("onClickRightButtonInList", {
+        model: this.model,
+        ids: this.getListSelect(),
+        type: "right",
+      });
+    },
+    /**
+     * 向父激发选择的单元格事项
+     */
+    onClickListCell(model, id) {
+      this.$emit("onClickListCell", {
+        model: model,
+        id: id,
+      });
+    },
+    //最近选择的列表，选择一览提出
+    getListSelect() {
+      let rtn = { model: this.model };
+      let items = [];
+      for (const ele of this.list) {
+        if (ele.checked) {
+          items.push(ele.value);
+        }
+      }
+      rtn.items = items;
+      return rtn;
+    },
+    onCheckboxChangeInList(item, index) {
+      console.log(`Checkbox for ${item.text} changed to ${item.checked}`);
+      this.clickedItem = index;
+      this.$emit("onCheckboxChangeInList", {
+        model: this.model,
+        ids: this.getListSelect(),
+        type: "checkbox",
+      });
+      // this.getListSelect();
+
+      // 其他处理逻辑...
+    },
     setList(list) {
       this.list = list;
     },
+
+    addObj(obj) {
+      this.list = [...this.list, obj];
+    },
+
     getIcon(type) {
       //企業
       if (type == 0) {
@@ -41,12 +157,6 @@ export default {
       }
     },
 
-    addItem() {
-      if (this.newItem.trim() !== "") {
-        this.list.push(this.newItem);
-        this.newItem = "";
-      }
-    },
     removeItem(index) {
       this.list.splice(index, 1);
     },
@@ -55,6 +165,39 @@ export default {
 </script>
 
 <style>
+.div_list_cell {
+  color: "#233e50" !important;
+  font-size: "" !important;
+  padding-left: 5px;
+  text-align: left; /* 文本左对齐 */
+}
+.checkbox-list-container {
+  padding: 20px;
+}
+
+.checkbox-list-container {
+  padding: 20px;
+}
+.checkbox-cell {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-cell .van-checkbox {
+  margin-left: auto;
+}
+.checkbox-checkbox {
+  display: flex;
+  align-items: left;
+}
+.checkbox-cell {
+  display: flex;
+  align-items: left;
+}
+
+.checkbox-cell .van-checkbox {
+  margin-left: auto;
+}
 .span-left {
   position: relative;
   padding-left: 4px;
@@ -62,7 +205,13 @@ export default {
   left: 2px; /* 向右偏移20px */
   text-align: left; /* 文本左对齐 */
 }
-
+.span-right {
+  position: relative;
+  padding-right: 4px;
+  width: 100%;
+  left: 2px; /* 向右偏移20px */
+  text-align: right; /* 文本左对齐 */
+}
 .list-item {
   display: flex;
   justify-content: space-between;

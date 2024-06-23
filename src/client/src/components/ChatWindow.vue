@@ -1,7 +1,13 @@
 <template>
   <div style="padding: 5px">
     <div>
-      <List ref="list" @onClickListCell="onClickListCell" />
+      <List
+        ref="list"
+        @onClickListCell="onClickListCell"
+        @onClickRightButtonInList="onClickRightButtonInList"
+        @onClickLeftButtonInList="onClickLeftButtonInList"
+        @onCheckboxChangeInList="$emit('onCheckboxChangeInList', $event)"
+      />
     </div>
     <div>
       <InputMessage
@@ -26,7 +32,13 @@ export default {
     InputMessage,
     List,
   },
-  emits: ["onMessage", "onClickListCell"],
+  emits: [
+    "onMessage",
+    "onClickListCell",
+    "onClickLeftButtonInList",
+    "onClickRightButtonInList",
+    "onCheckboxChangeInList",
+  ],
   props: {
     userId: { type: String, default: "9999" },
     url: { type: String, default: "" },
@@ -43,6 +55,12 @@ export default {
   },
 
   methods: {
+    onClickLeftButtonInList(obj) {
+      this.$emit("onClickLeftButtonInList", obj);
+    },
+    onClickRightButtonInList(obj) {
+      this.$emit("onClickRightButtonInList", obj);
+    },
     startRecord() {
       this.socket.emit("startRecord", {
         threadId: this.thread,
@@ -71,12 +89,10 @@ export default {
 
     addMessage(message) {
       if (message.mode && message.mode == "list") {
-        console.log("list22", message);
-        this.$refs.list.addMessage({
-          model: message.model,
-          list: message.list,
-          userId: this.thread,
-        });
+        //Listに追加する
+        // console.log("list:", message);
+        message.userId = this.thread;
+        this.$refs.list.addMessage(message);
       } else {
         const msg = message.message;
         this.$refs.list.addMessage({
@@ -87,13 +103,6 @@ export default {
     },
 
     sendMsg(message) {
-      //    msg: {
-      //     text: "",
-      //     value: "",
-      //     time: "",
-      //     userId: "",
-      //     link: "",
-      //   }
       var me = this;
       var _message = message.message;
       if (message.message == "#TEST#") {
@@ -106,12 +115,12 @@ export default {
           threadId: me.thread,
           msg: { content: _message },
         });
+        //Listに追加
+        this.$refs.list.addMessage({
+          text: _message,
+          userId: this.userId,
+        });
       }
-      //Listに追加
-      this.$refs.list.addMessage({
-        text: _message,
-        userId: this.userId,
-      });
     },
     loaded() {
       this.$refs.list.mode = "text";

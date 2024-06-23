@@ -1,12 +1,15 @@
 <template>
   <div>
-    <ProjectMatch ref="userList" />
+    <!-- <ProjectMatch ref="userList" /> -->
     <div>
       <ChatWindow
         ref="chatWindow"
         url="http://localhost:3000"
         @onMessage="onMessage"
         @onClickListCell="onClickListCell"
+        @onClickLeftButtonInList="onClickLeftButtonInList"
+        @onClickRightButtonInList="onClickRightButtonInList"
+        @onCheckboxChangeInList="onCheckboxChangeInList"
       />
     </div>
   </div>
@@ -14,7 +17,6 @@
 
 <script>
 import ProjectMatch from "./components/ProjectMatch.vue";
-
 import ChatWindow from "./components/ChatWindow.vue";
 import { showDialog } from "vant";
 import TestData from "./js/testData.js";
@@ -30,9 +32,24 @@ export default {
     // 组件挂载后调用的方法
     this.loaded();
   },
+  data() {
+    return {
+      item: {},
+    };
+  },
   methods: {
     loaded: function () {},
-
+    onCheckboxChangeInList: function (data) {
+      this.item = data;
+    },
+    onClickRightButtonInList: async function (data) {
+      this.item = data;
+      // console.log(data);
+    },
+    onClickLeftButtonInList: async function (data) {
+      this.item = data;
+      // console.log(data);
+    },
     onClickListCell: async function (data) {
       //先弹Modal，显示详细信息
       try {

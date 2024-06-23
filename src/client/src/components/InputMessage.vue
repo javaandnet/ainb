@@ -80,6 +80,7 @@ export default {
     },
     sendMsg() {
       let message = this.message;
+      //FOR TEST
       if (this.TEST == true) {
         message = "#TEST#";
       }

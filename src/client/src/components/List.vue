@@ -1,12 +1,12 @@
 <template>
   <div class="chat-container">
     <van-list v-model="loading" finished="finished" finished-text="">
-      <div v-if="mode == 'text'">
-        <div
-          v-for="(message, index) in messages"
-          :key="index"
-          :class="['chat-item', message.userId == userId ? 'mine' : 'theirs']"
-        >
+      <div
+        v-for="(message, index) in messages"
+        :key="index"
+        :class="['chat-item', message.userId == userId ? 'mine' : 'theirs']"
+      >
+        <div v-if="message.mode == 'text'">
           <div v-if="message.text">
             <div class="chat-content">
               <p class="chat-txt">
@@ -14,29 +14,20 @@
               </p>
             </div>
           </div>
-          <div v-else>
-            <van-cell
-              class="checkbox-cell"
-              v-for="item in message.list"
-              :key="item"
-              :size="large"
-            >
-              <van-checkbox
-                v-model="item.checked"
-                @change="onCheckboxChange(item, index)"
-              >
-              </van-checkbox>
-              <!-- 使用 right-icon 插槽来自定义右侧图标 -->
-              <template #right-icon
-                ><div
-                  class="div_list_cell"
-                  @click="onClickListCell(message.model, item.value)"
-                >
-                  {{ item.text }}
-                </div>
-              </template>
-            </van-cell>
-          </div>
+        </div>
+        <div v-else>
+          <!--第二层内部循环-->
+          <DynamicList
+            ref="messageList"
+            :isChecker="message.isChecker"
+            :model="message.model"
+            :initList="message.list"
+            :button="message.button"
+            @onClickListCell="onClickListCell"
+            @onClickRightButtonInList="onClickRightButtonInList"
+            @onClickLeftButtonInList="onClickLeftButtonInList"
+            @onCheckboxChangeInList="onCheckboxChangeInList"
+          />
         </div>
       </div>
     </van-list>
@@ -44,6 +35,7 @@
 </template>
 
 <script>
+import DynamicList from "../components/DynamicList.vue";
 import { List, Cell, Checkbox } from "vant";
 import "vant/lib/index.css";
 
@@ -52,41 +44,42 @@ export default {
     VanCell: Cell,
     VanList: List,
     VanCheckbox: Checkbox,
+    DynamicList,
   },
-  emits: ["clickCell"],
+  emits: [
+    "onClickListCell",
+    "onClickLeftButtonInList",
+    "onClickRightButtonInList",
+    "onCheckboxChangeInList",
+  ],
   props: {},
+  mounted() {
+    // 组件挂载后调用的方法
+    this.loaded();
+  },
   methods: {
-    onCheckboxChange(item, index) {
-      this.clickedItem = index;
-      this.getListSelect();
-      console.log(`Checkbox for ${item.text} changed to ${item.checked}`);
-      // 其他处理逻辑...
+    loaded() {
+      // this.$refs.messageList.setList(this.list);
     },
     addMessage(message) {
+      console.log("List:", message);
       this.messages = [...this.messages, message];
     },
     /**
      * 向父激发选择的单元格事项
      */
-    onClickListCell(model, id) {
-      this.$emit("onClickListCell", {
-        model: model,
-        id: id,
-      });
+    onClickListCell(obj) {
+      this.$emit("onClickListCell", obj);
     },
-    //最近选择的列表，选择一览提出
-    getListSelect() {
-      const message = this.messages[this.clickedItem];
-      let rtn = { model: message.model };
-      let items = [];
-      for (const ele of message.list) {
-        if (ele.checked) {
-          items.push(ele.value);
-        }
-      }
-      rtn.items = items;
-      console.log(rtn);
-      return rtn;
+    onClickLeftButtonInList(obj) {
+      this.$emit("onClickLeftButtonInList", obj);
+    },
+    onClickRightButtonInList(obj) {
+      this.$emit("onClickRightButtonInList", obj);
+    },
+    onCheckboxChangeInList(obj) {
+      console.log(obj);
+      this.$emit("onCheckboxChangeInList", obj);
     },
   },
   data() {
@@ -113,11 +106,11 @@ export default {
 </script>
 
 <style scoped>
-.checkbox-list-container {
-  padding: 20px;
-}
 .div_list_cell {
   padding-left: 5px;
+}
+.checkbox-list-container {
+  padding: 20px;
 }
 .checkbox-cell {
   display: flex;
