@@ -67,11 +67,7 @@ app.post('/model', async (req, res) => {
 app.post('/stop', async (req, res) => {
     const data = req.body;
     console.log('Received data:', data);
-    var rtn = {};
-    // rtn = await assistant.func.getModelById({
-    //     model: data.model,
-    //     id: data.id
-    // });
+    let rtn = await assistant.func.changeSalesStatus(data);
     console.log(rtn);
     // 返回响应
     res.json(rtn);

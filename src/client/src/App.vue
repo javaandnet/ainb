@@ -63,8 +63,10 @@ export default {
     onCheckboxChangeInList: function (data) {
       this.item = data;
     },
-    onClickRightButtonInList: async function () {
+    onClickRightButtonInList: async function (data) {
       this.show = true;
+      console.log(this.item);
+      this.item = data;
     },
     onClickLeftButtonInList: async function (data) {
       console.log(data);
@@ -76,6 +78,7 @@ export default {
           const response = await me.$axios.post(me.URL + "stop", {
             model: data.model,
             ids: data.ids.items,
+            status: 0,
           });
           console.log(response.data);
         })

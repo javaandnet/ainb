@@ -22,14 +22,18 @@ export default class TestData {
                 value: "a05F300000HYu46IAD"//Id,   
             }, {
                 text: "任テスト用",
-                value: "a05F300000HZBJ7IAP"//Id,   
+                value: "a05F300000HZBJDIA5"//Id,   
             }, {
                 text: "nintest2",
                 value: "a05F300000HZBJ7IAP"//Id,   
             }, {
                 text: "王瀚達",
                 value: "a05F300000HYu68IAD"//Id,   
-            }], isChecker: true, button: {
+            }, {
+                text: "劉磊",
+                value: "a05F300000HYu41IAD"//Id,   
+            }
+        ], isChecker: true, button: {
                 left: { label: "営業停止" }, right: { label: "宛先追加" }
             }
         };

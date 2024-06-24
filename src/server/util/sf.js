@@ -83,7 +83,7 @@ export default class SF {
     return "NG";
   }
 
-  async update(objName, condition, updateObj) {
+  async updateByCondition(objName, condition, updateObj) {
     var jsh = new JSH();
     var obj = await jsh.find(objName, condition, "Id");
     if (obj.length > 0) {
@@ -93,6 +93,11 @@ export default class SF {
     return { id: -1 };
   }
 
+  async update(objName, updateObj) {
+    var jsh = new JSH();
+    return await jsh.update(objName, updateObj);
+
+  }
 
   async insert(objName, insertObj) {
     var jsh = new JSH();

@@ -194,6 +194,41 @@ class Company {
             }
             return "情報がありません";
         },
+        //営業停止
+        changeSalesStatus: async function (args) {
+            let objName = "";
+            let status = args.status;
+            let objs = [];
+            for (const id of args.ids) {
+                let item = {};
+                item["Id"] = id;
+                if (args.model == "worker") {
+                    objName = "WORKER__c";
+                    if (status == 0) {
+                        item["SalesStatus__c"] = "不可";
+                    } else {
+                        item["SalesStatus__c"] = "可能";
+                    }
+                } else if (args.model == "project") {
+                    objName = "PROJECT__C";
+                    if (status == 0) {
+                        item["Status__c"] = "9";
+                    } else {
+                        item["Status__c"] = "0";
+                    }
+                }
+                objs.push(item);
+            }
+            console.log(objs);
+            const rets = await sf.update(objName, objs);
+            let rtn = [];
+            for (const ret of rets) {
+                if (ret.success) {
+                    rtn.push(ret.id);
+                }
+            }
+            return rtn;
+        },
         changeStatus: async function (args) {
             let doFlg = false;
             if (args.type == "WORKER__c") {
@@ -214,7 +249,7 @@ class Company {
                 doFlg = true;
             }
             if (doFlg) {
-                var rtn = sf.update(args.type, args.condition, args.updateObj);
+                var rtn = sf.updateByCondition(args.type, args.condition, args.updateObj);
                 if (rtn.id == "-1") {
                     return "NG";
                 } else {
@@ -278,7 +313,7 @@ class Company {
                 map = { "Id": "id", "Name": "name", "Status__c": "status", "AutoNo__c": "no", "Information__c": "information", "Resume__c": "resume" };
             }
             let data = await sf.find(object, { id: args.id }, field, 1);
-            if (data.length > 0) {          
+            if (data.length > 0) {
                 return util.objToObj(data[0], map);
             }
             return {};

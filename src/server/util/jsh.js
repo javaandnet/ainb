@@ -146,23 +146,7 @@ class JSH {
         if (me.conn == null) {
             await me.login();
         }
-        return new Promise(function (resolve, reject) {
-            me.conn.sobject(objectName).update(rec, function (err, res) {
-                if (err) {
-                    console.error(err);
-                    resolve({ err: err.errorCode, id: "-1" });
-                } else {
-
-                    for (const ret of rets) {
-                        if (ret.success) {
-                          console.log(`Updated Successfully : ${ret.id}`);
-                        }
-                      }
-
-                    resolve({ id: res.id });
-                }
-            });
-        });
+        return await me.conn.sobject(objectName).update(rec);
     }
 
     async insert(objectName, rec) {
