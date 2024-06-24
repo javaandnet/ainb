@@ -49,7 +49,7 @@ const io = new Server(server, {
 server.listen(port, function () {
     console.log(`AI App listening on port ${port}`);
 });
- 
+
 let assistant = assistantFactory.get(ASSISITANT_NAME);
 /**
  * 定义一个 POST 路由来接收前台的 AJAX 请求
@@ -61,13 +61,23 @@ app.post('/model', async (req, res) => {
         model: data.model,
         id: data.id
     });
+    // 返回响应
+    res.json(rtn);
+});
+app.post('/stop', async (req, res) => {
+    const data = req.body;
+    console.log('Received data:', data);
+    var rtn = {};
+    // rtn = await assistant.func.getModelById({
+    //     model: data.model,
+    //     id: data.id
+    // });
     console.log(rtn);
     // 返回响应
     res.json(rtn);
 });
 
-
-ai.updateAssistant();
+ai.updateAssistant(ASSISITANT_NAME);
 var keyWordMap = { "#Add#": "案件:{0}を追加する" };
 var outFuncMap = {};
 outFuncMap[ASSISITANT_NAME] = ["selectInfo", "addInfo"];

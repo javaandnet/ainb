@@ -46,6 +46,7 @@ export default {
   },
   data() {
     return {
+      URL: "http://localhost:3000/",
       item: {},
       show: false,
     };
@@ -62,20 +63,21 @@ export default {
     onCheckboxChangeInList: function (data) {
       this.item = data;
     },
-    onClickRightButtonInList: async function (data) {
-      this.item = data;
+    onClickRightButtonInList: async function () {
       this.show = true;
     },
     onClickLeftButtonInList: async function (data) {
-      this.item = data;
+      console.log(data);
+      const me = this;
       showConfirmDialog({
         message: "選択したものを営業停止してよろしいでしょうか？",
       })
         .then(async function () {
-          const response = await this.$axios.post(
-            "http://localhost:3000/stop",
-            data
-          );
+          const response = await me.$axios.post(me.URL + "stop", {
+            model: data.model,
+            ids: data.ids.items,
+          });
+          console.log(response.data);
         })
         .catch(() => {
           // on cancel
@@ -84,10 +86,7 @@ export default {
     onClickListCell: async function (data) {
       //先弹Modal，显示详细信息
       try {
-        const response = await this.$axios.post(
-          "http://localhost:3000/model",
-          data
-        );
+        const response = await this.$axios.post(this.URL + "model", data);
         showDialog({
           messageAlign: "left",
           allowHtml: true,

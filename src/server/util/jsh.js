@@ -152,6 +152,13 @@ class JSH {
                     console.error(err);
                     resolve({ err: err.errorCode, id: "-1" });
                 } else {
+
+                    for (const ret of rets) {
+                        if (ret.success) {
+                          console.log(`Updated Successfully : ${ret.id}`);
+                        }
+                      }
+
                     resolve({ id: res.id });
                 }
             });
