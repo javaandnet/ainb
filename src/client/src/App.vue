@@ -3,8 +3,9 @@
     <div>
       <ChatWindow
         ref="chatWindow"
-        url="http://localhost:3000"
+        :url="URL"
         @onMessage="onMessage"
+        @onSendMsg="onSendMsg"
         @onClickListCell="onClickListCell"
         @onClickLeftButtonInList="onClickLeftButtonInList"
         @onClickRightButtonInList="onClickRightButtonInList"
@@ -31,7 +32,7 @@ import { showDialog } from "vant";
 import { Overlay } from "vant";
 import TestData from "./js/testData.js";
 import { showConfirmDialog } from "vant";
-
+import io from "socket.io-client";
 let testData = new TestData();
 export default {
   name: "App",
@@ -53,7 +54,9 @@ export default {
     };
   },
   methods: {
-    loaded: function () {},
+    loaded: function () {
+      this.socket = io(this.URL);
+    },
 
     onClickLeftButtonInPM: function () {
       // this.item = data;
@@ -121,13 +124,73 @@ export default {
         console.error("获取数据失败");
       }
     },
-    //Logic これ
-    onMessage(data) {
+    /**
+     * 技術者リストを作成する
+     */
+    createWorkerList(list) {
+      return {
+        mode: "list",
+        model: "worker",
+        list: list,
+        isChecker: true,
+        button: {
+          left: { label: "営業停止" },
+          right: { label: "宛先追加" },
+        },
+      };
+    },
+
+    /**
+     *入力发送信息时
+     */
+    onSendMsg(message) {
+      console.log(message);
+      let data = message.message;
+      if (data.trim() == "") {
+        return;
+      }
       //Test処理
-      if (data.message == "#TEST#") {
+      if (data == "#TEST#") {
         this.$refs.chatWindow.addMessage(testData.listMsg());
       } else {
-        this.$refs.chatWindow.addMessage(data);
+        //TODO
+        //this.$refs.chatWindow.addMessage(data);
+        this.$refs.chatWindow.sendMsg(this.getMsg(data));
+        // this.socket.emit("message", this.getMsg(data));
+      }
+    },
+    //入力时进行操作
+    onMessage(message) {
+      let data = message.message;
+      const msg = this.createWorkerList(data);
+      this.$refs.chatWindow.addMessage(msg);
+    },
+    getCmdList() {
+      return {
+        "#0#": {
+          msg: "help",
+          desc: "Help",
+        },
+        "#1#": {
+          msg: "listInfo",
+          args: { type: "worker" },
+          desc: "技術者一覧",
+        },
+        "#8#": {
+          msg: "sendInfo",
+          desc: "情報発送",
+        },
+      };
+    },
+    getMsg(key, args) {
+      var cmd = this.getCmdList()[key];
+      if (key != "#0#") {
+        return {
+          threadId: this.thread,
+          content: cmd.msg,
+          args: args || cmd.args,
+          option: "server",
+        };
       }
     },
   },

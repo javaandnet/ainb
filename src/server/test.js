@@ -142,4 +142,15 @@ async function testCompany_005() {
     await ai.chat("案件FSR-0004の情報");
 }
 // testCompany_005();
-testAI_001();
+// testAI_001();
+
+
+async function testCompany_006() {
+    var outFuncMap = {};
+    outFuncMap[ASSISITANT_NAME] = ["selectInfo", "addInfo", "listInfo"];
+    var message = { content: 'listInfo', args: { type: 'worker' }, option: 'server' };
+    const rtn = await ai.exe(outFuncMap, { func: message.content, args: message.args }, {}).then(function (data) {
+       console.log(data);
+    });
+}
+testCompany_006();

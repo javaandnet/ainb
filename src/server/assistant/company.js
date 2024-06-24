@@ -162,7 +162,24 @@ class Company {
             obj.option = args;
             return args;
         },
-
+        listInfo: async function (args, obj) {
+            if (args.type == "worker") {
+                var data = await sf.find("Worker__c", { SalesStatus__c: '可能' }, "Id, Name", 50);
+                if (data == null || data.totalSize == 0) {
+                    return [];
+                } else {
+                    var rtn = [];
+                    var worker = {};
+                    var ai = {};
+                    data.forEach((element, index) => {
+                        rtn.push({ text: element.Name, value: element.Id });
+                    });
+                    return rtn;
+                }
+            }
+            console.log(args);
+            return [];
+        },
         addInfo: async function (args, obj) {
             obj.option = args;
             var insertObj = { Name: args.name, Detail__c: args.KEYWORDSTR, status__c: 0 };

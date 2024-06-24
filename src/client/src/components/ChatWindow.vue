@@ -12,7 +12,7 @@
     <div>
       <InputMessage
         ref="input"
-        @sendMsg="sendMsg"
+        @sendMsg="onSendMsg"
         @recording="recording"
         @stopRecord="stopRecord"
         @startRecord="startRecord"
@@ -34,6 +34,7 @@ export default {
   },
   emits: [
     "onMessage",
+    "onSendMsg",
     "onClickListCell",
     "onClickLeftButtonInList",
     "onClickRightButtonInList",
@@ -101,26 +102,30 @@ export default {
         });
       }
     },
-
+    /**本质还要这个发送 */
     sendMsg(message) {
-      var me = this;
-      var _message = message.message;
-      if (message.message == "#TEST#") {
-        _message = message.message;
-        this.$emit("onMessage", {
-          message: _message,
-        });
-      } else {
-        this.socket.emit("message", {
-          threadId: me.thread,
-          msg: { content: _message },
-        });
-        //Listに追加
-        this.$refs.list.addMessage({
-          text: _message,
-          userId: this.userId,
-        });
-      }
+      this.socket.emit("message", message);
+    },
+    onSendMsg(message) {
+      // var me = this;
+      // var _message = message.message;
+      this.$emit("onSendMsg", message);
+      // if (message.message == "#TEST#") {
+      //   _message = message.message;
+      //   this.$emit("onMessage", {
+      //     message: _message,
+      //   });
+      // } else {
+      //   this.socket.emit("message", {
+      //     threadId: me.thread,
+      //     msg: { content: _message },
+      //   });
+      //   //Listに追加
+      //   this.$refs.list.addMessage({
+      //     text: _message,
+      //     userId: this.userId,
+      //   });
+      // }
     },
     loaded() {
       this.$refs.list.mode = "text";
@@ -134,6 +139,7 @@ export default {
         this.thread = threadId;
       });
       this.socket.on("message", (msg) => {
+        console.log("msg", msg);
         this.$emit("onMessage", {
           message: msg,
         });
