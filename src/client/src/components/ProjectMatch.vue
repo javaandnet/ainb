@@ -26,7 +26,7 @@ import DynamicList from "../components/DynamicList.vue";
 import Select from "../components/Select.vue";
 // import TestData from "../js/testData.js";
 import { Divider } from "vant";
-import { showDialog } from "vant";
+// import { showDialog } from "vant";
 import { Space } from "vant";
 // let testData = new TestData();
 /**
@@ -88,11 +88,11 @@ export default {
       let list = this.$refs.senderList.getList();
       if (data.model == "worker") {
         list = this.$refs.workerList.getList();
-        item.type = 9;
       }
       for (let item of data.items) {
         if (!this.objInArray(item, list)) {
           if (data.model == "worker") {
+            item.type = 9;
             this.addWorker(item);
           } else {
             this.addSender(item);
@@ -103,7 +103,6 @@ export default {
     objInArray: function (data, objArray) {
       return objArray.some((obj) => obj.value === data.value);
     },
-
     onClickLeftButton: function () {
       this.$emit("onClickLeftButton");
     },
@@ -111,6 +110,7 @@ export default {
       this.$emit("onClickRightButton");
     },
     onAddSender: function () {
+      //不同选项不同操作
       this.addSender({ type: "4", text: "FSR会社", value: "13" });
     },
     addSender: function (obj) {
