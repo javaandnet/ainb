@@ -12,7 +12,12 @@
     </van-space>
     <van-divider>技術者一覧</van-divider>
     <DynamicList ref="workerList" /><!--:isChecker="true"-->
-    <van-button type="primary" @click="send">発送確認</van-button>
+    <van-space>
+      <van-button type="primary" @click="onClickLeftButton">発送確認</van-button
+      ><van-button type="warning" @click="onClickRightButton"
+        >閉じる</van-button
+      >
+    </van-space>
   </div>
 </template>
 
@@ -38,6 +43,7 @@ export default {
     DynamicList,
     Select,
   },
+  emits: ["onClickLeftButton", "onClickRightButton"],
   mounted() {
     // 组件挂载后调用的方法
     this.loaded();
@@ -75,7 +81,12 @@ export default {
   },
 
   methods: {
-    send: function () {},
+    onClickLeftButton: function () {
+      this.$emit("onClickLeftButton");
+    },
+    onClickRightButton: function () {
+      this.$emit("onClickRightButton");
+    },
     onAddSender: function () {
       this.addSender({ type: "4", text: "FSR会社", value: "13" });
     },

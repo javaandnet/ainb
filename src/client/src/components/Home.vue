@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- <ProjectMatch ref="userList" /> -->
     <div>
       <ChatWindow
         ref="chatWindow"
@@ -11,35 +12,22 @@
         @onCheckboxChangeInList="onCheckboxChangeInList"
       />
     </div>
-    <van-overlay :show="show" @click="show = false">
-      <div class="wrapper">
-        <ProjectMatch
-          ref="userList"
-          @onClickLeftButton="onClickLeftButtonInPM"
-          @onClickRightButton="onClickRightButtonInPM"
-        />
-      </div>
-    </van-overlay>
   </div>
 </template>
 
 <script>
-import ProjectMatch from "./components/ProjectMatch.vue";
-import ChatWindow from "./components/ChatWindow.vue";
+import ProjectMatch from "../components/ProjectMatch.vue";
+import ChatWindow from "../components/ChatWindow.vue";
 import { showDialog } from "vant";
-import { Overlay } from "vant";
-import TestData from "./js/testData.js";
-import { showConfirmDialog } from "vant";
+import TestData from "../js/testData.js";
 
 let testData = new TestData();
 export default {
   name: "App",
   components: {
-    VantOverlay: Overlay,
     ChatWindow,
     ProjectMatch,
   },
-
   mounted() {
     // 组件挂载后调用的方法
     this.loaded();
@@ -47,39 +35,20 @@ export default {
   data() {
     return {
       item: {},
-      show: false,
     };
   },
   methods: {
     loaded: function () {},
-
-    onClickLeftButtonInPM: function () {
-      // this.item = data;
-    },
-    onClickRightButtonInPM: function () {
-      this.show = false;
-    },
     onCheckboxChangeInList: function (data) {
       this.item = data;
     },
     onClickRightButtonInList: async function (data) {
       this.item = data;
-      this.show = true;
+      // console.log(data);
     },
     onClickLeftButtonInList: async function (data) {
       this.item = data;
-      showConfirmDialog({
-        message: "選択したものを営業停止してよろしいでしょうか？",
-      })
-        .then(async function () {
-          const response = await this.$axios.post(
-            "http://localhost:3000/stop",
-            data
-          );
-        })
-        .catch(() => {
-          // on cancel
-        });
+      // console.log(data);
     },
     onClickListCell: async function (data) {
       //先弹Modal，显示详细信息
@@ -88,6 +57,7 @@ export default {
           "http://localhost:3000/model",
           data
         );
+
         showDialog({
           messageAlign: "left",
           allowHtml: true,
@@ -126,12 +96,5 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
-}
-.wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  background-color: #fff;
 }
 </style>

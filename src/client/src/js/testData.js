@@ -24,6 +24,9 @@ export default class TestData {
                 text: "任テスト用",
                 value: "a05F300000HZBJ7IAP"//Id,   
             }, {
+                text: "nintest2",
+                value: "a05F300000HZBJ7IAP"//Id,   
+            }, {
                 text: "王瀚達",
                 value: "a05F300000HYu68IAD"//Id,   
             }], isChecker: true, button: {
