@@ -39,7 +39,14 @@
       "vue/multi-word-component-names": "off",
       "vue/no-unused-components": "off",
       "vue/no-unused-vars": "off",
-      "vue/no-multiple-template-root": "off"
+      "vue/no-multiple-template-root": "off",
+      "no-unused-vars": [
+        "error",
+        {
+          "vars": "all",
+          "args": "all"
+        }
+      ]
     }
   },
   "browserslist": [

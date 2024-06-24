@@ -11,12 +11,13 @@
         @onCheckboxChangeInList="onCheckboxChangeInList"
       />
     </div>
-    <van-overlay :show="show" @click="show = false">
+    <van-overlay :show="show">
       <div class="wrapper">
         <ProjectMatch
-          ref="userList"
+          ref="projectMatch"
           @onClickLeftButton="onClickLeftButtonInPM"
           @onClickRightButton="onClickRightButtonInPM"
+          @loaded="onLoadedPM"
         />
       </div>
     </van-overlay>
@@ -67,6 +68,9 @@ export default {
       this.show = true;
       console.log(this.item);
       this.item = data;
+      if (this.$refs.projectMatch) {
+        this.$refs.projectMatch.sync(this.item);
+      }
     },
     onClickLeftButtonInList: async function (data) {
       console.log(data);
@@ -75,30 +79,40 @@ export default {
         message: "選択したものを営業停止してよろしいでしょうか？",
       })
         .then(async function () {
-          const response = await me.$axios.post(me.URL + "stop", {
+          await me.$axios.post(me.URL + "stop", {
             model: data.model,
-            ids: data.ids.items,
+            ids: data.items,
             status: 0,
           });
-          console.log(response.data);
+          // console.log(response.data);
         })
         .catch(() => {
           // on cancel
         });
     },
+    onLoadedPM: function () {
+      this.$refs.projectMatch.sync(this.item);
+    },
     onClickListCell: async function (data) {
       //先弹Modal，显示详细信息
       try {
         const response = await this.$axios.post(this.URL + "model", data);
+        let content =
+          // response.data.status +
+          // "<br><br>" +
+          // response.data.skill +
+          // "<br><br>" +
+          // response.data.japanese +
+          "<br><br>" +
+          response.data.information +
+          "<br><br><a href='" +
+          response.data.resume +
+          "' target='_blank'>履歴書Download</a>";
         showDialog({
           messageAlign: "left",
           allowHtml: true,
           title: response.data.name,
-          message:
-            response.data.information +
-            "<br><br><a href='" +
-            response.data.resume +
-            "' target='_blank'>履歴書Download</a>",
+          message: content,
         }).then(() => {
           // on close
         });

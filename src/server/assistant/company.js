@@ -199,9 +199,10 @@ class Company {
             let objName = "";
             let status = args.status;
             let objs = [];
+            let rtn = [];
             for (const id of args.ids) {
                 let item = {};
-                item["Id"] = id;
+                item["Id"] = id.value;
                 if (args.model == "worker") {
                     objName = "WORKER__c";
                     if (status == 0) {
@@ -217,16 +218,17 @@ class Company {
                         item["Status__c"] = "0";
                     }
                 }
-                objs.push(item);
-            }
-            console.log(objs);
-            const rets = await sf.update(objName, objs);
-            let rtn = [];
-            for (const ret of rets) {
-                if (ret.success) {
-                    rtn.push(ret.id);
+                // objs.push(item);
+                const rets = await sf.update(objName, [item]);
+
+                for (const ret of rets) {
+                    if (ret.success) {
+                        rtn.push(ret.id);
+                    }
                 }
             }
+
+
             return rtn;
         },
         changeStatus: async function (args) {
@@ -309,10 +311,11 @@ class Company {
                 map = { "Id": "id", "Name": "name", "Status__c": "status", "AutoNo__c": "no", "Detail__c": "detail" };
             } else {
                 object = "Worker__c";
-                field = "Id, Name, Status__c, AutoNo__c, Information__c, Resume__c";
-                map = { "Id": "id", "Name": "name", "Status__c": "status", "AutoNo__c": "no", "Information__c": "information", "Resume__c": "resume" };
+                field = "Id, Name, Status__c, AutoNo__c,Japanese__c,TecLevel__c, Information__c, Resume__c";
+                map = { "Id": "id", "Name": "name", "Status__c": "status", "AutoNo__c": "no", "Information__c": "information", "Resume__c": "resume", "Japanese__c": "japanese", "TecLevel__c": "skill", "Status__c": "status" };
             }
             let data = await sf.find(object, { id: args.id }, field, 1);
+            console.log(data);
             if (data.length > 0) {
                 return util.objToObj(data[0], map);
             }

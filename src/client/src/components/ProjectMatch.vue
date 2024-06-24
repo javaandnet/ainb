@@ -24,11 +24,11 @@
 <script>
 import DynamicList from "../components/DynamicList.vue";
 import Select from "../components/Select.vue";
-import TestData from "../js/testData.js";
+// import TestData from "../js/testData.js";
 import { Divider } from "vant";
 import { showDialog } from "vant";
 import { Space } from "vant";
-let testData = new TestData();
+// let testData = new TestData();
 /**
  * 上部为一个案件 不是必须
  * 下部为动态列表 显示技术者
@@ -43,14 +43,16 @@ export default {
     DynamicList,
     Select,
   },
-  emits: ["onClickLeftButton", "onClickRightButton"],
+  emits: ["onClickLeftButton", "onClickRightButton", "loaded"],
   mounted() {
     // 组件挂载后调用的方法
     this.loaded();
   },
   data() {
     return {
+      initFLg: false,
       initSelect: [1],
+      initData: {},
       selectedValues: {
         value: 1,
         text: "案件",
@@ -81,6 +83,27 @@ export default {
   },
 
   methods: {
+    sync: function (data) {
+      //items
+      let list = this.$refs.senderList.getList();
+      if (data.model == "worker") {
+        list = this.$refs.workerList.getList();
+        item.type = 9;
+      }
+      for (let item of data.items) {
+        if (!this.objInArray(item, list)) {
+          if (data.model == "worker") {
+            this.addWorker(item);
+          } else {
+            this.addSender(item);
+          }
+        }
+      }
+    },
+    objInArray: function (data, objArray) {
+      return objArray.some((obj) => obj.value === data.value);
+    },
+
     onClickLeftButton: function () {
       this.$emit("onClickLeftButton");
     },
@@ -95,6 +118,7 @@ export default {
       this.$refs.senderList.addObj(obj);
     },
     addWorker: function (obj) {
+      console.log("addWorker", obj);
       obj.icon = this.getIcon(obj.type);
       this.$refs.workerList.addObj(obj);
     },
@@ -126,39 +150,11 @@ export default {
       return list;
     },
     loaded: function () {
-      this.$refs.senderList.setList(this.changeIcon(testData.getSenderList()));
-      this.$refs.workerList.setList(this.changeIcon(testData.getWorkerList()));
-
+      this.$emit("loaded");
       this.$refs.senderTypeList.setInitValue({
         value: 1,
         text: "案件",
       });
-    },
-
-    onClickListCell: async function (data) {
-      //先弹Modal，显示详细信息
-      try {
-        const response = await this.$axios.post(
-          "http://localhost:3000/model",
-          data
-        );
-
-        showDialog({
-          messageAlign: "left",
-          allowHtml: true,
-          title: response.data.name,
-          message:
-            response.data.information +
-            "<br><br><a href='" +
-            response.data.resume +
-            "' target='_blank'>履歴書Download</a>",
-        }).then(() => {
-          // on close
-        });
-        console.log(response.data);
-      } catch (error) {
-        console.error("获取数据失败");
-      }
     },
   },
 };

@@ -14,7 +14,7 @@
             <van-checkbox
               class="checkbox-checkbox"
               v-model="item.checked"
-              @change="onCheckboxChangeInList(item, index)"
+              @change="onCheckboxChangeInList(index)"
             >
             </van-checkbox>
           </template>
@@ -80,22 +80,17 @@ export default {
   methods: {
     loaded() {
       this.list = this.initList;
-      console.log(this.initList);
     },
 
     onClickLeftButtonInList() {
-      this.$emit("onClickLeftButtonInList", {
-        model: this.model,
-        ids: this.getListSelect(),
-        type: "left",
-      });
+      let rtn = this.getListSelect();
+      rtn.type = "left";
+      this.$emit("onClickLeftButtonInList", rtn);
     },
     onClickRightButtonInList() {
-      this.$emit("onClickRightButtonInList", {
-        model: this.model,
-        ids: this.getListSelect(),
-        type: "right",
-      });
+      let rtn = this.getListSelect();
+      rtn.type = "right";
+      this.$emit("onClickRightButtonInList", rtn);
     },
     /**
      * 向父激发选择的单元格事项
@@ -112,20 +107,18 @@ export default {
       let items = [];
       for (const ele of this.list) {
         if (ele.checked) {
-          items.push(ele.value);
+          items.push(ele);
         }
       }
       rtn.items = items;
       return rtn;
     },
-    onCheckboxChangeInList(item, index) {
-      console.log(`Checkbox for ${item.text} changed to ${item.checked}`);
+    onCheckboxChangeInList(index) {
+      // console.log(`Checkbox for ${item.text} changed to ${item.checked}`);
       this.clickedItem = index;
-      this.$emit("onCheckboxChangeInList", {
-        model: this.model,
-        ids: this.getListSelect(),
-        type: "checkbox",
-      });
+      let rtn = this.getListSelect();
+      rtn.type = "checkbox";
+      this.$emit("onCheckboxChangeInList", rtn);
       // this.getListSelect();
 
       // 其他处理逻辑...
@@ -133,7 +126,9 @@ export default {
     setList(list) {
       this.list = list;
     },
-
+    getList() {
+      return this.list;
+    },
     addObj(obj) {
       this.list = [...this.list, obj];
     },
