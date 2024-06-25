@@ -5,7 +5,7 @@
         <div v-for="(item, index) in list" :key="index" class="list-item">
           <van-icon :name="item.icon" />
           <span class="span-left">{{ item.text }}</span>
-          <van-icon name="close" @click="removeItem(index)" />
+          <van-icon v-if="isDelete == true" name="close" @click="removeItem(index)" />
         </div>
       </div>
       <div v-else>
@@ -64,6 +64,7 @@ export default {
   ],
   props: {
     model: { type: String, default: "" },
+    isDelete: { type: Boolean, default: true },
     isChecker: { type: Boolean, default: false },
     button: { type: Object, "default": () => {} },
     initList: { type: Object, "default": () => [] },
@@ -209,6 +210,7 @@ export default {
 }
 .list-item {
   display: flex;
+    padding: 4px;
   justify-content: space-between;
   align-items: left;
   padding: 10px;

@@ -6,19 +6,18 @@
         :key="index"
         :class="['chat-item', message.userId == userId ? 'mine' : 'theirs']"
       >
-        <div v-if="message.mode == 'text'">
-          <div v-if="message.text">
-            <div class="chat-content">
-              <p class="chat-txt">
-                {{ message.text }}
-              </p>
-            </div>
+        <div v-if="message.mode == 'text' && message.text">
+          <div class="chat-content">
+            <p class="chat-txt">
+              {{ message.text }}
+            </p>
           </div>
         </div>
         <div v-else>
           <!--第二层内部循环-->
           <DynamicList
             ref="messageList"
+            :isDelete="message.isDelete"
             :isChecker="message.isChecker"
             :model="message.model"
             :initList="message.list"
@@ -136,6 +135,8 @@ export default {
   margin: 5px 0; /* 减小上下空白 */
 }
 .chat-txt {
+  padding: 2px;
+  padding-right: 8px;
   margin-bottom: 2px;
   margin-top: 2px;
 }
