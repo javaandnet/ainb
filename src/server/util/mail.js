@@ -1,5 +1,5 @@
 import { createTransport } from "nodemailer";
-
+import axios from 'axios';
 const transport = createTransport({
     host: 'smtp.exmail.qq.com',
     port: 465,
@@ -17,21 +17,20 @@ class Mail {
             cc: config.cc, //抄送
             bcc: config.bcc, //秘送
             subject: config.subject, //标题
-            text: config.content, //纯文本
-            //html: " <b>你好啊！</b>",
-            attachments:config.attach
+            //text: config.content, //纯文本
+            html: config.content,
+            attachments: config.attach
         }
         var rtn = await transport.sendMail(mailOptions);
         return rtn;
 
     }
+    // //送信区分：１（グループ）０（個人）
+    // String type = weComId == null ? '1' : '0';
+    // 送信名（グループ：SALESFORCE）
+    sendWecom = async function (message, type = 1, name = "SALESFORCE") {
+        const endpointurl = 'http://160.16.216.251:11117/msg?type=' + type + '&to=' + name + '&msg=' + message;
+        return await axios.get(endpointurl);
+    }
 }
 export { Mail };
-//         {
-//     filename: "检测报告",
-//     path: attach //文件路径
-// },
-// {
-//     filename: "fileName", //文件名
-//     content: "texttexttext" //文件内容，自己写
-// }

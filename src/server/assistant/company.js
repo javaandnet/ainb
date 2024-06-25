@@ -158,7 +158,61 @@ class Company {
             obj.option = args;
             return args;
         },
+        confirmInfo: async function (args, obj) {
+            const senders = args.sender;
+            const workers = args.worker;
 
+            let rtn = "";
+            let ids = [];
+            for (const worker of workers) {
+                ids.push(worker.value);
+            }
+            var datas = await await sf.retrieve("Worker__c", ids);
+            let infos = [];
+            for (const worker of datas) {
+                //TODO 
+                let str = worker.Information__c +
+                    "\r\n<a href='" +
+                    worker.Resume__c +
+                    "' target='_blank'>履歴書Download</a>";
+                infos.push(str);
+            }
+            rtn = infos.join("\r\n\r\n");
+            let tos = [];
+            let wecoms = [];
+            for (const sender of senders) {
+                if (sender.type == 2) {
+                    tos.push(sender.value);
+                } else if (sender.type == 3) {//TODO Every Max Length
+                    wecoms.push(sender.value);
+                }
+            }
+      
+            //SendMail
+            if (tos.length == 0) {
+                rtn = rtn.replaceAll("\r\n", "<br>");
+                var res = await mail.sendMail({
+                    to: tos.join(","),
+                    subject: "FSR技術者提案 By AI",
+                    content: rtn
+                });
+                let mailResult = {};
+                if (res.accepted.length > 0) {
+                    mailResult = {
+                        ai: JSON.stringify({ mailto: tos.join(",") }), //只有名字
+                        out: "[" + res.accepted.join(",") + "]に送信いたしました。"
+                    };
+                } else {
+                    mailResult = {
+                        ai: JSON.stringify({ mailto: tos.join(",") }), //只有名字
+                        out: "送信失敗しました。"
+                    };
+                }
+            }
+            await mail.sendWecom(rtn);
+            // wecoms
+            return rtn;
+        },
         changePrice: async function (args, obj) {
             obj.option = args;
             return args;
@@ -285,10 +339,9 @@ class Company {
         getProject: async function (args) {
             if (util.defined(args.status)) {
                 var status = {};
-
                 if (args.status == "0") {
                     var parent = this.parent;
-                    var data = await parent.out.listInfo({ type: "project" });;
+                    var data = await parent.out.listInfo({ type: "project" });
                     if (data == null || data.size == 0) {
                         return { ai: "情報なし", out: "案件情報がありません" };
                     } else {
