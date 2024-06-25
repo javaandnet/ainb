@@ -82,7 +82,7 @@ export default {
       let message = this.message;
       //FOR TEST
       if (this.TEST == true) {
-        message = "#2#";
+        message = "#3#テス案件名\r\n内容確認\r\n２行め位";
       }
       this.$emit("sendMsg", {
         message: message,

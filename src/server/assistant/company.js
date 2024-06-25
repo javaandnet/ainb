@@ -184,11 +184,8 @@ class Company {
             return [];
         },
         addInfo: async function (args, obj) {
-            obj.option = args;
-            var insertObj = { Name: args.name, Detail__c: args.KEYWORDSTR, status__c: 0 };
+            var insertObj = { Name: util.firstLine(args.info), Detail__c: args.info, status__c: 0 };
             var rtn = await sf.insert("Project__c", insertObj);
-            //console.log(rtn);
-            //console.log("addInfo out func:", rtn);
             return args;
         }
     };

@@ -84,12 +84,16 @@ app.post('/cmd', async (req, res) => {
             msg: "listInfo",
             args: { type: "worker" },
             desc: "営業中技術者一覧,点击单元格查看详细信息",
-        },"#2#": {
+        }, "#2#": {
             msg: "listInfo",
             args: { type: "project" },
             desc: "未完了案件一覧,点击单元格查看详细信息",
+        }, "#3#": {
+            msg: "addInfo",
+            args: { type: "project" },
+            desc: "案件を追加する。#3#後ろ内容で、第一行は案件名です。",
         },
-        "#8#": {
+        "#9#": {
             msg: "sendInfo",
             desc: "情報発送",
         },

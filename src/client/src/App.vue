@@ -104,7 +104,7 @@ export default {
       try {
         const response = await this.$axios.post(this.URL + "model", data);
         let content = "";
-        if ((data.model == "project")) {
+        if (data.model == "project") {
           content = "<br><br>" + response.data.detail;
         } else {
           content =
@@ -177,19 +177,30 @@ export default {
     onSendMsg(message) {
       console.log(message);
       let data = message.message;
+      let info = "";
+      let cmdKey = data;
       if (data.trim() == "") {
         return;
       }
-      const msg = this.getMsg(data);
+      //首文字开始
+      for (let key of Object.keys(this.cmdList)) {
+        if (data.indexOf(key) == 0) {
+          cmdKey = key;
+          info = data.replace(key, "");
+          break;
+        }
+      }
+      const msg = this.getMsg(cmdKey);
       //Test処理
-      if (data == "#TEST#") {
+      if (cmdKey == "#TEST#") {
         this.$refs.chatWindow.addMessage(testData.listMsg());
       } else if (msg.option == "server") {
-        this.addTransKeyInfo(data);
-        if (data == "#0#") {
+        this.addTransKeyInfo(cmdKey);
+        if (cmdKey == "#0#") {
           //Need not to send
           this.$refs.chatWindow.addMessage(this.createCmdList());
         } else {
+          msg.args.info = info;
           this.$refs.chatWindow.sendMsg(msg);
         }
       }
