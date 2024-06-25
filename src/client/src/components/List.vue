@@ -6,13 +6,15 @@
         :key="index"
         :class="['chat-item', message.userId == userId ? 'mine' : 'theirs']"
       >
-        <div v-if="message.mode == 'text' && message.text">
-          <div class="chat-content">
-            <p class="chat-txt">
-              {{ message.text }}
-            </p>
-          </div>
+        <div
+          v-if="message.mode == 'text' && message.text"
+          class="chat-content"
+        >
+          <p class="chat-txt">
+            {{ message.text }}
+          </p>
         </div>
+
         <div v-else>
           <!--第二层内部循环-->
           <DynamicList
