@@ -94,6 +94,9 @@ export default {
 
   methods: {
     onSelect: function (data) {
+      if (data[0]) {
+        data = 2;
+      }
       this.selectType = data;
       if (data == 2) {
         this.showMail = true;
@@ -135,6 +138,7 @@ export default {
       };
     },
     onAddSender: function () {
+      console.log(this.selectType);
       if (this.selectType == 2) {
         //不同选项不同操作
         this.addSender({
