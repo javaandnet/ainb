@@ -101,7 +101,9 @@ app.post('/cmd', async (req, res) => {
     // 返回响应
     res.json(cmdList);
 });
-ai.updateAssistant(ASSISITANT_NAME);
+
+await ai.updateAssistant(ASSISITANT_NAME);
+await ai.getAssistant(ASSISITANT_NAME);
 var keyWordMap = { "#Add#": "案件:{0}を追加する" };
 var outFuncMap = {};
 outFuncMap[ASSISITANT_NAME] = ["selectInfo", "addInfo", "listInfo"];
@@ -123,7 +125,7 @@ io.on('connection', (socket) => {
         } else {
             console.log(message);
             ai.chat(message.text, keyWordMap, message.threadId, false).then(function (rtn) {
-                var json = { content: rtn.rtn.str };
+                var json = { text: rtn.rtn.str, type: rtn.rtn.type, func: rtn.rtn.func, args: rtn.rtn.args };
                 ai.exe(outFuncMap, rtn.rtn, json).then(function (data) {
                     socket.emit("message", json);
                 });
