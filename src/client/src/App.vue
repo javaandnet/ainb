@@ -50,9 +50,9 @@ export default {
   data() {
     return {
       URL: "http://localhost:3000/",
-      item: {},
+      item: { items: [] },
       cmdList: {},
-      show: false,
+      show: true,
     };
   },
   methods: {
@@ -63,8 +63,10 @@ export default {
       // this.cmdList = rtn.data;
     },
 
-    onClickLeftButtonInPM: function () {
-      // this.item = data;
+    onClickLeftButtonInPM: async function () {
+      let info = this.$refs.projectMatch.getInfo();
+      console.log(info);
+      await this.$axios.post(this.URL + "confirmInfo", info);
     },
     onClickRightButtonInPM: function () {
       this.show = false;
@@ -80,7 +82,6 @@ export default {
       }
     },
     onClickLeftButtonInList: async function (data) {
-      console.log(data);
       const me = this;
       showConfirmDialog({
         message: "選択したものを営業停止してよろしいでしょうか？",

@@ -65,6 +65,17 @@ app.post('/model', async (req, res) => {
     // 返回响应
     res.json(rtn);
 });
+
+app.post('/confirmInfo', async (req, res) => {
+    const data = req.body;
+    console.log('Received data:', data);
+    var rtn = await assistant.out.confirmInfo(data);
+    // 返回响应
+    res.json(rtn);
+});
+
+
+
 app.post('/stop', async (req, res) => {
     const data = req.body;
     console.log('Received data:', data);
@@ -92,6 +103,10 @@ app.post('/cmd', async (req, res) => {
             msg: "addInfo",
             args: { type: "project" },
             desc: "案件を追加する。#3#後ろ内容で、第一行は案件名です。",
+        },"#4#": {
+            msg: "listInfo",
+            args: { type: "interview" },
+            desc: "面接一覧",
         },
         "#9#": {
             msg: "sendInfo",
