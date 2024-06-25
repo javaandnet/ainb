@@ -61,6 +61,7 @@ app.post('/model', async (req, res) => {
         model: data.model,
         id: data.id
     });
+    rtn.model = data.model;
     // 返回响应
     res.json(rtn);
 });
@@ -82,7 +83,11 @@ app.post('/cmd', async (req, res) => {
         "#1#": {
             msg: "listInfo",
             args: { type: "worker" },
-            desc: "技術者一覧,点击单元格查看详细信息",
+            desc: "営業中技術者一覧,点击单元格查看详细信息",
+        },"#2#": {
+            msg: "listInfo",
+            args: { type: "project" },
+            desc: "未完了案件一覧,点击单元格查看详细信息",
         },
         "#8#": {
             msg: "sendInfo",
@@ -105,8 +110,9 @@ io.on('connection', (socket) => {
         });
     socket.on('message', (message) => {
         if (message.option == "server") {
-            let msg = { func: message.content, args: message.args };
-            const rtn = ai.exe(outFuncMap, { func: message.content, args: message.args }, {}).then(function (data) {
+            let msg = { func: message.text, args: message.args };
+            // console.log("msg",message);
+            const rtn = ai.exe(outFuncMap, { func: message.text, args: message.args }, {}).then(function (data) {
                 msg.rtn = data;
                 socket.emit("message", msg);
             });

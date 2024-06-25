@@ -163,14 +163,18 @@ class Company {
             return args;
         },
         listInfo: async function (args, obj) {
-            if (args.type == "worker") {
-                var data = await sf.find("Worker__c", { SalesStatus__c: '可能' }, "Id, Name", 50);
+            if (args.type == "worker" || args.type == "project") {
+                let model = "Worker__c";
+                let condition = { SalesStatus__c: '可能' };
+                if (args.type == "project") {
+                    model = "Project__c";
+                    condition = { Status__c: '0' };
+                }
+                var data = await sf.find(model, condition, "Id, Name", 50);
                 if (data == null || data.totalSize == 0) {
                     return [];
                 } else {
                     var rtn = [];
-                    var worker = {};
-                    var ai = {};
                     data.forEach((element, index) => {
                         rtn.push({ text: element.Name, value: element.Id });
                     });

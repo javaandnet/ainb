@@ -73,7 +73,6 @@ export default {
     },
     onClickRightButtonInList: async function (data) {
       this.show = true;
-      console.log(this.item);
       this.item = data;
       if (this.$refs.projectMatch) {
         this.$refs.projectMatch.sync(this.item);
@@ -104,17 +103,22 @@ export default {
       //先弹Modal，显示详细信息
       try {
         const response = await this.$axios.post(this.URL + "model", data);
-        let content =
-          // response.data.status +
-          // "<br><br>" +
-          // response.data.skill +
-          // "<br><br>" +
-          // response.data.japanese +
-          "<br><br>" +
-          response.data.information +
-          "<br><br><a href='" +
-          response.data.resume +
-          "' target='_blank'>履歴書Download</a>";
+        let content = "";
+        if ((data.model == "project")) {
+          content = "<br><br>" + response.data.detail;
+        } else {
+          content =
+            // response.data.status +
+            // "<br><br>" +
+            // response.data.skill +
+            // "<br><br>" +
+            // response.data.japanese +
+            "<br><br>" +
+            response.data.information +
+            "<br><br><a href='" +
+            response.data.resume +
+            "' target='_blank'>履歴書Download</a>";
+        }
         showDialog({
           messageAlign: "left",
           allowHtml: true,
@@ -135,6 +139,21 @@ export default {
       return {
         mode: "list",
         model: "worker",
+        list: list,
+        isChecker: true,
+        button: {
+          left: { label: "営業停止" },
+          right: { label: "宛先追加" },
+        },
+      };
+    },
+    /**
+     * 技術者リストを作成する
+     */
+    createProjectList(list) {
+      return {
+        mode: "list",
+        model: "project",
         list: list,
         isChecker: true,
         button: {
@@ -190,6 +209,9 @@ export default {
       if (data.func == "listInfo") {
         if (data.args.type == "worker") {
           const msg = this.createWorkerList(data.rtn);
+          this.$refs.chatWindow.addMessage(msg);
+        } else if (data.args.type == "project") {
+          const msg = this.createProjectList(data.rtn);
           this.$refs.chatWindow.addMessage(msg);
         }
       }

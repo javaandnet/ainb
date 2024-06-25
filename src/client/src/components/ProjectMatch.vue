@@ -95,6 +95,9 @@ export default {
             item.type = 9;
             this.addWorker(item);
           } else {
+            if (typeof this.type == "undefined") {
+              item.type = 1;
+            }
             this.addSender(item);
           }
         }
