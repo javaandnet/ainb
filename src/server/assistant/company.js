@@ -285,6 +285,22 @@ class Company {
         getProject: async function (args) {
             if (util.defined(args.status)) {
                 var status = {};
+
+                if (args.status == "0") {
+                    var parent = this.parent;
+                    var data = await parent.out.listInfo({ type: "project" });;
+                    if (data == null || data.size == 0) {
+                        return { ai: "情報なし", out: "案件情報がありません" };
+                    } else {
+                        return {
+                            func: "listInfo",
+                            args: { type: "project" },
+                            ai: "NO", //只有名字
+                            out: data
+                        };
+                    }
+                }
+
                 if (args.status != "-1") {
                     status.Status__c = args.status;
                 }
@@ -483,6 +499,7 @@ class Company {
         getProject: async function (args) {
             var status = util.getArg(args, ["status"], {
                 "未完了": "0",
+                "未完了案件": "0",
                 "一覧": "0",
                 "all": "0",
                 "全ての案件": "0",
