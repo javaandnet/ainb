@@ -1,9 +1,16 @@
 <template>
   <div>
     <DynamicList ref="senderList" />
+    <van-field
+      v-if="showMail == true"
+      v-model="addMail"
+      label=""
+      placeholder="メールを入力してくださいï"
+    />
     <van-space>
       <Select
         ref="senderTypeList"
+        @onSelect="onSelect"
         :list="sendTypeList"
         label="送りタイプ"
         :selectedValue="initSelect"
@@ -50,6 +57,9 @@ export default {
   },
   data() {
     return {
+      selectType: 0, //選択タイプ
+      addMail: "",
+      showMail: false,
       initFLg: false,
       initSelect: [1],
       initData: {},
@@ -83,6 +93,12 @@ export default {
   },
 
   methods: {
+    onSelect: function (data) {
+      this.selectType = data;
+      if (data == 2) {
+        this.showMail = true;
+      }
+    },
     sync: function (data) {
       //items
       let list = this.$refs.senderList.getList();
@@ -112,9 +128,24 @@ export default {
     onClickRightButton: function () {
       this.$emit("onClickRightButton");
     },
+    getInfo: function () {
+      return {
+        sender: this.$refs.senderList.getList(),
+        worker: this.$refs.workerList.getList(),
+      };
+    },
     onAddSender: function () {
-      //不同选项不同操作
-      this.addSender({ type: "4", text: "FSR会社", value: "13" });
+      if (this.selectType == 2) {
+        //不同选项不同操作
+        this.addSender({
+          type: this.selectType,
+          text: this.addMail,
+          value: this.addMail,
+        });
+      } else {
+        //不同选项不同操作
+        this.addSender({ type: this.selectType, text: "FSR会社", value: "13" });
+      }
     },
     addSender: function (obj) {
       obj.icon = this.getIcon(obj.type);

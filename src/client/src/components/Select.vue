@@ -31,7 +31,7 @@ export default {
     VanField: field,
     VanCheckbox: Checkbox,
   },
-
+  emits: ["onSelect"],
   props: {
     label: { type: String, default: "" },
     list: { type: Array, "default": () => [] },
@@ -62,6 +62,7 @@ export default {
       this.showPicker = false;
       this.fieldValue = selectedOptions[0].text;
       console.log(this.selectedValue);
+      this.$emit("onSelect", this.selectedValue);
       this.value = selectedOptions[0].value;
     },
   },
