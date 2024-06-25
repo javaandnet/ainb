@@ -223,12 +223,15 @@ export default {
       });
       this.socket.on("message", (msg) => {
         console.log("cw", msg);
-        if (msg.type == "FUNC" || msg.type == "AI") {
+        //"FUNC" DO OUT
+        if (msg.type == "AI") {
           this.addMessage({
             mode: "text",
             message: { text: msg.text },
             userId: this.thread,
           });
+        } else {
+          this.$emit("onMessage", msg);
         }
         // this.$emit("onMessage", msg);
       });
