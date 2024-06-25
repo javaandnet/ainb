@@ -72,7 +72,26 @@ app.post('/stop', async (req, res) => {
     // 返回响应
     res.json(rtn);
 });
-
+app.post('/cmd', async (req, res) => {
+    const data = req.body;
+    var cmdList = {
+        "#0#": {
+            msg: "help",
+            desc: "Help",
+        },
+        "#1#": {
+            msg: "listInfo",
+            args: { type: "worker" },
+            desc: "技術者一覧,点击单元格查看详细信息",
+        },
+        "#8#": {
+            msg: "sendInfo",
+            desc: "情報発送",
+        },
+    };
+    // 返回响应
+    res.json(cmdList);
+});
 ai.updateAssistant(ASSISITANT_NAME);
 var keyWordMap = { "#Add#": "案件:{0}を追加する" };
 var outFuncMap = {};
@@ -86,8 +105,10 @@ io.on('connection', (socket) => {
         });
     socket.on('message', (message) => {
         if (message.option == "server") {
+            let msg = { func: message.content, args: message.args };
             const rtn = ai.exe(outFuncMap, { func: message.content, args: message.args }, {}).then(function (data) {
-                socket.emit("message", data);
+                msg.rtn = data;
+                socket.emit("message", msg);
             });
         } else {
             ai.chat(message.msg.content, keyWordMap, message.threadId, false).then(function (rtn) {

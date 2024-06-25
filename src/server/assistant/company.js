@@ -177,7 +177,6 @@ class Company {
                     return rtn;
                 }
             }
-            console.log(args);
             return [];
         },
         addInfo: async function (args, obj) {

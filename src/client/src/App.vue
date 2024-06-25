@@ -50,12 +50,16 @@ export default {
     return {
       URL: "http://localhost:3000/",
       item: {},
+      cmdList: {},
       show: false,
     };
   },
   methods: {
-    loaded: function () {
+    loaded: async function () {
+      var me = this;
       this.socket = io(this.URL);
+      let rtn = await me.$axios.post(me.URL + "cmd");
+      this.cmdList = rtn.data;
     },
 
     onClickLeftButtonInPM: function () {
@@ -139,9 +143,17 @@ export default {
         },
       };
     },
-
+    createCmdList() {
+      return {
+        mode: "list",
+        model: "cmd",
+        list: this.getCmdList(),
+        isDelete: false,
+        button: {},
+      };
+    },
     /**
-     *入力发送信息时
+     *入力发送信息时, TODO chatWindow中处理
      */
     onSendMsg(message) {
       console.log(message);
@@ -149,48 +161,62 @@ export default {
       if (data.trim() == "") {
         return;
       }
+      const msg = this.getMsg(data);
       //Test処理
       if (data == "#TEST#") {
         this.$refs.chatWindow.addMessage(testData.listMsg());
-      } else {
-        //TODO
-        //this.$refs.chatWindow.addMessage(data);
-        this.$refs.chatWindow.sendMsg(this.getMsg(data));
-        // this.socket.emit("message", this.getMsg(data));
+      } else if (msg.option == "server") {
+        this.addTransKeyInfo(data);
+        if (data == "#0#") {
+          //Need not to send
+          this.$refs.chatWindow.addMessage(this.createCmdList());
+        } else {
+          this.$refs.chatWindow.sendMsg(msg);
+        }
       }
     },
-    //入力时进行操作
+
+    addTransKeyInfo(key) {
+      this.$refs.chatWindow.addMessage({
+        mode: "text",
+        message: { text: this.cmdList[key].desc },
+      });
+    },
+
+    //サーバから情報戻す
     onMessage(message) {
       let data = message.message;
-      const msg = this.createWorkerList(data);
-      this.$refs.chatWindow.addMessage(msg);
+      if (data.func == "listInfo") {
+        if (data.arge.type == "worker") {
+          const msg = this.createWorkerList(data);
+          this.$refs.chatWindow.addMessage(msg);
+        }
+      }
     },
     getCmdList() {
-      return {
-        "#0#": {
-          msg: "help",
-          desc: "Help",
-        },
-        "#1#": {
-          msg: "listInfo",
-          args: { type: "worker" },
-          desc: "技術者一覧",
-        },
-        "#8#": {
-          msg: "sendInfo",
-          desc: "情報発送",
-        },
-      };
+      //TODO 服务器初始化定义
+      let rtn = [];
+      for (const ele of Object.keys(this.cmdList)) {
+        rtn.push({ value: ele, text: ele + ":" + this.cmdList[ele].desc });
+      }
+      return rtn;
     },
     getMsg(key, args) {
-      var cmd = this.getCmdList()[key];
-      if (key != "#0#") {
-        return {
-          threadId: this.thread,
-          content: cmd.msg,
-          args: args || cmd.args,
-          option: "server",
-        };
+      var cmd = this.cmdList[key];
+      if (key == "#0#") {
+        //输出帮助信息
+      } else {
+        if (key) {
+          return {
+            threadId: this.thread,
+            text: cmd.msg,
+            args: args || cmd.args,
+            option: "server",
+          };
+        } else {
+          return { threadId: this.thread, content: key };
+        }
+        // this.$refs.chatWindow.addMessage(msg);
       }
     },
   },
