@@ -5,6 +5,7 @@ const mail = new Mail();
 const sf = new SF();
 const util = new Util();
 class Company {
+    me = this;
     DEBUG = false;
     id = "asst_KQsWjF05lR95Z92JwpOMCZBE";
     config = {
@@ -189,7 +190,9 @@ class Company {
             return args;
         }
     };
+
     func = {
+
         changePrice: async function (args) {
             return "OK";
         },
@@ -343,11 +346,12 @@ class Company {
         },
 
         getEmp: async function (args) {
+            var parent = this.parent;
             if (args.status == "inactive") {
                 // return await sf.workerNoWork();
                 // var sql = "SELECT Id,  Name,AutoNumber__c  FROM Worker__c  where SalesStatus__c = '可能'";
-                var data = await sf.find("Worker__c", { SalesStatus__c: '可能' }, "Id, Name, Status__c, AutoNo__c", 50);
-                if (data == null || data.totalSize == 0) {
+                var data = await parent.out.listInfo({ type: "worker" });;
+                if (data == null || data.size == 0) {
                     return { ai: "情報なし", out: "技術者情報がありません" };
                 } else {
                     var worker = {};
@@ -356,8 +360,10 @@ class Company {
                         worker[element.AutoNo__c] = element.Name;
                     });
                     return {
-                        ai: util.objToStr(worker), //只有名字
-                        out: util.objToStr(worker)
+                        func: "listInfo",
+                        args: { type: "worker" },
+                        ai: "NO", //只有名字
+                        out: data
                     };
                 }
             } else if (args.name) {
@@ -444,6 +450,9 @@ class Company {
             }
         }
     };
+
+
+
     changeArgs = {
         changeStatus: async function (args) {
             var type = util.getArg(args, [""], {

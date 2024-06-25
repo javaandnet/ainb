@@ -290,9 +290,12 @@ class AI {
                         }
                     ],
                 });
-
-                doRtn.func = funcName;
-                doRtn.args = args;
+                if (util.undefined(doRtn.func)) {
+                    doRtn.func = funcName;
+                }
+                if (util.undefined(doRtn.args)) {
+                    doRtn.args = args;
+                }
                 //递归调用
                 return await this.waitRun(threadId, runId, doRtn);
             } else if (run.status === "completed") {
