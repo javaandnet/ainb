@@ -96,9 +96,11 @@ export default {
         this.$refs.list.addMessage(message);
       } else {
         const msg = message.message;
+        console.log(msg);
         this.$refs.list.addMessage({
-          text: msg.content,
-          userId: this.thread,
+          mode:message.mode,
+          text: msg.text,
+          userId: this.userId,
         });
       }
     },
