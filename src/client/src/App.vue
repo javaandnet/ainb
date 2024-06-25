@@ -177,10 +177,10 @@ export default {
       let data = message;
       if (data.func == "listInfo") {
         if (data.args.type == "worker") {
-          const msg = this.createWorkerList(data.rtn);
+          const msg = this.createWorkerList(data.text);
           this.$refs.chatWindow.addMessage(msg);
         } else if (data.args.type == "project") {
-          const msg = this.createProjectList(data.rtn);
+          const msg = this.createProjectList(data.text);
           this.$refs.chatWindow.addMessage(msg);
         }
       }

@@ -119,11 +119,11 @@ io.on('connection', (socket) => {
             let msg = { func: message.text, args: message.args };
             // console.log("msg",message);
             const rtn = ai.exe(outFuncMap, { func: message.text, args: message.args }, {}).then(function (data) {
-                msg.rtn = data;
+                msg.text = data;
                 socket.emit("message", msg);
             });
         } else {
-            console.log(message);
+            // console.log(message);
             ai.chat(message.text, keyWordMap, message.threadId, false).then(function (rtn) {
                 var json = { text: rtn.rtn.str, type: rtn.rtn.type, func: rtn.rtn.func, args: rtn.rtn.args };
                 ai.exe(outFuncMap, rtn.rtn, json).then(function (data) {
