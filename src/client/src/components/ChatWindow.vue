@@ -91,19 +91,30 @@ export default {
     },
 
     addMessage(message) {
-      if (message.mode && message.mode == "list") {
-        //Listに追加する
-        // console.log("list:", message);
-        message.userId = this.thread;
-        this.$refs.list.addMessage(message);
-      } else {
-        const msg = message.message;
-        console.log(msg);
+      //Default
+      if (typeof message == "string") {
         this.$refs.list.addMessage({
-          mode: message.mode,
-          text: msg.text,
+          mode: "text",
+          text: message,
           userId: this.userId,
         });
+      } else {
+        if (message.mode && message.mode == "list") {
+          //Listに追加する
+          // console.log("list:", message);
+          if (typeof message.userId == "undefined") {
+            message.userId = this.thread;
+          }
+          this.$refs.list.addMessage(message);
+        } else {
+          const msg = message.message;
+          console.log(msg);
+          this.$refs.list.addMessage({
+            mode: message.mode,
+            text: msg.text,
+            userId: message.userId,
+          });
+        }
       }
     },
     /**本质还要这个发送 */
@@ -190,10 +201,12 @@ export default {
           }
         }
       } else {
+        this.addMessage(data);
         this.sendMsg({ mode: "input", text: data, threadId: this.thread });
       }
       this.$emit("onSendMsg", message);
     },
+
     async loaded() {
       var me = this;
       let rtn = await me.$axios.post(me.url + "cmd");
@@ -209,7 +222,15 @@ export default {
         this.thread = threadId;
       });
       this.socket.on("message", (msg) => {
-        this.$emit("onMessage", msg);
+        console.log("cw", msg);
+        if (msg.type == "FUNC" || msg.type == "AI") {
+          this.addMessage({
+            mode: "text",
+            message: { text: msg.text },
+            userId: this.thread,
+          });
+        }
+        // this.$emit("onMessage", msg);
       });
     },
   },
