@@ -69,8 +69,8 @@ export default class SF {
   }
 
   async retrieve(model, id) {
-    // Single record retrieval
-    return await conn.sobject(model).retrieve(id);
+    var jsh = new JSH();
+    return await jsh.retrieve(model, id);
   }
 
   async updateStatus(name, status) {
