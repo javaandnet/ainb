@@ -30,10 +30,11 @@ import ProjectMatch from "./components/ProjectMatch.vue";
 import ChatWindow from "./components/ChatWindow.vue";
 import { showDialog } from "vant";
 import { Overlay } from "vant";
-import TestData from "./js/testData.js";
 import { showConfirmDialog } from "vant";
-import io from "socket.io-client";
+import TestData from "./js/testData.js";
 let testData = new TestData();
+
+testData.listMsg();
 export default {
   name: "App",
   components: {
@@ -56,10 +57,10 @@ export default {
   },
   methods: {
     loaded: async function () {
-      var me = this;
-      this.socket = io(this.URL);
-      let rtn = await me.$axios.post(me.URL + "cmd");
-      this.cmdList = rtn.data;
+      // var me = this;
+      // this.socket = io(this.URL);
+      // let rtn = await me.$axios.post(me.URL + "cmd");
+      // this.cmdList = rtn.data;
     },
 
     onClickLeftButtonInPM: function () {
@@ -162,55 +163,12 @@ export default {
         },
       };
     },
-    createCmdList() {
-      return {
-        mode: "list",
-        model: "cmd",
-        list: this.getCmdList(),
-        isDelete: false,
-        button: {},
-      };
-    },
+
     /**
      *入力发送信息时, TODO chatWindow中处理
      */
     onSendMsg(message) {
       console.log(message);
-      let data = message.message;
-      let info = "";
-      let cmdKey = data;
-      if (data.trim() == "") {
-        return;
-      }
-      //首文字开始
-      for (let key of Object.keys(this.cmdList)) {
-        if (data.indexOf(key) == 0) {
-          cmdKey = key;
-          info = data.replace(key, "");
-          break;
-        }
-      }
-      const msg = this.getMsg(cmdKey);
-      //Test処理
-      if (cmdKey == "#TEST#") {
-        this.$refs.chatWindow.addMessage(testData.listMsg());
-      } else if (msg.option == "server") {
-        this.addTransKeyInfo(cmdKey);
-        if (cmdKey == "#0#") {
-          //Need not to send
-          this.$refs.chatWindow.addMessage(this.createCmdList());
-        } else {
-          msg.args.info = info;
-          this.$refs.chatWindow.sendMsg(msg);
-        }
-      }
-    },
-
-    addTransKeyInfo(key) {
-      this.$refs.chatWindow.addMessage({
-        mode: "text",
-        message: { text: this.cmdList[key].desc },
-      });
     },
 
     //サーバから情報戻す
@@ -225,32 +183,6 @@ export default {
           const msg = this.createProjectList(data.rtn);
           this.$refs.chatWindow.addMessage(msg);
         }
-      }
-    },
-    getCmdList() {
-      //TODO 服务器初始化定义
-      let rtn = [];
-      for (const ele of Object.keys(this.cmdList)) {
-        rtn.push({ value: ele, text: ele + ":" + this.cmdList[ele].desc });
-      }
-      return rtn;
-    },
-    getMsg(key, args) {
-      var cmd = this.cmdList[key];
-      if (key == "#0#") {
-        //输出帮助信息
-      } else {
-        if (key) {
-          return {
-            threadId: this.thread,
-            text: cmd.msg,
-            args: args || cmd.args,
-            option: "server",
-          };
-        } else {
-          return { threadId: this.thread, content: key };
-        }
-        // this.$refs.chatWindow.addMessage(msg);
       }
     },
   },

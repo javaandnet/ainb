@@ -25,7 +25,8 @@
 import InputMessage from "./InputMessage.vue";
 import List from "./List.vue";
 import io from "socket.io-client";
-
+import TestData from "../js/testData.js";
+let testData = new TestData();
 export default {
   name: "App",
   components: {
@@ -46,6 +47,7 @@ export default {
   },
   data() {
     return {
+      cmdList: {},
       threadId: "",
     };
   },
@@ -98,7 +100,7 @@ export default {
         const msg = message.message;
         console.log(msg);
         this.$refs.list.addMessage({
-          mode:message.mode,
+          mode: message.mode,
           text: msg.text,
           userId: this.userId,
         });
@@ -108,28 +110,94 @@ export default {
     sendMsg(message) {
       this.socket.emit("message", message);
     },
-    onSendMsg(message) {
-      // var me = this;
-      // var _message = message.message;
-      this.$emit("onSendMsg", message);
-      // if (message.message == "#TEST#") {
-      //   _message = message.message;
-      //   this.$emit("onMessage", {
-      //     message: _message,
-      //   });
-      // } else {
-      //   this.socket.emit("message", {
-      //     threadId: me.thread,
-      //     msg: { content: _message },
-      //   });
-      //   //Listに追加
-      //   this.$refs.list.addMessage({
-      //     text: _message,
-      //     userId: this.userId,
-      //   });
-      // }
+
+    createCmdList() {
+      return {
+        mode: "list",
+        model: "cmd",
+        list: this.getCmdList(),
+        isDelete: false,
+        button: {},
+      };
     },
-    loaded() {
+    getCmdList() {
+      //TODO 服务器初始化定义
+      let rtn = [];
+      for (const ele of Object.keys(this.cmdList)) {
+        rtn.push({ value: ele, text: ele + ":" + this.cmdList[ele].desc });
+      }
+      return rtn;
+    },
+    getMsg(key, args) {
+      var cmd = this.cmdList[key];
+      if (cmd) {
+        if (key == "#0#") {
+          //输出帮助信息
+        } else {
+          if (key) {
+            return {
+              threadId: this.thread,
+              text: cmd.msg,
+              args: args || cmd.args,
+              option: "server",
+            };
+          } else {
+            return { threadId: this.thread, content: key };
+          }
+          // this.addMessage(msg);
+        }
+      }
+      return null;
+    },
+    addTransKeyInfo(key) {
+      this.addMessage({
+        mode: "text",
+        message: { text: this.cmdList[key].desc },
+      });
+    },
+    onSendMsg(message) {
+      let data = message.message;
+      let info = "";
+      let cmdKey = "";
+      if (data.trim() == "") {
+        return;
+      }
+      if (data.indexOf("#") == 0) {
+        //首文字开始
+        for (let key of Object.keys(this.cmdList)) {
+          if (data.indexOf(key) == 0) {
+            cmdKey = key;
+            info = data.replace(key, "");
+            break;
+          }
+        }
+        //NO
+        if (cmdKey == "") {
+          return;
+        }
+        const msg = this.getMsg(cmdKey);
+        //Test処理
+        if (cmdKey == "#TEST#") {
+          this.addMessage(testData.listMsg());
+        } else if (msg.option == "server") {
+          this.addTransKeyInfo(cmdKey);
+          if (cmdKey == "#0#") {
+            //Need not to send
+            this.addMessage(this.createCmdList());
+          } else {
+            msg.args.info = info;
+            this.sendMsg(msg);
+          }
+        }
+      } else {
+        this.sendMsg({ mode: "input", text: data, threadId: this.thread });
+      }
+      this.$emit("onSendMsg", message);
+    },
+    async loaded() {
+      var me = this;
+      let rtn = await me.$axios.post(me.url + "cmd");
+      this.cmdList = rtn.data;
       this.$refs.list.mode = "text";
       this.$refs.list.userId = "9999";
       this.socket.on("v2t", (txt) => {

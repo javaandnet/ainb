@@ -121,7 +121,8 @@ io.on('connection', (socket) => {
                 socket.emit("message", msg);
             });
         } else {
-            ai.chat(message.msg.content, keyWordMap, message.threadId, false).then(function (rtn) {
+            console.log(message);
+            ai.chat(message.text, keyWordMap, message.threadId, false).then(function (rtn) {
                 var json = { content: rtn.rtn.str };
                 ai.exe(outFuncMap, rtn.rtn, json).then(function (data) {
                     socket.emit("message", json);

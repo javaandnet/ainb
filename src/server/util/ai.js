@@ -197,6 +197,7 @@ class AI {
 
     updateAssistant = async function (name = this.assistantName, options) {
         let at = assistantFactory.get(name);
+        this.assistant = at;
         openai.beta.assistants.update(at.id, at.config);
     };
 
