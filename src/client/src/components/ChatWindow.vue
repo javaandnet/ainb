@@ -141,10 +141,7 @@ export default {
         this.thread = threadId;
       });
       this.socket.on("message", (msg) => {
-        console.log("msg", msg);
-        this.$emit("onMessage", {
-          message: msg,
-        });
+        this.$emit("onMessage", msg);
       });
     },
   },

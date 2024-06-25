@@ -185,10 +185,11 @@ export default {
 
     //サーバから情報戻す
     onMessage(message) {
-      let data = message.message;
+      console.log(message);
+      let data = message;
       if (data.func == "listInfo") {
-        if (data.arge.type == "worker") {
-          const msg = this.createWorkerList(data);
+        if (data.args.type == "worker") {
+          const msg = this.createWorkerList(data.rtn);
           this.$refs.chatWindow.addMessage(msg);
         }
       }
