@@ -22,7 +22,12 @@
         />
       </div>
     </van-overlay>
-    <UploadFile v-if="mode == 2"></UploadFile>
+    <UploadFile
+      v-if="mode == 2"
+      @onClickClose="onClickCloseUploader"
+      @onRemoveItem="onRemoveItemUploader"
+      :url="URL"
+    ></UploadFile>
   </div>
 </template>
 
@@ -55,7 +60,7 @@ export default {
       URL: "http://localhost:3000/",
       item: { items: [] },
       cmdList: {},
-      mode: 0,
+      mode: 2,
     };
   },
   methods: {
@@ -64,6 +69,14 @@ export default {
       // this.socket = io(this.URL);
       // let rtn = await me.$axios.post(me.URL + "cmd");
       // this.cmdList = rtn.data;
+    },
+    onClickCloseUploader: function () {
+      this.mode = 0;
+    },
+
+    onRemoveItemUploader: function (item, cb) {
+      let flg = false;
+      cb(flg);//处理返回值，看看是否不删除
     },
 
     onClickLeftButtonInPM: async function () {

@@ -4,8 +4,14 @@
       <div v-if="isChecker != true">
         <div v-for="(item, index) in list" :key="index" class="list-item">
           <van-icon :name="item.icon" />
-          <span class="span-left" @click="onClickListCell(model, item.value)">{{ item.text }}</span>
-          <van-icon v-if="isDelete == true" name="close" @click="removeItem(index)" />
+          <span class="span-left" @click="onClickListCell(model, item.value)">{{
+            item.text
+          }}</span>
+          <van-icon
+            v-if="isDelete == true"
+            name="close"
+            @click="removeItem(index)"
+          />
         </div>
       </div>
       <div v-else>
@@ -49,6 +55,7 @@
 </template>
 <script>
 import { List, Cell, Checkbox } from "vant";
+import { showConfirmDialog } from "vant";
 import "vant/lib/index.css";
 export default {
   components: {
@@ -61,8 +68,10 @@ export default {
     "onClickLeftButtonInList",
     "onClickRightButtonInList",
     "onCheckboxChangeInList",
+    "onRemoveItem",
   ],
   props: {
+    confirmBeforeDelete: { type: Boolean, default: false },
     model: { type: String, default: "" },
     isDelete: { type: Boolean, default: true },
     isChecker: { type: Boolean, default: false },
@@ -97,7 +106,6 @@ export default {
      * 向父激发选择的单元格事项
      */
     onClickListCell(model, id) {
-
       this.$emit("onClickListCell", {
         model: model,
         id: id,
@@ -155,7 +163,32 @@ export default {
     },
 
     removeItem(index) {
-      this.list.splice(index, 1);
+      var me = this;
+      function doRemove(index) {
+        //First bak
+        me.bakItem = me.list[index];
+        me.bakIndex = index;
+        me.list.splice(index, 1);
+        me.$emit("onRemoveItem", me.list[index], function (success = true) {
+          if (!success) {
+            me.list.splice(index, 0, me.bakItem);
+          }
+        });
+      }
+
+      if (this.confirmBeforeDelete) {
+        showConfirmDialog({
+          message: "選択したものを削除してよろしいでしょうか？",
+        })
+          .then(function () {
+            doRemove(index);
+          })
+          .catch(() => {
+            // on cancel
+          });
+      } else {
+        doRemove(index);
+      }
     },
   },
 };
@@ -211,7 +244,7 @@ export default {
 }
 .list-item {
   display: flex;
-    padding: 4px;
+  padding: 4px;
   justify-content: space-between;
   align-items: left;
   padding: 10px;

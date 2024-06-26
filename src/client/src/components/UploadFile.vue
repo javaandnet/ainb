@@ -23,7 +23,12 @@
         閉じる</van-button
       >
     </div>
-    <DynamicList ref="senderList" :initList="list" />
+    <DynamicList
+      ref="senderList"
+      :initList="list"
+      :confirmBeforeDelete="true"
+      @onRemoveItem="onRemoveItem"
+    />
   </div>
 </template>
 
@@ -40,15 +45,15 @@ export default {
     return {
       fileList: [],
       list: [
-            { type: "0", text: "FSR会社", value: "11" },
-            { type: "1", text: "SAP案件説明名", value: "11" },
-            { type: "2", text: "メール例 nin@fsr.co.jp", value: "11" },
-            { type: "3", text: "任（企業Wecom）", value: "11" },
-            { type: "4", text: "個人名", value: "11" },
-        ],
+        { type: "0", text: "FSR会社", value: "11" },
+        { type: "1", text: "SAP案件説明名", value: "11" },
+        { type: "2", text: "メール例 nin@fsr.co.jp", value: "11" },
+        { type: "3", text: "任（企業Wecom）", value: "11" },
+        { type: "4", text: "個人名", value: "11" },
+      ],
     };
   },
-  emits: ["onUploaded", "onClickClose"],
+  emits: ["onUploaded", "onClickClose", "onRemoveItem"],
   props: {
     url: { type: String, default: "http://127.0.0.1:3000/" },
   },
@@ -71,7 +76,11 @@ export default {
       }
       return isXlsx;
     },
-
+    onRemoveItem: function (item, cb) {
+      this.$emit("onRemoveItem", item, (val) => {
+        cb(val); //依次传递，处理返回值
+      });
+    },
     handleUpload: async function (files) {
       // 多图片上传
       files.status = "uploading";
