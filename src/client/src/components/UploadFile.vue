@@ -24,7 +24,7 @@
       >
     </div>
     <DynamicList
-      ref="senderList"
+      ref="fileList"
       :initList="list"
       :confirmBeforeDelete="true"
       @onRemoveItem="onRemoveItem"
@@ -41,23 +41,35 @@ export default {
     DynamicList,
     VanUploader: Uploader,
   },
+  props: {
+    initList: { type: Object, "default": () => [] },
+    url: { type: String, default: "http://127.0.0.1:3000/" },
+  },
   data() {
     return {
       fileList: [],
-      list: [
-        { type: "0", text: "FSR会社", value: "11" },
-        { type: "1", text: "SAP案件説明名", value: "11" },
-        { type: "2", text: "メール例 nin@fsr.co.jp", value: "11" },
-        { type: "3", text: "任（企業Wecom）", value: "11" },
-        { type: "4", text: "個人名", value: "11" },
-      ],
+      list: [],
     };
   },
   emits: ["onUploaded", "onClickClose", "onRemoveItem"],
-  props: {
-    url: { type: String, default: "http://127.0.0.1:3000/" },
+
+  mounted() {
+    // 组件挂载后调用的方法
+    this.loaded();
   },
   methods: {
+    loaded() {
+      this.list = this.initList;
+      this.refresh();
+    },
+    async refresh() {
+      const res = await this.$axios.post(this.url + "files", {
+        option: "list",
+      });
+      for (const file of res.data) {
+        this.$refs.fileList.addObj({ type: "2", text: file, value: file });
+      }
+    },
     onClickClose() {
       this.$emit("onClickClose");
     },
@@ -76,10 +88,19 @@ export default {
       }
       return isXlsx;
     },
-    onRemoveItem: function (item, cb) {
-      this.$emit("onRemoveItem", item, (val) => {
-        cb(val); //依次传递，处理返回值
+    onRemoveItem: async function (item, cb) {
+      const res = await this.$axios.post(this.url + "files", {
+        option: "delete",
+        id: item.value,
       });
+      let rtn = true;
+      if (res.data != "ok") {
+        rtn = false;
+      }
+      cb(rtn);
+      // this.$emit("onRemoveItem", item, (val) => {
+      //   cb(val); //依次传递例，处理返回值
+      // });
     },
     handleUpload: async function (files) {
       // 多图片上传

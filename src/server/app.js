@@ -98,9 +98,43 @@ app.post('/upload', upload.any('files'), (req, res) => {
         msg: 'ok',
         files: fileInfos
     });
-  
 });
+// 上传文件接口
+app.post('/files', upload.any('files'), (req, res) => {
+    const directoryPath = path.join(__dirname, 'files');
+    if (req.body.option == "list") {
+        let rtn = [];
 
+        try {
+            const files = fs.readdirSync(directoryPath);
+            files.forEach(file => {
+                const filePath = path.join(directoryPath, file);
+                const stats = fs.statSync(filePath);
+                if (stats.isFile()) {
+                    rtn.push(file);
+                }
+            });
+        } catch (err) {
+            console.error('无法扫描目录: ' + err);
+        }
+
+
+        res.json(rtn);
+    } else if (req.body.option == "delete") {
+        let filePath = req.body.id;
+        filePath = path.join(__dirname, 'files/' + filePath);
+        let rtn = "ok";
+        try {
+            fs.unlinkSync(filePath);
+            console.log('文件已成功删除');
+        } catch (err) {
+            rtn = "ng";
+            console.error('无法删除文件: ' + err);
+        }
+        res.send(rtn);
+    }
+
+});
 app.post('/stop', async (req, res) => {
     const data = req.body;
     console.log('Received data:', data);
