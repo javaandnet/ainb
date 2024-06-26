@@ -8,12 +8,14 @@ import 'vant/lib/index.css';
 
 import Home from './components/Home.vue';
 import SendInfo from './components/SendInfo.vue';
+import UploadFile from './components/UploadFile.vue';
 import { createRouter, createWebHistory } from 'vue-router'
 
 
 const routes = [
     { path: '/', component: Home },
-    { path: '/about', component: SendInfo }
+    { path: '/about', component: SendInfo },
+    { path: '/upload', component: UploadFile }
 ];
 const router = createRouter({
     history: createWebHistory(),

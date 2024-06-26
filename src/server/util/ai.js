@@ -157,7 +157,7 @@ class AI {
                 }
             }
         }
-        return (doRtn);
+        return doRtn;
 
     };
 

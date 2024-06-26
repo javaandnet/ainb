@@ -1,18 +1,18 @@
 <template>
   <div>
-    <div>
-      <ChatWindow
-        ref="chatWindow"
-        :url="URL"
-        @onMessage="onMessage"
-        @onSendMsg="onSendMsg"
-        @onClickListCell="onClickListCell"
-        @onClickLeftButtonInList="onClickLeftButtonInList"
-        @onClickRightButtonInList="onClickRightButtonInList"
-        @onCheckboxChangeInList="onCheckboxChangeInList"
-      />
-    </div>
-    <van-overlay :show="show">
+    <ChatWindow
+      v-if="mode == 0"
+      ref="chatWindow"
+      :url="URL"
+      @onMessage="onMessage"
+      @onSendMsg="onSendMsg"
+      @onClickListCell="onClickListCell"
+      @onClickLeftButtonInList="onClickLeftButtonInList"
+      @onClickRightButtonInList="onClickRightButtonInList"
+      @onCheckboxChangeInList="onCheckboxChangeInList"
+    />
+
+    <van-overlay :show="mode == 1">
       <div class="wrapper">
         <ProjectMatch
           ref="projectMatch"
@@ -22,12 +22,14 @@
         />
       </div>
     </van-overlay>
+    <UploadFile v-if="mode == 2"></UploadFile>
   </div>
 </template>
 
 <script>
 import ProjectMatch from "./components/ProjectMatch.vue";
 import ChatWindow from "./components/ChatWindow.vue";
+import UploadFile from "./components/UploadFile.vue";
 import { showDialog } from "vant";
 import { Overlay } from "vant";
 import { showConfirmDialog } from "vant";
@@ -41,6 +43,7 @@ export default {
     VantOverlay: Overlay,
     ChatWindow,
     ProjectMatch,
+    UploadFile,
   },
 
   mounted() {
@@ -52,7 +55,7 @@ export default {
       URL: "http://localhost:3000/",
       item: { items: [] },
       cmdList: {},
-      show: true,
+      mode: 0,
     };
   },
   methods: {
@@ -69,13 +72,13 @@ export default {
       await this.$axios.post(this.URL + "confirmInfo", info);
     },
     onClickRightButtonInPM: function () {
-      this.show = false;
+      this.mode = 0;
     },
     onCheckboxChangeInList: function (data) {
       this.item = data;
     },
     onClickRightButtonInList: async function (data) {
-      this.show = true;
+      this.mode = 1;
       this.item = data;
       if (this.$refs.projectMatch) {
         this.$refs.projectMatch.sync(this.item);
@@ -102,6 +105,11 @@ export default {
       this.$refs.projectMatch.sync(this.item);
     },
     onClickListCell: async function (data) {
+      if (data.model == "cmd") {
+        console.log(data);
+        this.$refs.chatWindow.onSendMsg({ message: data.id });
+        return;
+      }
       //先弹Modal，显示详细信息
       try {
         const response = await this.$axios.post(this.URL + "model", data);
@@ -184,6 +192,8 @@ export default {
           const msg = this.createProjectList(data.text);
           this.$refs.chatWindow.addMessage(msg);
         }
+      } else if (data.func == "upload") {
+        this.mode = "2";
       }
     },
   },

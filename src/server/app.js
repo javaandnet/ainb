@@ -1,4 +1,5 @@
 import express from 'express';
+import multer from 'multer';
 import http from 'http';
 import https from 'https';
 import fs from 'fs';
@@ -32,7 +33,7 @@ var options = {
     key: fs.readFileSync(path.join(__dirname, 'crt/local.key')),
     cert: fs.readFileSync(path.join(__dirname, 'crt/local.crt'))
 };
-console.log(path.join(__dirname, '../server/public'));
+// console.log(path.join(__dirname, '../server/public'));
 app.use('/', express.static(path.join(__dirname, '../server/public/dist')))
 const port = 3000;
 
@@ -56,7 +57,7 @@ let assistant = assistantFactory.get(ASSISITANT_NAME);
  */
 app.post('/model', async (req, res) => {
     const data = req.body;
-    console.log('Received data:', data);
+    // console.log('Received data:', data);
     var rtn = await assistant.func.getModelById({
         model: data.model,
         id: data.id
@@ -74,7 +75,24 @@ app.post('/confirmInfo', async (req, res) => {
     res.json(rtn);
 });
 
-
+// 设置存储配置
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        // console.log(path.join(__dirname, 'files'));
+        cb(null, path.join(__dirname, 'files'));
+    },
+    filename: function (req, file, cb) {
+        // console.log(file);
+        //cb(null,file);
+        cb(null, decodeURI(file.originalname));
+    }
+});
+const upload = multer({ storage: storage });
+// 上传文件接口
+app.post('/upload', upload.any('files'), (req, res) => {
+    console.log(req.body.formData);
+    res.json({ status: "ok" });
+});
 
 app.post('/stop', async (req, res) => {
     const data = req.body;
@@ -84,6 +102,7 @@ app.post('/stop', async (req, res) => {
     // 返回响应
     res.json(rtn);
 });
+
 app.post('/cmd', async (req, res) => {
     const data = req.body;
     var cmdList = {
@@ -103,10 +122,13 @@ app.post('/cmd', async (req, res) => {
             msg: "addInfo",
             args: { type: "project" },
             desc: "案件を追加する。#3#後ろ内容で、第一行は案件名です。",
-        },"#4#": {
+        }, "#4#": {
             msg: "listInfo",
             args: { type: "interview" },
             desc: "面接一覧",
+        }, "#5#": {
+            msg: "upload",
+            desc: "ファイルをUploadする、FSR_XXXX_外部名.xlsx",
         },
         "#9#": {
             msg: "sendInfo",
@@ -132,8 +154,11 @@ io.on('connection', (socket) => {
     socket.on('message', (message) => {
         if (message.option == "server") {
             let msg = { func: message.text, args: message.args };
-            // console.log("msg",message);
+            console.log("server", message);
             const rtn = ai.exe(outFuncMap, { func: message.text, args: message.args }, {}).then(function (data) {
+                if (data == null) {
+                    msg.type = "FUNC";
+                }
                 msg.text = data;
                 socket.emit("message", msg);
             });
