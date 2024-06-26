@@ -143,7 +143,7 @@ export default {
       var cmd = this.cmdList[key];
       if (cmd) {
         if (key == "#0#") {
-          //输出帮助信息
+          return { option: "server" };
         } else {
           if (key) {
             return {
@@ -161,10 +161,7 @@ export default {
       return null;
     },
     addTransKeyInfo(key) {
-      this.addMessage({
-        mode: "text",
-        message: { text: this.cmdList[key].desc },
-      });
+      this.addMessage(this.cmdList[key].desc);
     },
     onSendMsg(message) {
       let data = message.message;
@@ -196,7 +193,9 @@ export default {
             //Need not to send
             this.addMessage(this.createCmdList());
           } else {
-            msg.args.info = info;
+            if (msg.args) {
+              msg.args.info = info;
+            }
             this.sendMsg(msg);
           }
         }

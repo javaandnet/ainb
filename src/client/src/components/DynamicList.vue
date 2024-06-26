@@ -4,7 +4,7 @@
       <div v-if="isChecker != true">
         <div v-for="(item, index) in list" :key="index" class="list-item">
           <van-icon :name="item.icon" />
-          <span class="span-left">{{ item.text }}</span>
+          <span class="span-left" @click="onClickListCell(model, item.value)">{{ item.text }}</span>
           <van-icon v-if="isDelete == true" name="close" @click="removeItem(index)" />
         </div>
       </div>
@@ -97,6 +97,7 @@ export default {
      * 向父激发选择的单元格事项
      */
     onClickListCell(model, id) {
+
       this.$emit("onClickListCell", {
         model: model,
         id: id,
