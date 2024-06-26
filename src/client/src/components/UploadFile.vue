@@ -1,29 +1,62 @@
 <template>
-  <van-uploader
-    v-model="fileList"
-    :multiple="true"
-    :after-read="handleUpload"
-    :before-read="beforeRead"
-    :max-count="10"
-    :preview-size="[300, 300]"
-    accept=".xlsx"
-  >
-  </van-uploader>
+  <div>
+    <div>
+      <van-uploader
+        v-model="fileList"
+        :multiple="true"
+        :reupload="true"
+        :after-read="handleUpload"
+        :before-read="beforeRead"
+        :max-count="10"
+        :preview-size="[300, 150]"
+        accept=".xlsx"
+      >
+      </van-uploader>
+    </div>
+    <div>
+      <van-button
+        type="primary"
+        @click="onClickClose"
+        icon="cross"
+        size="large"
+      >
+        閉じる</van-button
+      >
+    </div>
+    <DynamicList ref="senderList" :initList="list" />
+  </div>
 </template>
 
 <script>
 import { Uploader } from "vant";
+import { showToast } from "vant";
+import DynamicList from "../components/DynamicList.vue";
 export default {
   components: {
+    DynamicList,
     VanUploader: Uploader,
   },
   data() {
     return {
       fileList: [],
-      url: "http://127.0.0.1:3000/",
+      list: [
+            { type: "0", text: "FSR会社", value: "11" },
+            { type: "1", text: "SAP案件説明名", value: "11" },
+            { type: "2", text: "メール例 nin@fsr.co.jp", value: "11" },
+            { type: "3", text: "任（企業Wecom）", value: "11" },
+            { type: "4", text: "個人名", value: "11" },
+        ],
     };
   },
+  emits: ["onUploaded", "onClickClose"],
+  props: {
+    url: { type: String, default: "http://127.0.0.1:3000/" },
+  },
   methods: {
+    onClickClose() {
+      this.$emit("onClickClose");
+    },
+
     beforeRead(file) {
       if (!Array.isArray(file)) {
         file = [file];
@@ -45,7 +78,7 @@ export default {
       files.message = "上传中...";
       let formData = new FormData();
       //需要依次添加进去
-      console.log(files);
+
       for (let i = 0; i < files.length; i++) {
         let file = files[i].file;
         const fileName = file.name;
@@ -62,12 +95,17 @@ export default {
         files[i].file = renamedFile;
         formData.append("files", renamedFile);
       }
-      let res = await this.$axios({
+      const res = await this.$axios({
         method: "post",
         url: this.url + "upload",
         data: formData,
       });
-      console.log(res);
+      if (res.data && res.data.msg == "ok") {
+        showToast("成功");
+        this.fileList = [];
+        this.$emit("onUploaded");
+      }
+      // console.log(res);
       // if (res.status === 200) {
       //   file.status = "done";
       //   file.message = "上传成功";

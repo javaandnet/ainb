@@ -90,8 +90,15 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 // 上传文件接口
 app.post('/upload', upload.any('files'), (req, res) => {
-    console.log(req.body.formData);
-    res.json({ status: "ok" });
+    const fileInfos = req.files.map(file => ({
+        originalname: file.originalname,
+        size: file.size
+    }));
+    res.json({
+        msg: 'ok',
+        files: fileInfos
+    });
+  
 });
 
 app.post('/stop', async (req, res) => {
