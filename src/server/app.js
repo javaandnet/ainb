@@ -35,7 +35,7 @@ var options = {
 };
 // console.log(path.join(__dirname, '../server/public'));
 app.use('/', express.static(path.join(__dirname, './public/dist')))
-const port = 3000;
+const port = 8379;
 
 let server = http.createServer(options, app);
 
@@ -43,7 +43,7 @@ const ASSISITANT_NAME = "company";
 // cros
 const io = new Server(server, {
     cors: {
-        origin: ["http://192.168.1.160:8080", "http://localhost:3000", "http://localhost:8080", "https://localhost:8080", "http://192.168.1.160:3000"],
+        origin: ["http://192.168.1.160:8080", "http://localhost:3000", "http://localhost:8379", "http://localhost:8080", "https://localhost:8080", "http://192.168.1.160:3000"],
         methods: ["GET", "POST"]
     }
 });
@@ -121,6 +121,32 @@ app.post('/upload', upload.any('files'), (req, res) => {
     });
     FILES.resume = refreshResume();
 });
+
+
+function checkExistFile(filePath) {
+    var isExist = false;
+    try {
+        fs.statSync(filePath);
+        isExist = true;
+    } catch (err) {
+        isExist = false;
+    }
+    return isExist;
+}
+
+function deleteFile(filePath) {
+    var result = false;
+    if (!checkExistFile(filePath)) {
+        return true;
+    }
+    try {
+        fs.unlinkSync(filePath);
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+
 // 上传文件接口
 app.post('/files', upload.any('files'), (req, res) => {
     const directoryPath = path.join(__dirname, 'files');
@@ -138,13 +164,15 @@ app.post('/files', upload.any('files'), (req, res) => {
         filePath = path.join(__dirname, 'files/' + filePath);
         let rtn = "ok";
         try {
-            fs.unlinkSync(filePath);
-            FILES.resume = refreshResume();
-            console.log('文件已成功删除');
+            let delLtn = deleteFile(filePath);
+            if (delLtn) {
+                console.log('File Del', filePath);
+            }
         } catch (err) {
             rtn = "ng";
             console.error('无法删除文件: ' + err);
         }
+        FILES.resume = refreshResume();
         res.send(rtn);
     }
 });

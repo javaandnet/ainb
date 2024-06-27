@@ -58,7 +58,8 @@ export default {
   },
   data() {
     return {
-      URL: "http://160.16.216.251:8379/",
+        URL: "http://160.16.216.251:8379/",
+     //URL: "http://localhost:8379/",
       item: { items: [] },
       cmdList: {},
       mode: 2,

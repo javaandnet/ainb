@@ -13,6 +13,10 @@
 10. - [x] 引入 recorder OK
 11. - [x] 文件夹整理 OK
 12. - [x] 配置文件 整理 OK
+13. npn install 整理
+14. Release手顺 整理
+    1.  build -》 dist
+    2.  pm2 restart 7 服务器
 ## AI
 1. - [ ] Load 文件测试
 2. - [x] 多助手：更换助手
