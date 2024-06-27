@@ -1,8 +1,8 @@
 import SF from '../util/sf.js';
 import Util from '../util/util.js';
-import { Mail } from '../util/mail.js';
+import { Sender } from '../util/Sender.js';
 import Worker from '../model/worker.js';
-const mail = new Mail();
+const senderToOut = new Sender();
 const sf = new SF();
 const util = new Util();
 const worker = new Worker();
@@ -160,6 +160,13 @@ class Company {
             obj.option = args;
             return args;
         },
+
+        /**
+         * TODO Model改成继承，此处也可以写成通用，Maill Send
+         * @param {*} args 
+         * @param {*} obj 
+         * @returns 
+         */
         confirmInfo: async function (args, obj) {
             const senders = args.sender;
             const workers = args.worker;
@@ -193,7 +200,7 @@ class Company {
             //SendMail
             if (tos.length == 0) {
                 rtn = rtn.replaceAll("\r\n", "<br>");
-                var res = await mail.sendMail({
+                var res = await senderToOut.mail({
                     to: tos.join(","),
                     subject: "FSR技術者提案 By AI",
                     content: rtn
@@ -211,7 +218,7 @@ class Company {
                     };
                 }
             }
-            await mail.sendWecom(rtn);
+            await senderToOut.wecom(rtn);
             // wecoms
             return rtn;
         },
@@ -468,59 +475,6 @@ class Company {
             return str;
         },
         sendMail: async function (args) {
-            var address = {
-                "任峰磊": "javaandnet@gmail.com"
-            };
-            var emp = {};
-            if (args.emp) {
-                emp = await sf.empByName(args.emp);
-            } else {
-                return { ai: "送信内容を不明です", out: "どうの内容を不明です" };
-            }
-            if (emp == null) {
-                return { ai: "該当技術者の情報がありません", out: "該当技術者の情報がありません" };
-            }
-            var to = args.mailto;
-
-            //送信先を設定する
-            if (to && (to == "")) {
-                return { ai: "送信先を設定が必要", out: "誰に送信しますか？" };
-            } else {
-                if (!(to.includes("@") && to.includes("."))) {
-                    to = address[to];
-                }
-            }
-
-            if (args.isConfirm === "確認") {
-                var str = "";
-                str += "mailTo:" + to + "\r\n";
-                str += "Subject:" + "技術者提案「" + emp.name + "」\r\n";
-                str += "内容:\r\n" + emp.information + "\r\n";
-                str += "Attachment:\r\n" + emp.link + "\r\n";
-                str += "上記情報を使用して送信してよろしいでしょうか？";
-                return {
-                    ai: JSON.stringify({ mailto: args.mailto, emp: emp.name }), //只有名字
-                    out: str
-                };
-            } else {
-                //SendMail
-                var res = await mail.sendMail({
-                    to: to,
-                    subject: "FSR技術者提案「" + emp.name + "」",
-                    content: emp.information
-                });
-                if (res.accepted.length > 0) {
-                    return {
-                        ai: JSON.stringify({ mailto: to, emp: emp.name }), //只有名字
-                        out: "[" + res.accepted.join(",") + "]に送信いたしました。"
-                    };
-                } else {
-                    return {
-                        ai: JSON.stringify({ mailto: to, emp: emp.name }), //只有名字
-                        out: "送信失敗しました。"
-                    };
-                }
-            }
         }
     };
 

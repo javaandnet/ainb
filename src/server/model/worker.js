@@ -64,7 +64,6 @@ export default class Worker {
             } else {
                 rtnArray.push(link);
             }
-
         }
         let rtnStr = "";
         if (isHtml) {
