@@ -135,8 +135,11 @@ export default {
       files.status = "uploading";
       files.message = "上传中...";
       let formData = new FormData();
+      // 单文件对相应
+      if (files.file) {
+        files = [files];
+      }
       //需要依次添加进去
-
       for (let i = 0; i < files.length; i++) {
         let file = files[i].file;
         const fileName = file.name;
