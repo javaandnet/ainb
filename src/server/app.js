@@ -38,6 +38,7 @@ app.use('/', express.static(path.join(__dirname, '../server/public/dist')))
 const port = 3000;
 
 let server = http.createServer(options, app);
+
 const ASSISITANT_NAME = "company";
 // cros
 const io = new Server(server, {
@@ -75,6 +76,26 @@ app.post('/confirmInfo', async (req, res) => {
     res.json(rtn);
 });
 
+let FILES = { resume: [] };
+
+const refreshResume = function () {
+    const directoryPath = path.join(__dirname, 'files');
+    const files = fs.readdirSync(directoryPath);
+    let rtn = [];
+    files.forEach(file => {
+        const filePath = path.join(directoryPath, file);
+        const stats = fs.statSync(filePath);
+        if (stats.isFile()) {
+            rtn.push(file);
+        }
+    });
+    return rtn;
+};
+FILES.resume = refreshResume();
+
+/**
+ * Files处理 Start
+ */
 // 设置存储配置
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -98,6 +119,7 @@ app.post('/upload', upload.any('files'), (req, res) => {
         msg: 'ok',
         files: fileInfos
     });
+    FILES.resume = refreshResume();
 });
 // 上传文件接口
 app.post('/files', upload.any('files'), (req, res) => {
@@ -106,19 +128,10 @@ app.post('/files', upload.any('files'), (req, res) => {
         let rtn = [];
 
         try {
-            const files = fs.readdirSync(directoryPath);
-            files.forEach(file => {
-                const filePath = path.join(directoryPath, file);
-                const stats = fs.statSync(filePath);
-                if (stats.isFile()) {
-                    rtn.push(file);
-                }
-            });
+            rtn = FILES.resume;
         } catch (err) {
             console.error('无法扫描目录: ' + err);
         }
-
-
         res.json(rtn);
     } else if (req.body.option == "delete") {
         let filePath = req.body.id;
@@ -126,6 +139,7 @@ app.post('/files', upload.any('files'), (req, res) => {
         let rtn = "ok";
         try {
             fs.unlinkSync(filePath);
+            FILES.resume = refreshResume();
             console.log('文件已成功删除');
         } catch (err) {
             rtn = "ng";
@@ -133,8 +147,42 @@ app.post('/files', upload.any('files'), (req, res) => {
         }
         res.send(rtn);
     }
-
 });
+
+/** 
+
+*/
+app.get('/files/:name', (req, res) => {
+    let filePath = req.params.name;
+    const type = filePath.split('.').pop();
+    let header = "";
+    filePath = path.join(__dirname, 'files', filePath);
+    if (type == "xlsx") {
+        header = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    } else if (type == "xls") {
+        header = 'application/vnd.ms-excel';
+    } else if (type == "pdf") {
+        header = 'application/vnd.ms-excel';
+    }
+    fs.readFile(filePath, (err, data) => {
+        if (err) {
+            res.status(500).send('Error reading the file.');
+        } else {
+            res.setHeader('Content-Type', header);
+            res.send(data);
+        }
+    });
+});
+
+
+/**
+ * Files处理 END
+ */
+
+/**
+ * 录音处理Start
+ */
+
 app.post('/stop', async (req, res) => {
     const data = req.body;
     console.log('Received data:', data);
@@ -214,9 +262,11 @@ io.on('connection', (socket) => {
         }
     });
 
+
     //VOICE
     let wavRate = 48000;
     let bufferAll = {};
+
     /**
      * 初期化
      */

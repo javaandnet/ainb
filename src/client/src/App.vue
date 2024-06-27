@@ -26,6 +26,7 @@
       v-if="mode == 2"
       @onClickClose="onClickCloseUploader"
       @onRemoveItem="onRemoveItemUploader"
+      @onClickListCell="oonClickListCellUploader"
       :url="URL"
     ></UploadFile>
   </div>
@@ -60,7 +61,7 @@ export default {
       URL: "http://localhost:3000/",
       item: { items: [] },
       cmdList: {},
-      mode: 2,
+      mode: 0,
     };
   },
   methods: {
@@ -76,7 +77,7 @@ export default {
 
     onRemoveItemUploader: function (item, cb) {
       let flg = false;
-      cb(flg);//处理返回值，看看是否不删除
+      cb(flg); //处理返回值，看看是否不删除
     },
 
     onClickLeftButtonInPM: async function () {
@@ -84,6 +85,15 @@ export default {
       console.log(info);
       await this.$axios.post(this.URL + "confirmInfo", info);
     },
+
+    oonClickListCellUploader: async function (item) {
+      console.log(item);
+      await this.$axios.get(this.URL + "files/"+ item.id );
+      // window.open(this.URL+'files/'+item.id, '_blank');
+      // window.open('https://www.google.com', '_blank');
+      // this.mode = 0;
+    },
+
     onClickRightButtonInPM: function () {
       this.mode = 0;
     },

@@ -9,7 +9,7 @@
         :before-read="beforeRead"
         :max-count="10"
         :preview-size="[300, 150]"
-        accept=".xlsx"
+        :accept="accept"
       >
       </van-uploader>
     </div>
@@ -46,6 +46,7 @@ export default {
     VanUploader: Uploader,
   },
   props: {
+    accept:{ type: String, default: ".xls,.xlsx,.pdf" },
     initList: { type: Object, "default": () => [] },
     url: { type: String, default: "http://127.0.0.1:3000/" },
   },
