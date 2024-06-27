@@ -5,7 +5,7 @@ import { JSH } from './jsh.js';
 
 
 export default class SF {
-  constructor(x) {
+  constructor() {
 
   }
   async projectByCondition(name) {
@@ -30,23 +30,23 @@ export default class SF {
   }
   async empByName(name) {
     var jsh = new JSH();
-    var sql = "SELECT Id, Name, Information__c, Resume__c FROM Worker__c where name =  '" + name + "'";
+    var sql = "SELECT Id, Name, Information__c, NameToOuter__c FROM Worker__c where name =  '" + name + "'";
     var data = await jsh.query(sql);
     var str = "";
     if (data.totalSize > 0) {
       var rec = data.records[0];
-      return { "id": rec.Id, "name": rec.Name, "information": rec.Information__c, "link": rec.Resume__c };
+      return { "id": rec.Id, "name": rec.Name, "information": rec.Information__c, "link": rec.NameToOuter__c };
     }
     return null;
   }
   async empByNo(no) {
     var jsh = new JSH();
-    var sql = "SELECT Id, Name, Information__c, Resume__c FROM Worker__c Where AutoNo__c =  '" + no + "'";
+    var sql = "SELECT Id, Name, Information__c, NameToOuter__c FROM Worker__c Where AutoNo__c =  '" + no + "'";
     var data = await jsh.query(sql);
     var str = "";
     if (data.totalSize > 0) {
       var rec = data.records[0];
-      return { "id": rec.Id, "name": rec.Name, "information": rec.Information__c, "link": rec.Resume__c };
+      return { "id": rec.Id, "name": rec.Name, "information": rec.Information__c, "link": rec.NameToOuter__c };
     }
     return null;
   }
@@ -113,10 +113,5 @@ export default class SF {
       return obj;
     }
     return null;
-    //   var names = [];
-    //   if (data != null && data.totalSize > 0) {
-    //     data.records.forEach((element) => { names.push(element.Name) });
-    //   }
-    //   return names.join(",");
   }
 }

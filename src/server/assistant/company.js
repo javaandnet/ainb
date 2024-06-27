@@ -173,7 +173,7 @@ class Company {
                 //TODO 
                 let str = worker.Information__c +
                     "\r\n<a href='" +
-                    worker.Resume__c +
+                    worker.NameToOuter__c +
                     "' target='_blank'>履歴書Download</a>";
                 infos.push(str);
             }
@@ -400,8 +400,8 @@ class Company {
                 map = { "Id": "id", "Name": "name", "Status__c": "status", "AutoNo__c": "no", "Detail__c": "detail" };
             } else {
                 object = "Worker__c";
-                field = "Id, Name, Status__c, AutoNo__c,Japanese__c,TecLevel__c, Information__c, Resume__c";
-                map = { "Id": "id", "Name": "name", "Status__c": "status", "AutoNo__c": "no", "Information__c": "information", "Resume__c": "resume", "Japanese__c": "japanese", "TecLevel__c": "skill", "Status__c": "status" };
+                field = "Id, Name, Status__c, AutoNo__c,Japanese__c,TecLevel__c, Information__c, NameToOuter__c";
+                map = { "Id": "id", "Name": "name", "Status__c": "status", "AutoNo__c": "no", "Information__c": "information", "NameToOuter__c": "outname", "Japanese__c": "japanese", "TecLevel__c": "skill", "Status__c": "status" };
             }
             let data = await sf.find(object, { id: args.id }, field, 1);
             console.log(data);
