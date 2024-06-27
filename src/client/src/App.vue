@@ -26,7 +26,7 @@
       v-if="mode == 2"
       @onClickClose="onClickCloseUploader"
       @onRemoveItem="onRemoveItemUploader"
-      @onClickListCell="oonClickListCellUploader"
+      @onClickListCell="onClickListCellUploader"
       serverFolder="resume"
       :url="URL"
     ></UploadFile>
@@ -59,8 +59,8 @@ export default {
   },
   data() {
     return {
-         //URL: "http://160.16.216.251:8379/",
-    URL: "http://localhost:8379/",
+      //URL: "http://160.16.216.251:8379/",
+      URL: "http://192.168.1.160:8379/",
       item: { items: [] },
       cmdList: {},
       mode: 2,
@@ -88,12 +88,8 @@ export default {
       await this.$axios.post(this.URL + "confirmInfo", info);
     },
 
-    oonClickListCellUploader: async function (item) {
-      console.log(item);
-      await this.$axios.get(this.URL + "files/"+ item.id );
-      // window.open(this.URL+'files/'+item.id, '_blank');
-      // window.open('https://www.google.com', '_blank');
-      // this.mode = 0;
+    onClickListCellUploader: async function (item) {
+
     },
 
     onClickRightButtonInPM: function () {

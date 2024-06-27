@@ -21,7 +21,7 @@
         :initList="list"
         :confirmBeforeDelete="true"
         @onRemoveItem="onRemoveItem"
-        @onClickListCell="$emit('onClickListCell', $event)"
+        @onClickListCell="onClickListCell"
       />
     </div>
     <div>
@@ -67,11 +67,12 @@ export default {
   methods: {
     loaded() {
       this.list = this.initList;
-      this.refresh();
+      this.refresh(true);
     },
-    async refresh() {
+    async refresh(flag = false) {
       const res = await this.$axios.post(this.url + "files", {
         option: "list",
+        flag: flag,
         folder: this.serverFolder,
       });
       this.$refs.fileList.list = [];
@@ -83,6 +84,22 @@ export default {
       this.$emit("onClickClose");
     },
 
+    async onClickListCell(item) {
+      // let res = await this.$axios({
+      //   url: this.url + "files/" + item.id,
+      //   method: "GET",
+      //   responseType: "blob", // 重要：指定响应类型为 blob
+      // });
+
+      const url = this.URL + "files/" + this.serverFolder + "/" + item.id; // 文件路径
+      const downloadLink = window.document.createElement("a");
+      downloadLink.href = url;
+      downloadLink.download = item.id;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      this.$emit("onClickListCell", item);
+    },
     beforeRead(file) {
       if (!Array.isArray(file)) {
         file = [file];

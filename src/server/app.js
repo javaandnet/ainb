@@ -120,7 +120,7 @@ const multerErrorHandler = (err, req, res, next) => {
 };
 const upload = multer({ storage: storage });
 // 上传文件接口
-app.post('/upload', upload.any("files"), (req, res) => {
+app.post('/upload', [upload.any("files"), multerErrorHandler], (req, res) => {
     const folder = req.query.folder;
     const fileInfos = req.files.map(file => ({
         originalname: file.originalname,
@@ -166,6 +166,9 @@ app.post('/files', (req, res) => {
     const folder = req.body.folder;
 
     if (req.body.option == "list") {
+        if (req.body.flag === true) {
+            FILES.resume = refreshFile(folder);
+        }
         let rtn = [];
         try {
             rtn = FILES.resume;
@@ -191,11 +194,12 @@ app.post('/files', (req, res) => {
 /** 
 
 */
-app.get('/files/:name', (req, res) => {
+app.get('/files/:folder/:name', (req, res) => {
     let filePath = req.params.name;
+    let folder = req.params.folder;
     const type = filePath.split('.').pop();
     let header = "";
-    filePath = path.join(__dirname, 'files', filePath);
+    filePath = path.join(__dirname, 'files', folder, filePath);
     if (type == "xlsx") {
         header = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     } else if (type == "xls") {
@@ -208,6 +212,9 @@ app.get('/files/:name', (req, res) => {
             res.status(500).send('Error reading the file.');
         } else {
             res.setHeader('Content-Type', header);
+            const deFileName = encodeURI(req.params.name);
+            // res.setHeader('Content-Disposition', 'attachment; filename="' + deFileName + '"');
+            res.setHeader('Content-Disposition', 'attachment; ');
             res.send(data);
         }
     });
