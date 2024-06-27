@@ -82,7 +82,7 @@ export default {
       let message = this.message;
       //FOR TEST
       if (this.TEST == true) {
-        message = "#1#";
+        message = "#0#";
       }
       this.$emit("sendMsg", {
         message: message,

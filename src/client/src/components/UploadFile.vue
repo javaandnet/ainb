@@ -48,7 +48,7 @@ export default {
   props: {
     accept:{ type: String, default: ".xls,.xlsx,.pdf" },
     initList: { type: Object, "default": () => [] },
-    url: { type: String, default: "http://127.0.0.1:3000/" },
+    url: { type: String, default: "" },
   },
   data() {
     return {

@@ -58,10 +58,10 @@ export default {
   },
   data() {
     return {
-      URL: "http://localhost:3000/",
+      URL: "http://160.16.216.251:8379/",
       item: { items: [] },
       cmdList: {},
-      mode: 0,
+      mode: 2,
     };
   },
   methods: {
