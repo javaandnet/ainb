@@ -1,6 +1,6 @@
 import Util from '../util/util.js';
 import SF from '../util/sf.js';
-
+const util = new Util();
 const sf = new SF();
 export default class Worker {
     constructor(server = "http://160.16.216.251:8379/") {
@@ -15,8 +15,18 @@ export default class Worker {
         };
     }
 
-    //Id, Name, Status__c, AutoNo__c,Japanese__c,TecLevel__c, Information__c, NameToOuter__c,Resume__c
-
+    /**
+     *  変換
+     * @param {*} key 
+     * @param {*} obj 
+     * @returns 
+     */
+    trans(key, obj) {
+        if (util.undefined(this.keyToValue[key])) {
+            return "";
+        }
+        return this.keyToValue[key][obj[key]];
+    }
 
     /**
      *  技術者情報
@@ -25,7 +35,7 @@ export default class Worker {
      * @param {*} isHtml  true Tag
      */
     async info(id, fields = "id", type = 0, isHtml = true) {
-        fields = fields.replaceAll(" ","");
+        fields = fields.replaceAll(" ", "");
         let datas = await sf.find(this.name, { id: id }, fields, 1);
         let data = null;
         if (datas.length > 0) {
@@ -34,7 +44,7 @@ export default class Worker {
             let fieldsArray = fields.split(",");
             for (const f of mapKeys) {
                 if (fieldsArray.indexOf(f) >= 0) {
-                    data[f] = this.keyToValue[f][data[f]];//変換
+                    data[f] = this.trans(f, data);//変換
                 }
             }
         }
@@ -46,12 +56,13 @@ export default class Worker {
                 rtnArray.push("日本語:" + data.Japanese__c);
             }
             rtnArray.push(data.Information__c);
+            let link = this.server + "files/resume/" +
+                data.Resume__c;
             if (isHtml) {
-                rtnArray.push("<a href='/files/resume/" +
-                    data.Resume__c + "' target='_blank'>履歴書Download</a>");
+                rtnArray.push("<a href='" +
+                    link + "' target='_blank'>履歴書Download</a>");
             } else {
-                rtnArray.push(this.server + "/files/resume/" +
-                    data.Resume__c);
+                rtnArray.push(link);
             }
 
         }

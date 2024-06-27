@@ -1,9 +1,11 @@
 import SF from '../util/sf.js';
 import Util from '../util/util.js';
 import { Mail } from '../util/mail.js';
+import Worker from '../model/worker.js';
 const mail = new Mail();
 const sf = new SF();
 const util = new Util();
+const worker = new Worker();
 class Company {
     me = this;
     DEBUG = false;
@@ -172,8 +174,8 @@ class Company {
             for (const worker of datas) {
                 //TODO 
                 let str = worker.Information__c +
-                    "\r\n<a href='" +
-                    worker.NameToOuter__c +
+                    "\r\n<a href='/files/resume/" +
+                    worker.Resume__c +
                     "' target='_blank'>履歴書Download</a>";
                 infos.push(str);
             }
@@ -187,7 +189,7 @@ class Company {
                     wecoms.push(sender.value);
                 }
             }
-      
+
             //SendMail
             if (tos.length == 0) {
                 rtn = rtn.replaceAll("\r\n", "<br>");
@@ -225,13 +227,14 @@ class Company {
                     model = "Project__c";
                     condition = { Status__c: '0' };
                 }
-                var data = await sf.find(model, condition, "Id, Name", 50);
+                var data = await sf.find(model, condition, "Status__c,Id, Name", 50);
                 if (data == null || data.totalSize == 0) {
                     return [];
                 } else {
                     var rtn = [];
                     data.forEach((element, index) => {
-                        rtn.push({ text: element.Name, value: element.Id });
+                        //TODO Worker 状态追加
+                        rtn.push({ text: worker.trans("Status__c", element) + " :" + element.Name, value: element.Id });
                     });
                     return rtn;
                 }
@@ -394,19 +397,20 @@ class Company {
             let object = "";
             let field = "";
             let map = {};
+            let data = null;
             if (args.model == "project") {
                 object = "Project__c";
-                field = "Id, Name, Status__c,AutoNo__c,Detail__c";
-                map = { "Id": "id", "Name": "name", "Status__c": "status", "AutoNo__c": "no", "Detail__c": "detail" };
+                field = "Status__c,Id, Name, AutoNo__c,Detail__c";
+                // map = { "Id": "id", "Name": "name", "Status__c": "status", "AutoNo__c": "no", "Detail__c": "detail" };
+                data = await sf.find(object, { id: args.id }, field, 1);
+                // console.log(data);
+                if (data.length > 0) {
+                    return util.objToObj(data[0], map);
+                }
             } else {
                 object = "Worker__c";
-                field = "Id, Name, Status__c, AutoNo__c,Japanese__c,TecLevel__c, Information__c, NameToOuter__c";
-                map = { "Id": "id", "Name": "name", "Status__c": "status", "AutoNo__c": "no", "Information__c": "information", "NameToOuter__c": "outname", "Japanese__c": "japanese", "TecLevel__c": "skill", "Status__c": "status" };
-            }
-            let data = await sf.find(object, { id: args.id }, field, 1);
-            console.log(data);
-            if (data.length > 0) {
-                return util.objToObj(data[0], map);
+                field = "Status__c,Id, Name,  AutoNo__c,Japanese__c,TecLevel__c, Information__c, NameToOuter__c,Resume__c";
+                return { info: await worker.info(args.id, field, 0, true) };
             }
             return {};
         },
