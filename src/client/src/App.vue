@@ -63,7 +63,7 @@ export default {
       URL: "http://192.168.1.160:8379/",
       item: { items: [] },
       cmdList: {},
-      mode: 2,
+      mode: 0,
     };
   },
   methods: {
@@ -88,9 +88,7 @@ export default {
       await this.$axios.post(this.URL + "confirmInfo", info);
     },
 
-    onClickListCellUploader: async function (item) {
-
-    },
+    onClickListCellUploader: async function (item) {},
 
     onClickRightButtonInPM: function () {
       this.mode = 0;
@@ -138,17 +136,8 @@ export default {
         if (data.model == "project") {
           content = "<br><br>" + response.data.detail;
         } else {
-          content =
-            // response.data.status +
-            // "<br><br>" +
-            // response.data.skill +
-            // "<br><br>" +
-            // response.data.japanese +
-            "<br><br>" +
-            response.data.information +
-            "<br><br><a href='" +
-            response.data.resume +
-            "' target='_blank'>履歴書Download</a>";
+          console.log(response.data);
+          content = response.data.info;
         }
         showDialog({
           messageAlign: "left",
