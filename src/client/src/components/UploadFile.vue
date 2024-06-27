@@ -74,7 +74,7 @@ export default {
         option: "list",
         folder: this.serverFolder,
       });
-       this.$refs.fileList.list = [];
+      this.$refs.fileList.list = [];
       for (const file of res.data) {
         this.$refs.fileList.addObj({ type: "2", text: file, value: file });
       }

@@ -120,7 +120,7 @@ const multerErrorHandler = (err, req, res, next) => {
 };
 const upload = multer({ storage: storage });
 // 上传文件接口
-app.post('/upload', upload.any(['files', "folder"]), (req, res) => {
+app.post('/upload', upload.any("files"), (req, res) => {
     const folder = req.query.folder;
     const fileInfos = req.files.map(file => ({
         originalname: file.originalname,
@@ -164,7 +164,7 @@ function deleteFile(filePath) {
 // 上传文件接口
 app.post('/files', (req, res) => {
     const folder = req.body.folder;
-    
+
     if (req.body.option == "list") {
         let rtn = [];
         try {
