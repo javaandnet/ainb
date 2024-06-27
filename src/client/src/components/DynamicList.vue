@@ -169,7 +169,8 @@ export default {
         me.bakItem = me.list[index];
         me.bakIndex = index;
         me.list.splice(index, 1);
-        me.$emit("onRemoveItem", me.list[index], function (success = true) {
+
+        me.$emit("onRemoveItem", me.bakItem, function (success = true) {
           if (!success) {
             me.list.splice(index, 0, me.bakItem);
           }
