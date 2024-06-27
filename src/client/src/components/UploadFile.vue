@@ -13,6 +13,16 @@
       >
       </van-uploader>
     </div>
+
+    <div class="list-container">
+      <DynamicList
+        ref="fileList"
+        :initList="list"
+        :confirmBeforeDelete="true"
+        @onRemoveItem="onRemoveItem"
+        @onClickListCell="$emit('onClickListCell', $event)"
+      />
+    </div>
     <div>
       <van-button
         type="primary"
@@ -23,12 +33,6 @@
         閉じる</van-button
       >
     </div>
-    <DynamicList
-      ref="fileList"
-      :initList="list"
-      :confirmBeforeDelete="true"
-      @onRemoveItem="onRemoveItem"
-    />
   </div>
 </template>
 
@@ -51,7 +55,7 @@ export default {
       list: [],
     };
   },
-  emits: ["onUploaded", "onClickClose", "onRemoveItem"],
+  emits: ["onUploaded", "onClickClose", "onRemoveItem", "onClickListCell"],
 
   mounted() {
     // 组件挂载后调用的方法
@@ -148,5 +152,8 @@ export default {
 };
 </script>
 <style scoped>
-/* 添加一些样式 */
+.list-container {
+  height: 500px; /* 设置容器高度 */
+  overflow-y: auto; /* 添加垂直滚动条 */
+}
 </style>
