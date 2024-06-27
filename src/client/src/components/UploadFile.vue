@@ -85,13 +85,14 @@ export default {
     },
 
     async onClickListCell(item) {
+      // console.log(item);
       // let res = await this.$axios({
       //   url: this.url + "files/" + item.id,
       //   method: "GET",
       //   responseType: "blob", // 重要：指定响应类型为 blob
       // });
 
-      const url = this.URL + "files/" + this.serverFolder + "/" + item.id; // 文件路径
+      const url = this.url + "files/" + this.serverFolder + "/" + item.id; // 文件路径
       const downloadLink = window.document.createElement("a");
       downloadLink.href = url;
       downloadLink.download = item.id;
