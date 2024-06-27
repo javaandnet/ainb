@@ -27,6 +27,7 @@
       @onClickClose="onClickCloseUploader"
       @onRemoveItem="onRemoveItemUploader"
       @onClickListCell="oonClickListCellUploader"
+      serverFolder="resume"
       :url="URL"
     ></UploadFile>
   </div>
@@ -58,8 +59,8 @@ export default {
   },
   data() {
     return {
-        URL: "http://160.16.216.251:8379/",
-     //URL: "http://localhost:8379/",
+      //URL: "http://160.16.216.251:8379/",
+      URL: "http://localhost:8379/",
       item: { items: [] },
       cmdList: {},
       mode: 2,
@@ -89,7 +90,7 @@ export default {
 
     oonClickListCellUploader: async function (item) {
       console.log(item);
-      await this.$axios.get(this.URL + "files/"+ item.id );
+      await this.$axios.get(this.URL + "files/" + item.id);
       // window.open(this.URL+'files/'+item.id, '_blank');
       // window.open('https://www.google.com', '_blank');
       // this.mode = 0;

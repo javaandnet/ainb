@@ -78,8 +78,8 @@ app.post('/confirmInfo', async (req, res) => {
 
 let FILES = { resume: [] };
 
-const refreshResume = function () {
-    const directoryPath = path.join(__dirname, 'files');
+const refreshFile = function (folder = "") {
+    const directoryPath = path.join(__dirname, 'files', folder);
     const files = fs.readdirSync(directoryPath);
     let rtn = [];
     files.forEach(file => {
@@ -91,7 +91,7 @@ const refreshResume = function () {
     });
     return rtn;
 };
-FILES.resume = refreshResume();
+FILES.resume = refreshFile("resume");
 
 /**
  * Files处理 Start
@@ -99,8 +99,7 @@ FILES.resume = refreshResume();
 // 设置存储配置
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        // console.log(path.join(__dirname, 'files'));
-        cb(null, path.join(__dirname, 'files'));
+        cb(null, path.join(__dirname, 'files', req.query.folder));
     },
     filename: function (req, file, cb) {
         // console.log(file);
@@ -108,18 +107,32 @@ const storage = multer.diskStorage({
         cb(null, decodeURI(file.originalname));
     }
 });
+
+const multerErrorHandler = (err, req, res, next) => {
+    if (err) {
+        console.log(err);
+        res.status(400).json({
+            message: err.message,
+        });
+    } else {
+        next();
+    }
+};
 const upload = multer({ storage: storage });
 // 上传文件接口
-app.post('/upload', upload.any('files'), (req, res) => {
+app.post('/upload', upload.any(['files', "folder"]), (req, res) => {
+    const folder = req.query.folder;
     const fileInfos = req.files.map(file => ({
         originalname: file.originalname,
         size: file.size
     }));
+    FILES.resume = refreshFile(folder);
     res.json({
         msg: 'ok',
+        list: FILES.resume,
         files: fileInfos
     });
-    FILES.resume = refreshResume();
+
 });
 
 
@@ -143,36 +156,34 @@ function deleteFile(filePath) {
         fs.unlinkSync(filePath);
         return true;
     } catch (err) {
+        console.error('无法删除文件: ' + err);
         return false;
     }
 }
 
 // 上传文件接口
-app.post('/files', upload.any('files'), (req, res) => {
-    const directoryPath = path.join(__dirname, 'files');
+app.post('/files', (req, res) => {
+    const folder = req.body.folder;
+    
     if (req.body.option == "list") {
         let rtn = [];
-
         try {
             rtn = FILES.resume;
         } catch (err) {
-            console.error('无法扫描目录: ' + err);
+            console.error('dont scan: ' + err);
         }
         res.json(rtn);
     } else if (req.body.option == "delete") {
         let filePath = req.body.id;
-        filePath = path.join(__dirname, 'files/' + filePath);
+        filePath = path.join(__dirname, 'files', folder, filePath);
         let rtn = "ok";
-        try {
-            let delLtn = deleteFile(filePath);
-            if (delLtn) {
-                console.log('File Del', filePath);
-            }
-        } catch (err) {
+        let delLtn = deleteFile(filePath);
+        if (delLtn) {
+            console.log('File Del', filePath);
+        } else {
             rtn = "ng";
-            console.error('无法删除文件: ' + err);
         }
-        FILES.resume = refreshResume();
+        FILES.resume = refreshFile(folder);
         res.send(rtn);
     }
 });

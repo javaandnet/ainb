@@ -2,6 +2,7 @@
   <div>
     <div>
       <van-uploader
+        :serverFolder="serverFolder"
         v-model="fileList"
         :multiple="true"
         :reupload="true"
@@ -46,9 +47,10 @@ export default {
     VanUploader: Uploader,
   },
   props: {
-    accept:{ type: String, default: ".xls,.xlsx,.pdf" },
+    accept: { type: String, default: ".xls,.xlsx,.pdf" },
     initList: { type: Object, "default": () => [] },
     url: { type: String, default: "" },
+    serverFolder: { type: String, default: "" },
   },
   data() {
     return {
@@ -70,7 +72,9 @@ export default {
     async refresh() {
       const res = await this.$axios.post(this.url + "files", {
         option: "list",
+        folder: this.serverFolder,
       });
+       this.$refs.fileList.list = [];
       for (const file of res.data) {
         this.$refs.fileList.addObj({ type: "2", text: file, value: file });
       }
@@ -96,6 +100,7 @@ export default {
     onRemoveItem: async function (item, cb) {
       const res = await this.$axios.post(this.url + "files", {
         option: "delete",
+        folder: this.serverFolder,
         id: item.value,
       });
       let rtn = true;
@@ -124,20 +129,25 @@ export default {
         const fileExtention = fileName.substring(fileName.lastIndexOf(".") + 1);
         const renamedFile = new File(
           [blob],
-          encodedFileName + "." + fileExtention,
+          this.serverFolder + "/" + encodedFileName + "." + fileExtention,
           { type: file.type }
         );
         files[i].file = renamedFile;
         formData.append("files", renamedFile);
       }
-      const res = await this.$axios({
-        method: "post",
-        url: this.url + "upload",
-        data: formData,
-      });
+      // formData.append("folder", this.serverFolder);
+      const res = await this.$axios.post(
+        this.url + "upload?folder=" + this.serverFolder,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+
       if (res.data && res.data.msg == "ok") {
         showToast("成功");
         this.fileList = [];
+        this.refresh();
         this.$emit("onUploaded");
       }
       // console.log(res);
