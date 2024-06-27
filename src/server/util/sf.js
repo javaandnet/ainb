@@ -35,7 +35,7 @@ export default class SF {
     var str = "";
     if (data.totalSize > 0) {
       var rec = data.records[0];
-      return { "id": rec.Id, "name": rec.Name, "information": rec.Information__c, "link": rec.NameToOuter__c };
+      return { "id": rec.Id, "name": rec.Name, "information": rec.Information__c, "link": rec.Resume__c };
     }
     return null;
   }
@@ -46,7 +46,7 @@ export default class SF {
     var str = "";
     if (data.totalSize > 0) {
       var rec = data.records[0];
-      return { "id": rec.Id, "name": rec.Name, "information": rec.Information__c, "link": rec.NameToOuter__c };
+      return { "id": rec.Id, "name": rec.Name, "information": rec.Information__c, "link": rec.Resume__c };
     }
     return null;
   }
