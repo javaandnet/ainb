@@ -3,7 +3,7 @@ import SF from '../util/sf.js';
 const util = new Util();
 const sf = new SF();
 export default class Model {
-    constructor(server = "http://160.16.216.251:8379/", name, keyToValue) {
+    constructor(server, name, keyToValue) {
         this.name = name;
         this.server = server;
         this.keyToValue = keyToValue;

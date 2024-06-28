@@ -4,9 +4,7 @@ import Model from '../model/model.js';
 const util = new Util();
 const sf = new SF();
 export default class Worker extends Model {
-    constructor(server = "http://160.16.216.251:8379/") {
-
-
+    constructor(server = "") {
         const keyToValue =
         {
             "Status__c": { "0": "待機中", "2": "提案中", "3": "面接あり", "4": "契約済", "9": "稼働中", "-1": "管理外", "8": "保留中" },

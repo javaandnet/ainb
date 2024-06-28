@@ -279,8 +279,5 @@ class JSH {
         }
     }
 }
-//http://localhost:11117/sf/file/0680l000003V5r4AAC
+
 export { JSH };
-//http://160.16.216.251:11117/msg?type=1&to=SALESFORCE&msg=SALESFORCETEST
-//http://160.16.216.251:11117/sf
-//http://localhost:3000/sf/worker/a050l00000GQUk9AAH
