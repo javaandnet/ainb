@@ -1,7 +1,6 @@
 <template>
   <div>
     <ChatWindow
-      v-if="mode == 0"
       ref="chatWindow"
       :url="URL"
       @onMessage="onMessage"
@@ -22,14 +21,17 @@
         />
       </div>
     </van-overlay>
-    <UploadFile
-      v-if="mode == 2"
-      @onClickClose="onClickCloseUploader"
-      @onRemoveItem="onRemoveItemUploader"
-      @onClickListCell="onClickListCellUploader"
-      serverFolder="resume"
-      :url="URL"
-    ></UploadFile>
+    <van-overlay :show="mode == 2">
+      <div class="wrapper">
+        <UploadFile
+          @onClickClose="onClickCloseUploader"
+          @onRemoveItem="onRemoveItemUploader"
+          @onClickListCell="onClickListCellUploader"
+          serverFolder="resume"
+          :url="URL"
+        ></UploadFile>
+      </div>
+    </van-overlay>
   </div>
 </template>
 
