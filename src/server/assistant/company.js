@@ -497,9 +497,9 @@ class Company {
                 //内部
                 // * @param {*} isHtml  true Tag
                 // * @param {*} isSendMail  メール発送
-                worker.trans(datas, fields);
+                workerModel.trans(datas, fields);
 
-                return { info: await worker.infoById(args.id, field, 0, true) };
+                return { info: await workerModel.infoById(args.id, field, 0, true) };
             }
             return {};
         },
