@@ -17,6 +17,58 @@ export default class Worker extends Model {
         super(server, "Worker__c", keyToValue);
     }
 
+    /**
+       *  技術者情報
+       * @param {*} id 
+       * @param {*} type  0 内部
+       * @param {*} isHtml  true Tag
+       * @param {*} isSendMail  メール発送
+       */
+    async info(datas, type = 0, isHtml = true, isSendMail = false) {
+        let rtnStr = "";
+        let files = [];
+        let rtnObj = {};
+        let rtnArray = [];
+        for (let data of datas) {
+            // rtnArray.push("状態：" + data.Status__c);
+            if (type == 0) {
+                rtnArray.push("Skill:" + data.TecLevel__c);
+                rtnArray.push("日本語:" + data.Japanese__c);
+            }
+            // this.trans(datas, "Status__c");
+            const information = this.replaceFieldValue(data.Information__c, "営業状況", this.transValue("Status__c", data));
+            rtnArray.push(information);
+            let resume = data.Resume__c;
+            if (!isSendMail) {
+
+                //TODO 转换加密3日内有效
+                // if (type == 1) {
+                //     resume = resume + "#" + type; //加密
+                // }
+                let link = this.server + "files/resume/" +
+                    resume;
+                if (isHtml) {
+                    rtnArray.push("<a href='" +
+                        link + "' target='_blank'>履歴書Download</a>");
+                } else {
+                    rtnArray.push(link);
+                }
+            } else {
+                files.push(resume);
+            }
+        }
+        if (isHtml) {
+            rtnStr = rtnArray.join("<br>");
+            rtnStr = rtnStr.replaceAll("\r\n", "<br>");
+        } else {
+            rtnStr = rtnArray.join("\r\n");
+            rtnStr = rtnStr.replaceAll("<br>", "\r\n");
+        }
+        rtnObj.rtn = rtnStr;
+        rtnObj.files = files;
+        return rtnObj;
+    }
+
 
     /**
      *  技術者情報
@@ -25,49 +77,11 @@ export default class Worker extends Model {
      * @param {*} isHtml  true Tag
      * @param {*} isSendMail  メール発送
      */
-    async info(id, fields = "id", type = 0, isHtml = true, isSendMail = false) {
-        let rtnObj = {};
+    async infoById(id, fields = "id", type = 0, isHtml = true, isSendMail = false) {
         fields = fields.replaceAll(" ", "");
         let datas = await sf.find(this.name, { id: id }, fields, 1);
-        let rtnStr = "";
-        let files = [];
-        if (datas.length > 0) {
-            this.trans(datas, fields);
-            for (let data of datas) {
-                let rtnArray = [];
-                rtnArray.push("状態：" + data.Status__c);
-                if (type == 0) {
-                    rtnArray.push("Skill:" + data.TecLevel__c);
-                    rtnArray.push("日本語:" + data.Japanese__c);
-                }
-                rtnArray.push(data.Information__c);
-
-                if (!isSendMail) {
-                    let resume = data.Resume__c;
-                    files.push(resume);
-                    //TODO 转换加密3日内有效
-                    // if (type == 1) {
-                    //     resume = resume + "#" + type; //加密
-                    // }
-                    let link = this.server + "files/resume/" +
-                        resume;
-                    if (isHtml) {
-                        rtnArray.push("<a href='" +
-                            link + "' target='_blank'>履歴書Download</a>");
-                    } else {
-                        rtnArray.push(link);
-                    }
-                }
-                if (isHtml) {
-                    rtnStr = rtnArray.join("<br><br>");
-                } else {
-                    rtnStr = rtnArray.join("\r\n");
-                }
-            }
-        }
-        rtnObj.rtn = rtnStr;
-        rtnObj.files = files;
-        return rtnObj;
+        this.trans(datas, fields);
+        return await this.info(datas, type = 0, isHtml = true, isSendMail = false);
     }
 
 }

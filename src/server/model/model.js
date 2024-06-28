@@ -22,6 +22,10 @@ export default class Model {
         return this.keyToValue[key][obj[key]];
     }
 
+    async getDataByIds(ids) {
+        return await sf.retrieve(this.name, ids);
+    }
+
     /**
      *  mapのValueと交換するï
      * @param {*} datas 
@@ -38,5 +42,45 @@ export default class Model {
                 }
             }
         }
+    }
+
+    async info() {
+
+    }
+
+
+    /**
+     * 
+     * @param {*} datas 
+     * @param {*} type //内部外部
+     * @returns 
+     */
+    async infoTxt(datas, type) {
+        let rtn = await this.info(datas, type, false, false);
+        return rtn.rtn;
+    }
+
+    /**
+     * 
+     * @param {*} datas 
+     * @param {*} type //内部外部
+     * @returns 
+     */
+    async infoHtml(datas, type) {
+        let rtn = await this.info(datas, type, true, false);
+        return rtn.rtn;
+    }
+    escapeRegExp(string) {
+        // 转义特殊字符
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    replaceFieldValue(text, fieldName, newValue) {
+        // 将字段名转换为正则表达式
+        const regex = new RegExp(`【${this.escapeRegExp(fieldName)}】：([^\\n]*)`);
+        // 将匹配的值替换为新的值，判断到换行符位置，会把\r去掉所以需要补上
+        let newText = text.replace(regex, `【${fieldName}】：${newValue}\r`);
+        // newText = newText +"\r\n";
+        return newText;
     }
 }
