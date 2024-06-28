@@ -10,6 +10,7 @@ class AssistantFactory {
             var obj = null
             if (id == "company") {
                 obj = new Company();
+                obj.setServer("http://localhost:8379/");
             } else if (id == "restaurant") {
                 obj = new Restaurant();
             } else {
