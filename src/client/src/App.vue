@@ -130,18 +130,18 @@ export default {
       }
       //先弹Modal，显示详细信息
       try {
-        const response = await this.$axios.post(this.URL + "model", data.id);
+        const response = await this.$axios.post(this.URL + "model", data);
         let content = "";
         if (data.model == "project") {
-          content = "<br><br>" + response.data.detail;
+          content = "<br><br>" + response.data.rtn;
         } else {
-          console.log(response.data);
-          content = response.data.info;
+          // console.log(response.data);
+          content = response.data.rtn;
         }
         showDialog({
           messageAlign: "left",
           allowHtml: true,
-          title: response.data.name,
+          title: data.text,
           message: content,
         }).then(() => {
           // on close

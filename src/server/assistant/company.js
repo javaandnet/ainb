@@ -10,6 +10,10 @@ const sf = new SF();
 const util = new Util();
 const workerModel = new Worker();
 class Company {
+    setServer(server) {
+        this.server = server;
+        workerModel.server = server;
+    };
     me = this;
     DEBUG = false;
     id = "asst_KQsWjF05lR95Z92JwpOMCZBE";
@@ -195,13 +199,12 @@ class Company {
             const senders = args.sender;
             const workers = args.worker;
             // console.log(path.join("../files/resume/"));
-            workerModel.server = args.server || workerModel.server;
             let toMails = [];
             let toWecoms = [];
             let toCompanys = [];
             let toContacts = [];
             let mailStr = "";
-            let mailRtn = "";
+            let mailRtn = [];
             let ids = [];
             for (const worker of workers) {
                 ids.push(worker.value);
@@ -252,13 +255,13 @@ class Company {
                     if (fs.existsSync(filePath)) {
                         files.push({
                             filename: filesStr,
-                            path: path.join(args.root, "files", "resume", filesStr) // stream this file
+                            path: filePath // stream this file
                         })
                     }
                 }
 
                 /** SendMail Start **/
-                let mailRtn = await senderToOut.mail({
+                mailRtn = await senderToOut.mail({
                     fromName: args.fromName || "FSRのAI営業",
                     subject: args.subject || "FSR技術者提案",
                     content: mailStr,
@@ -497,9 +500,9 @@ class Company {
                 //内部
                 // * @param {*} isHtml  true Tag
                 // * @param {*} isSendMail  メール発送
-                workerModel.trans(datas, fields);
+                // workerModel.trans(datas, fields);
 
-                return { info: await workerModel.infoById(args.id, field, 0, true) };
+                return await workerModel.infoById(args.id, field, 0, true);
             }
             return {};
         },

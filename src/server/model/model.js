@@ -81,6 +81,9 @@ export default class Model {
     }
 
     replaceFieldValue(text, fieldName, newValue) {
+        if (text == null) {
+            return "";
+        }
         // 将字段名转换为正则表达式
         const regex = new RegExp(`【${this.escapeRegExp(fieldName)}】：([^\\n]*)`);
         // 将匹配的值替换为新的值，判断到换行符位置，会把\r去掉所以需要补上

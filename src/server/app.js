@@ -58,7 +58,7 @@ let assistant = assistantFactory.get(ASSISITANT_NAME);
  */
 app.post('/model', async (req, res) => {
     const data = req.body;
-    // console.log('Received data:', data);
+
     var rtn = await assistant.func.getModelById({
         model: data.model,
         id: data.id
@@ -72,8 +72,6 @@ app.post('/confirmInfo', async (req, res) => {
     let data = req.body;
     data.root = __dirname;
     //链接地址
-    data.server = "http://160.16.216.251:8379/";
-    data.server = "http://localhost:8379/";
     var rtn = await assistant.out.confirmInfo(data);
     // 返回响应
     res.json(rtn);
@@ -208,7 +206,7 @@ app.get('/files/:folder/:name', (req, res) => {
         res.json({ "info": "Error" });
     }
     try {
-        if (!(fileArray[1] == "0" || (util.inDays(parseInt(fileArray[2]), 0)))) {
+        if (!(fileArray[1] == "0" || (util.inDays(parseInt(fileArray[2]), 3)))) {
             res.send("Expired Link リンク期限切れ");
         }
 

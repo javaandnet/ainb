@@ -22,13 +22,13 @@ async function testGetModelById() {
 
 async function testConfirmInfo() {
     var data = {
-        server : "http://192.168.1.160:8379/",
+        root: "/Users/fengleiren/git/ainb/src/server",
         sender: [
             {
-                // type: 2,
-                // text: '任峰磊 Hotmail',
-                // value: 'ts_xyf@hotmail.com',
-                // icon: 'envelop-o'
+                type: 2,
+                text: '任峰磊 Hotmail',
+                value: 'ts_xyf@hotmail.com',
+                icon: 'envelop-o'
                 // },
                 // {
                 //     type: 2,
@@ -47,16 +47,16 @@ async function testConfirmInfo() {
                 //     text: 'ren',
                 //     value: 'nin',
                 //     icon: 'envelop-o'
-            // }, {
+            }, {
                 type: 3,
                 text: 'ren',
                 value: 'nin',
                 icon: 'envelop-o'
-            // }, {
-            //     type: 4,
-            //     text: '連絡先',
-            //     value: '003F3000010o3P7IAI',
-            //     icon: 'envelop-o'
+                // }, {
+                //     type: 4,
+                //     text: '連絡先',
+                //     value: '003F3000010o3P7IAI',
+                //     icon: 'envelop-o'
             }
         ],
         worker: [
