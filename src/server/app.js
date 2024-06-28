@@ -69,7 +69,8 @@ app.post('/model', async (req, res) => {
 });
 
 app.post('/confirmInfo', async (req, res) => {
-    const data = req.body;
+    let data = req.body;
+    data.root = __dirname;
     console.log('Received data:', data);
     var rtn = await assistant.out.confirmInfo(data);
     // 返回响应

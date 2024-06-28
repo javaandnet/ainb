@@ -10,20 +10,36 @@ const transport = createTransport({
     }
 });
 class Sender {
-    mail = async function (config) {
-        var mailOptions = {
-            from: config.from || "任峰磊<nin@fsr.co.jp>", // 发件人
-            to: config.to, //收件人，多个收件人用,号隔开
-            cc: config.cc, //抄送
-            bcc: config.bcc, //秘送
-            subject: config.subject, //标题
-            //text: config.content, //纯文本
-            html: config.content,
-            attachments: config.attach
-        }
-        var rtn = await transport.mail(mailOptions);
-        return rtn;
+    mailToMulti = async function (config, attachments = [], sender) {
 
+
+
+    }
+    mail = async function (config, senders, attachments = []) {
+        let rtn = [];
+        for (const sender of senders) {
+            let mailInfo = sender.name + "様";
+            mailInfo += "<br>";
+            mailInfo += "お世話になっております<br>";
+            mailInfo += config.fromName + "です。<br><br>";
+            mailInfo += config.content + "<br><br>";
+            mailInfo += "以上　何卒、よろしくお願いします。";
+            var mailOptions = {
+                from: config.from || "任峰磊<nin@fsr.co.jp>", // 发件人
+                to: sender.email, //收件人，多个收件人用,号隔开
+                cc: config.cc, //抄送
+                bcc: config.bcc, //秘送
+                subject: config.subject, //标题
+                //text: config.content, //纯文本
+                html: mailInfo,
+                attachments: attachments
+            }
+            const res = await transport.sendMail(mailOptions);
+            if (res.accepted.length > 0) {
+                rtn.push(res.accepted);
+            }
+        }
+        return rtn;
     }
     // //送信区分：１（グループ）０（個人）
     // String type = weComId == null ? '1' : '0';

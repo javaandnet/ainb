@@ -2,10 +2,13 @@ import SF from '../util/sf.js';
 import Util from '../util/util.js';
 import { Sender } from '../util/Sender.js';
 import Worker from '../model/worker.js';
+import path from 'path';
+import fs from 'fs';
+
 const senderToOut = new Sender();
 const sf = new SF();
 const util = new Util();
-const worker = new Worker();
+const workerModel = new Worker();
 class Company {
     me = this;
     DEBUG = false;
@@ -150,6 +153,27 @@ class Company {
         ]
     };
     out = {
+        getIcon: function (type) {
+            //企業
+            if (type == 0) {
+                return "wap-home";
+                //案件
+            } else if (type == 1) {
+                return "description-o";
+                //Mail
+            } else if (type == 2) {
+                return "envelop-o";
+                //企業Wechat
+            } else if (type == 3) {
+                return "wechat";
+                //個人
+            } else if (type == 4) {
+                return "friends-o";
+                //その他
+            } else {
+                return "";
+            }
+        },
         /**
          * 添加技术者到返回Json
          * @param {*} args 
@@ -170,57 +194,110 @@ class Company {
         confirmInfo: async function (args, obj) {
             const senders = args.sender;
             const workers = args.worker;
+            // console.log(path.join("../files/resume/"));
 
-            let rtn = "";
+            let toMails = [];
+            let toWecoms = [];
+            let toCompanys = [];
+            let toContacts = [];
+            let mailStr = "";
             let ids = [];
             for (const worker of workers) {
                 ids.push(worker.value);
             }
-            var datas = await await sf.retrieve("Worker__c", ids);
-            let infos = [];
-            for (const worker of datas) {
-                //TODO 
-                let str = worker.Information__c +
-                    "\r\n<a href='/files/resume/" +
-                    worker.Resume__c +
-                    "' target='_blank'>履歴書Download</a>";
-                infos.push(str);
-            }
-            rtn = infos.join("\r\n\r\n");
-            let tos = [];
-            let wecoms = [];
+            var datas = await workerModel.getDataByIds(ids);
+
             for (const sender of senders) {
-                if (sender.type == 2) {
-                    tos.push(sender.value);
-                } else if (sender.type == 3) {//TODO Every Max Length
-                    wecoms.push(sender.value);
+                if (sender.type == 0) {
+                    toCompanys.push(sender.value);
+                } else if (sender.type == 2) {
+                    /**個人メールの場合、自由追加 */
+                    toMails.push({ "name": sender.text, "email": sender.value });
+                } else if (sender.type == 3) {
+                    toWecoms.push(sender.value);
+                } else if (sender.type == 4) {
+                    toContacts.push(sender.value);
+                }
+            }
+            /**企業 メール追加*/
+            if (toCompanys.length > 0) {
+                let contacts = await sf.queryByIds("SELECT Id,  Name,Account.Name, LastName, Email FROM Contact where AccountId in", toCompanys);
+                //企業一覧にメール
+                for (const contact of contacts.records) {
+                    toMails.push({ "name": contact.Account.Name + "<br>" + contact.LastName, "email": contact.Email });
+                }
+            }
+            /**連絡先追加*/
+            if (toContacts.length > 0) {
+                let contacts = await sf.queryByIds("SELECT Id,  Name, LastName, Email FROM Contact where id in", toContacts);
+                //企業一覧にメール
+                for (const contact of contacts.records) {
+                    toMails.push({ "name": contact.LastName, "email": contact.Email });
                 }
             }
 
-            //SendMail
-            if (tos.length == 0) {
-                rtn = rtn.replaceAll("\r\n", "<br>");
-                var res = await senderToOut.mail({
-                    to: tos.join(","),
-                    subject: "FSR技術者提案 By AI",
-                    content: rtn
-                });
-                let mailResult = {};
-                if (res.accepted.length > 0) {
-                    mailResult = {
-                        ai: JSON.stringify({ mailto: tos.join(",") }), //只有名字
-                        out: "[" + res.accepted.join(",") + "]に送信いたしました。"
-                    };
-                } else {
-                    mailResult = {
-                        ai: JSON.stringify({ mailto: tos.join(",") }), //只有名字
-                        out: "送信失敗しました。"
-                    };
+
+            if (toMails.length > 0) {
+                //メール送信文字列
+                //1 外部 无需替换、Info 内部处理 
+                const workerMailObj = await workerModel.info(datas, 1, true, true);
+                mailStr = workerMailObj.rtn;
+                mailStr = "下記の技術者を提案いたしました。ご確認をお願いします。<br>" + mailStr;
+                let filesStrs = workerMailObj.files;
+                let files = [];
+                for (const filesStr of filesStrs) {
+                    const filePath = path.join(args.root, "files", "resume", filesStr);
+                    if (fs.existsSync(filePath)) {
+                        files.push({
+                            filename: filesStr,
+                            path: path.join(args.root, "files", "resume", filesStr) // stream this file
+                        })
+                    }
+                }
+
+                /** SendMail Start **/
+                const mailRtn = await senderToOut.mail({
+                    fromName: args.fromName || "FSRのAI営業",
+                    subject: args.subject || "FSR技術者提案",
+                    content: mailStr,
+                }, toMails, files);
+            }
+
+            /** WebCom Start **/
+            async function sendWecom(sender, datas) {
+                let rtn = [];
+                for (const data of datas) {
+                    /** 每一个用户,长度有限制，只能1条1条发 */
+                    let wecomStr = await workerModel.infoHtml([data], 1);//外部
+                    //Id、内容 0 个人
+                    const rtnWecom = await senderToOut.wecom(wecomStr, 0, sender);
+                    //成功返回
+                    if (rtnWecom.data == "ok") {
+                        rtn.push(sender);
+                    }
+
+                }
+                return rtn;
+            }
+
+            /** WebCom Start **/
+            const wecomRtn = [];
+            if (toWecoms.length > 0) {
+                // let toWecomIds = await sf.queryByIds("SELECT Id,  Name, LastName, Email FROM Contact where id in", toWecoms);
+                //企業一覧にメール
+
+                for (const wecom of toWecoms) {
+                    wecomRtn.push(await sendWecom(wecom, datas));
                 }
             }
-            await senderToOut.wecom(rtn);
-            // wecoms
-            return rtn;
+            let rtnStr = "[" + mailRtn.join(",") + "]にメールを送信いたしました。"
+            let rtnWecomStr = "[" + wecomRtn.join(",") + "]にWeComを送信いたしました。"
+            const mailResult = {
+                ai: JSON.stringify({ mailto: mailRtn.join(",") }), //只有名字
+                out: rtnStr + "\r\n" + rtnWecomStr
+            };
+
+            return mailResult;
         },
         changePrice: async function (args, obj) {
             obj.option = args;
@@ -240,8 +317,7 @@ class Company {
                 } else {
                     var rtn = [];
                     data.forEach((element, index) => {
-                        //TODO Worker 状态追加
-                        rtn.push({ text: worker.trans("Status__c", element) + " :" + element.Name, value: element.Id });
+                        rtn.push({ text: workerModel.transValue("Status__c", element) + " :" + element.Name, value: element.Id });
                     });
                     return rtn;
                 }
@@ -408,7 +484,6 @@ class Company {
             if (args.model == "project") {
                 object = "Project__c";
                 field = "Status__c,Id, Name, AutoNo__c,Detail__c";
-                // map = { "Id": "id", "Name": "name", "Status__c": "status", "AutoNo__c": "no", "Detail__c": "detail" };
                 data = await sf.find(object, { id: args.id }, field, 1);
                 // console.log(data);
                 if (data.length > 0) {
@@ -417,7 +492,12 @@ class Company {
             } else {
                 object = "Worker__c";
                 field = "Status__c,Id, Name,  AutoNo__c,Japanese__c,TecLevel__c, Information__c, NameToOuter__c,Resume__c";
-                return { info: await worker.info(args.id, field, 0, true) };
+                //内部
+                // * @param {*} isHtml  true Tag
+                // * @param {*} isSendMail  メール発送
+                worker.trans(datas, fields);
+
+                return { info: await worker.infoById(args.id, field, 0, true) };
             }
             return {};
         },
