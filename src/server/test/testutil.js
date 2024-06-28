@@ -20,9 +20,17 @@ export default class TestUtil {
         // const instance = new className();
         const result = await instance[methodName](...args);
 
-        console.log(`方法 ${methodName} 的返回值: \r\n${result}\r\n`);
-        console.log(`########结束测试方法: ${methodName}#########\r\n`);
 
+
+        if (typeof result == "string") {
+            console.log(`方法 ${methodName} 的返回值: \r\n${result}\r\n`);
+        } else {
+            console.log(`方法 ${methodName} 的返回值: \r\n\r\n`);
+            console.log(result);
+            console.log(`\r\n\r\n`);
+        }
+
+        console.log(`########结束测试方法: ${methodName}#########\r\n`);
         return result;
     }
     test(instance, methodName, ...args) {
