@@ -6,7 +6,7 @@ import { AssistantFactory } from '../util/assistantFactory.js';
 const assistantFactory = new AssistantFactory();
 
 const ai = new AI();
-
+import pinyin from "pinyin";
 
 const ASSISITANT_NAME = "company";
 

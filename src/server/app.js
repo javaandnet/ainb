@@ -12,8 +12,11 @@ import bodyParser from 'body-parser'
 import { AI } from './util/ai.js';
 const ai = new AI();
 import { AssistantFactory } from './util/assistantFactory.js';
-const assistantFactory = new AssistantFactory();
 
+import romaji from 'romaji';
+import pinyin from "pinyin";
+
+const assistantFactory = new AssistantFactory();
 
 
 //Path 設定
@@ -198,8 +201,6 @@ app.post('/files', (req, res) => {
 app.get('/files/:folder/:name', (req, res) => {
     let filePath = req.params.name;
     let folder = req.params.folder;
-
-
     let fileArray = util.decrypt(filePath);
     fileArray = fileArray.split("#");
     if (fileArray.length != 3) {
@@ -232,8 +233,14 @@ app.get('/files/:folder/:name', (req, res) => {
             res.setHeader('Content-Type', header);
             // const deFileName = encodeURI(filePath);
             // console.log(fileArray[0]);
-            // res.setHeader('Content-Disposition', "attachment; filename=" +fileArray[0] + "");
-            res.setHeader('Content-Disposition', 'attachment; ');
+
+            let romajiText = fileArray[0];
+            romajiText = (pinyin.pinyin(romajiText, {
+                style: "NORMAL"
+            }));
+            romajiText = romajiText.join("").toUpperCase();
+            res.setHeader('Content-Disposition', "attachment; filename=" + romajiText + "");
+            // res.setHeader('Content-Disposition', 'attachment; ');
             res.send(data);
         }
     });
