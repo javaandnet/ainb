@@ -14,7 +14,7 @@ export default class TestUtil {
         }
     }
 
-    async testAwait(instance, methodName, ...args) {
+    async test(instance, methodName, ...args) {
         console.log(`############开始测试方法: ${methodName}##########\r\n`);
 
         // const instance = new className();
@@ -33,17 +33,7 @@ export default class TestUtil {
         console.log(`########结束测试方法: ${methodName}#########\r\n`);
         return result;
     }
-    test(instance, methodName, ...args) {
-        console.log(`############开始测试方法: ${methodName}##########\r\n`);
-
-        // const instance = new className();
-        const result = instance[methodName](...args);
-
-        console.log(`方法 ${methodName} 的返回值: \r\n${result}\r\n`);
-        console.log(`########结束测试方法: ${methodName}#########\r\n`);
-
-        return result;
-    }
+  
 }
 
 
