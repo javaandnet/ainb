@@ -40,13 +40,9 @@ export default class Worker extends Model {
             rtnArray.push(information);
             let resume = data.Resume__c;
             if (!isSendMail) {
-
-                //TODO 转换加密3日内有效
-                // if (type == 1) {
-                //     resume = resume + "#" + type; //加密
-                // }
-                let link = this.server + "files/resume/" +
-                    resume;
+                resume = resume + "#" + 1 + "#" + (new Date()).getTime();
+                resume = util.encrypt(resume);
+                let link = this.server + "files/resume/" + resume;
                 if (isHtml) {
                     rtnArray.push("<a href='" +
                         link + "' target='_blank'>履歴書Download</a>");

@@ -71,7 +71,8 @@ app.post('/model', async (req, res) => {
 app.post('/confirmInfo', async (req, res) => {
     let data = req.body;
     data.root = __dirname;
-    console.log('Received data:', data);
+    //链接地址
+    data.server = "http://160.16.216.251:8379/";
     var rtn = await assistant.out.confirmInfo(data);
     // 返回响应
     res.json(rtn);
@@ -87,7 +88,7 @@ const refreshFile = function (folder = "") {
         const filePath = path.join(directoryPath, file);
         const stats = fs.statSync(filePath);
         if (stats.isFile()) {
-            rtn.push(file);
+            rtn.push({ text: file, value: util.encrypt(file + "#0#1") });
         }
     });
     return rtn;
@@ -198,6 +199,23 @@ app.post('/files', (req, res) => {
 app.get('/files/:folder/:name', (req, res) => {
     let filePath = req.params.name;
     let folder = req.params.folder;
+
+
+    let fileArray = util.decrypt(filePath);
+    fileArray = fileArray.split("#");
+    if (fileArray.length != 3) {
+        res.json({ "info": "Error" });
+    }
+    try {
+        if (!(fileArray[1] == "0" || (util.inDays(parseInt(fileArray[2]), 3)))) {
+            res.json({ "info": "Expired" });
+        }
+
+    } catch (e) {
+        res.json({ "info": "Error" });
+    }
+    filePath = fileArray[0];
+
     const type = filePath.split('.').pop();
     let header = "";
     filePath = path.join(__dirname, 'files', folder, filePath);

@@ -48,7 +48,12 @@ export default class Model {
 
     }
 
-
+    async encrypt(str) {
+        return util.encrypt(str);
+    }
+    async decrypt(str) {
+        return util.decrypt(str);
+    }
     /**
      * 
      * @param {*} datas 

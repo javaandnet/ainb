@@ -1,3 +1,6 @@
+
+import crypto from 'crypto';
+
 export default class Util {
     copy(obj) {
         return JSON.parse(JSON.stringify(obj));
@@ -42,12 +45,39 @@ export default class Util {
         return strs.join("\r\n");
     }
 
-    objToObj(obj,map){
+    objToObj(obj, map) {
         let rtn = {};
         Object.keys(map).forEach((k) => {
             rtn[map[k]] = obj[k];
         });
         return rtn;
+    }
+
+
+    encrypt(text) {
+        const key = Buffer.from("37725295ea78b626");
+        const iv = Buffer.from("rflf77768bfsrai1");
+        const algorithm = 'aes-128-cbc'; // 加密算法
+        const cipher = crypto.createCipheriv(algorithm, key, iv);
+        let encrypted = cipher.update(text, 'utf8', 'hex');
+        encrypted += cipher.final('hex');
+        return encrypted;
+    }
+
+    decrypt(text) {
+        const key = Buffer.from("37725295ea78b626");
+        const iv = Buffer.from("rflf77768bfsrai1");
+        let src = "";
+        const cipher = crypto.createDecipheriv("aes-128-cbc", key, iv);
+        src += cipher.update(text, "hex", "utf8");
+        src += cipher.final("utf8");
+        return src;
+    }
+
+    inDays(time, days) {
+        const nowTime = (new Date()).getTime();
+        const threeDaysInMillis = days * 24 * 60 * 60 * 1000;
+        return (nowTime - time) < threeDaysInMillis;
     }
     /**
      * 
@@ -161,11 +191,11 @@ export default class Util {
         var ele = {};
         records.forEach((element, index) => {
             if (key == "#INDEX#") {
-                ele[index + 1] = element[value]; ;
-            }else{
+                ele[index + 1] = element[value];;
+            } else {
                 ele[element[key]] = element[value];
             }
-            
+
         });
         return this.objToStr(ele);
     }
