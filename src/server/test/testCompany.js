@@ -23,24 +23,39 @@ async function testGetModelById() {
 async function testConfirmInfo() {
     var data = {
         sender: [
-            { type: 0, text: 'FSR会社', value: '13', icon: 'wap-home' },
             {
-                type: 2,
-                text: 'ts_xyf@hotmail.com',
-                value: 'ts_xyf@hotmail.com',
-                icon: 'envelop-o'
-            },
-            {
-                type: 2,
-                text: 'javaandnet@gmail.com',
-                value: 'javaandnet@gmail.com',
-                icon: 'envelop-o'
-            },
-            {
+                // type: 2,
+                // text: '任峰磊 Hotmail',
+                // value: 'ts_xyf@hotmail.com',
+                // icon: 'envelop-o'
+                // },
+                // {
+                //     type: 2,
+                //     text: '任峰磊',
+                //     value: 'javaandnet@gmail.com',
+                //     icon: 'envelop-o'
+                // },
+                // {
+                //     type: 0,
+                //     text: 'FSR',
+                //     value: '0010l00001Y5hBdAAJ',
+                //     icon: 'envelop-o'
+                // },
+                // {
+                //     type: 3,
+                //     text: 'ren',
+                //     value: 'nin',
+                //     icon: 'envelop-o'
+            // }, {
                 type: 3,
-                text: 'javaandnet@gmail.com',
-                value: 'javaandnet@gmail.com',
+                text: 'ren',
+                value: 'nin',
                 icon: 'envelop-o'
+            // }, {
+            //     type: 4,
+            //     text: '連絡先',
+            //     value: '003F3000010o3P7IAI',
+            //     icon: 'envelop-o'
             }
         ],
         worker: [
@@ -50,24 +65,24 @@ async function testConfirmInfo() {
                 checked: true,
                 type: 9,
                 icon: ''
-            },
-            {
-                text: '李宥霖',
-                value: 'a05F300000HYu61IAD',
-                checked: true,
-                type: 9,
-                icon: ''
-            },
-            {
-                text: '王瀚達',
-                value: 'a05F300000HYu68IAD',
-                checked: true,
-                type: 9,
-                icon: ''
             }
         ]
     };
-
+    // ,
+    // {
+    //     text: '李宥霖',
+    //     value: 'a05F300000HYu61IAD',
+    //     checked: true,
+    //     type: 9,
+    //     icon: ''
+    // },
+    // {
+    //     text: '王瀚達',
+    //     value: 'a05F300000HYu68IAD',
+    //     checked: true,
+    //     type: 9,
+    //     icon: ''
+    // }
     //更新配置
     var data = await assistant.out.confirmInfo(data);
     console.log(data);

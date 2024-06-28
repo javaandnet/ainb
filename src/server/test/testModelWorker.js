@@ -6,16 +6,17 @@ const test = new TestUtil();
 const worker = new Worker();
 
 
-async function testInfo(type, isHtml) {
+async function testInfo(type, isHtml, isSendMail) {
     const id = "a05F300000HYu5xIAD";
     const fields = "Id, Name,Status__c, AutoNo__c,Japanese__c,TecLevel__c, Information__c, NameToOuter__c,Resume__c";
-    await test.testAwait(worker, "info", id, fields, type, isHtml, true);
+    await test.test(worker, "infoById", id, fields, type, isHtml, isSendMail);
 }
- 
 
-await testInfo(0, true);
-await testInfo(1, true);
-await testInfo(0, false);
-await testInfo(1, false);
 
-await test.testAwait(worker, "transValue", "Status__c", { Status__c: 9 });
+// await testInfo(0, true);
+// await testInfo(1, true);
+// await testInfo(0, false);
+await testInfo(1, true, true);
+const objs = await worker.getDataByIds(["a05F300000HYu5xIAD"]);
+// await test.test(worker, "infoTxt", objs, 0);
+// 
