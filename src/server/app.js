@@ -73,6 +73,7 @@ app.post('/confirmInfo', async (req, res) => {
     data.root = __dirname;
     //链接地址
     data.server = "http://160.16.216.251:8379/";
+    data.server = "http://localhost:8379/";
     var rtn = await assistant.out.confirmInfo(data);
     // 返回响应
     res.json(rtn);
@@ -207,8 +208,8 @@ app.get('/files/:folder/:name', (req, res) => {
         res.json({ "info": "Error" });
     }
     try {
-        if (!(fileArray[1] == "0" || (util.inDays(parseInt(fileArray[2]), 3)))) {
-            res.json({ "info": "Expired" });
+        if (!(fileArray[1] == "0" || (util.inDays(parseInt(fileArray[2]), 0)))) {
+            res.send("Expired Link リンク期限切れ");
         }
 
     } catch (e) {
@@ -231,8 +232,9 @@ app.get('/files/:folder/:name', (req, res) => {
             res.status(500).send('Error reading the file.');
         } else {
             res.setHeader('Content-Type', header);
-            const deFileName = encodeURI(req.params.name);
-            // res.setHeader('Content-Disposition', 'attachment; filename="' + deFileName + '"');
+            // const deFileName = encodeURI(filePath);
+            // console.log(fileArray[0]);
+            // res.setHeader('Content-Disposition', "attachment; filename=" +fileArray[0] + "");
             res.setHeader('Content-Disposition', 'attachment; ');
             res.send(data);
         }

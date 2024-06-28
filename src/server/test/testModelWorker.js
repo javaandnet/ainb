@@ -16,7 +16,11 @@ async function testInfo(type, isHtml, isSendMail) {
 // await testInfo(0, true);
 // await testInfo(1, true);
 // await testInfo(0, false);
-await testInfo(1, true, true);
-const objs = await worker.getDataByIds(["a05F300000HYu5xIAD"]);
+// await testInfo(1, true, true);
+// const objs = await worker.getDataByIds(["a05F300000HYu5xIAD"]);
 // await test.test(worker, "infoTxt", objs, 0);
 // 
+let str = "FSR_0007_高DF.xlsx" + "#" + 1 + "#" + (new Date()).getTime();
+let enc = await test.test(worker, "encrypt", str);
+
+enc = await test.test(worker, "decrypt", enc);

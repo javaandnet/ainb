@@ -22,6 +22,7 @@ async function testGetModelById() {
 
 async function testConfirmInfo() {
     var data = {
+        server : "http://192.168.1.160:8379/",
         sender: [
             {
                 // type: 2,

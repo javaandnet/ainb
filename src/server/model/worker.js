@@ -45,7 +45,7 @@ export default class Worker extends Model {
                 let link = this.server + "files/resume/" + resume;
                 if (isHtml) {
                     rtnArray.push("<a href='" +
-                        link + "' target='_blank'>履歴書Download</a>");
+                        link + "' target='_blank' download='" + data.Resume__c + "'>履歴書Download</a>");
                 } else {
                     rtnArray.push(link);
                 }

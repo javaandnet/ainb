@@ -195,12 +195,13 @@ class Company {
             const senders = args.sender;
             const workers = args.worker;
             // console.log(path.join("../files/resume/"));
-
+            workerModel.server = args.server || workerModel.server;
             let toMails = [];
             let toWecoms = [];
             let toCompanys = [];
             let toContacts = [];
             let mailStr = "";
+            let mailRtn = "";
             let ids = [];
             for (const worker of workers) {
                 ids.push(worker.value);
@@ -245,6 +246,7 @@ class Company {
                 mailStr = "下記の技術者を提案いたしました。ご確認をお願いします。<br>" + mailStr;
                 let filesStrs = workerMailObj.files;
                 let files = [];
+                //File attatch
                 for (const filesStr of filesStrs) {
                     const filePath = path.join(args.root, "files", "resume", filesStr);
                     if (fs.existsSync(filePath)) {
@@ -256,7 +258,7 @@ class Company {
                 }
 
                 /** SendMail Start **/
-                const mailRtn = await senderToOut.mail({
+                let mailRtn = await senderToOut.mail({
                     fromName: args.fromName || "FSRのAI営業",
                     subject: args.subject || "FSR技術者提案",
                     content: mailStr,
