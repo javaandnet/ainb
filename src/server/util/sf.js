@@ -104,6 +104,24 @@ export default class SF {
     return await jsh.insert(objName, insertObj);
   }
 
+  async query(sql, ids) {
+    var jsh = new JSH();
+    return await jsh.query(sql);
+  }
+  /**
+   * 
+   * @param {*} sql  IN 
+   * @param {*} ids 
+   * @returns 
+   */
+  async queryByIds(sql, ids) {
+    // 构建SOQL查询
+    const query = sql + ` (${ids.map(id => `'${id}'`).join(', ')})`;
+    var jsh = new JSH();
+    return await jsh.query(query);
+  }
+
+
 
   async workerNoWork() {
     var jsh = new JSH();

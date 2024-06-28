@@ -230,7 +230,7 @@ class JSH {
                     //console.log(err);
                     resolve({ errorCode: err.errorCode });
                 } else {
-                    console.log("Name : " + res.Name);
+
                     resolve(res);
                 }
             });
