@@ -4,7 +4,7 @@
       <div v-if="isChecker != true">
         <div v-for="(item, index) in list" :key="index" class="list-item">
           <van-icon :name="item.icon" />
-          <span class="span-left" @click="onClickListCell(model, item.value)">{{
+          <span class="span-left" @click="onClickListCell(model, item)">{{
             item.text
           }}</span>
           <van-icon
@@ -25,10 +25,7 @@
             </van-checkbox>
           </template>
           <!-- 使用 right-icon 插槽来自定义右侧图标 -->
-          <div
-            class="div_list_cell"
-            @click="onClickListCell(model, item.value)"
-          >
+          <div class="div_list_cell" @click="onClickListCell(model, item)">
             {{ item.text }}
           </div>
         </van-cell>
@@ -105,10 +102,11 @@ export default {
     /**
      * 向父激发选择的单元格事项
      */
-    onClickListCell(model, id) {
+    onClickListCell(model, item) {
       this.$emit("onClickListCell", {
         model: model,
-        id: id,
+        id: item.value,
+        text: item.text
       });
     },
     //最近选择的列表，选择一览提出

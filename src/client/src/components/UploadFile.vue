@@ -76,8 +76,9 @@ export default {
         folder: this.serverFolder,
       });
       this.$refs.fileList.list = [];
+      console.log(res.data);
       for (const file of res.data) {
-        this.$refs.fileList.addObj({ type: "2", text: file, value: file });
+        this.$refs.fileList.addObj({ type: "2", text: file.text, value: file.value });
       }
     },
     onClickClose() {
@@ -85,7 +86,7 @@ export default {
     },
 
     async onClickListCell(item) {
-      // console.log(item);
+      console.log(item);
       // let res = await this.$axios({
       //   url: this.url + "files/" + item.id,
       //   method: "GET",
@@ -95,7 +96,7 @@ export default {
       const url = this.url + "files/" + this.serverFolder + "/" + item.id; // 文件路径
       const downloadLink = window.document.createElement("a");
       downloadLink.href = url;
-      downloadLink.download = item.id;
+      downloadLink.download = item.text;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);

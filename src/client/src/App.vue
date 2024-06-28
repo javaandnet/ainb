@@ -59,11 +59,11 @@ export default {
   },
   data() {
     return {
-      //URL: "http://160.16.216.251:8379/",
+      // URL: "http://160.16.216.251:8379/",
       URL: "http://192.168.1.160:8379/",
       item: { items: [] },
       cmdList: {},
-      mode: 0,
+      mode: 2,
     };
   },
   methods: {
@@ -125,13 +125,12 @@ export default {
     },
     onClickListCell: async function (data) {
       if (data.model == "cmd") {
-        console.log(data);
         this.$refs.chatWindow.onSendMsg({ message: data.id });
         return;
       }
       //先弹Modal，显示详细信息
       try {
-        const response = await this.$axios.post(this.URL + "model", data);
+        const response = await this.$axios.post(this.URL + "model", data.id);
         let content = "";
         if (data.model == "project") {
           content = "<br><br>" + response.data.detail;
