@@ -18,6 +18,7 @@
         ></van-col>
         <van-col span="16">
           <van-field
+            @keyup="handleKeyup"
             v-model="message"
             placeholder="情報を入力してください"
             rows="1"
@@ -55,7 +56,7 @@ export default {
     return {
       message: "",
       show: true,
-      TEST: true,
+      // TEST: true,
     };
   },
   methods: {
@@ -77,6 +78,13 @@ export default {
 
     setInput(txt) {
       this.message = txt;
+    },
+
+    handleKeyup(event) {
+      console.log(event);
+      if ((event.ctrlKey && event.key === "Enter") || event.keyCode == 93) {
+         this.sendMsg();
+      }
     },
     sendMsg() {
       let message = this.message;
