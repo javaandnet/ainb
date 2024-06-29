@@ -321,6 +321,10 @@ class Company {
                 model = "Worker__c";
                 condition = { SalesStatus__c: '可能' };
                 field = "Status__c,Id, Name";
+            } else if (args.type == "user") {
+                model = "Worker__c";
+                condition = { "isSales__c": true };
+                field = "Name,WeCom__c";
             }
             var datas = await sf.find(model, condition, field, 50);
             var rtn = [];
@@ -332,7 +336,11 @@ class Company {
                     after.text = workerModel.transValue("Status__c", before) + " :" + after.text;
                 };
             }
-            rtn = util.objsToArray(datas, { "Id": "value", "Name": "text" }, cb);
+            let map = { "Id": "value", "Name": "text" };
+            if (args.type == "user") {
+                map = { "WeCom__c": "value", "Name": "text" };
+            }
+            rtn = util.objsToArray(datas, map, cb);
             return { model: args.type, list: rtn };
 
             return {};
