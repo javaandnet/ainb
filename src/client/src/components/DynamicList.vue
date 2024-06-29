@@ -141,25 +141,6 @@ export default {
       this.list = [...this.list, obj];
     },
 
-    getIcon(type) {
-      //企業
-      if (type == 0) {
-        return "";
-        //案件
-      } else if (type == 1) {
-        return "description-o";
-        //Mail
-      } else if (type == 2) {
-        return "envelop-o";
-        //個人
-      } else if (type == 3) {
-        return "user-o";
-        //その他
-      } else {
-        return "";
-      }
-    },
-
     removeItem(index) {
       var me = this;
       function doRemove(index) {

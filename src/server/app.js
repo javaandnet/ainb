@@ -270,28 +270,24 @@ app.post('/cmd', async (req, res) => {
         "#0#": {
             msg: "help",
             desc: "Help",
-        },
-        "#1#": {
-            msg: "listInfo",
-            args: { type: "worker" },
-            desc: "営業中技術者一覧,点击单元格查看详细信息",
-        }, "#2#": {
-            msg: "listInfo",
-            args: { type: "project" },
-            desc: "未完了案件一覧,点击单元格查看详细信息",
-        }, "#3#": {
+        }, "#1#": {
             msg: "addInfo",
             args: { type: "project" },
             desc: "案件を追加する。#3#後ろ内容で、第一行は案件名です。",
-        }, "#4#": {
+        }, "#2#": {
             msg: "listInfo",
             args: { type: "interview" },
             desc: "面接一覧",
-        }, "#5#": {
+        }, "#3#": {
             msg: "listInfo",
-            args: { type: "user" },
-            desc: "社内ユーザ一覧",
-        }, "#6#": {
+            args: { type: "worker" },
+            desc: "営業中技術者一覧,点击单元格查看详细信息",
+        }, "#4#": {
+            msg: "listInfo",
+            args: { type: "project" },
+            desc: "未完了案件一覧,点击单元格查看详细信息",
+        },
+        "#6#": {
             msg: "upload",
             desc: "ファイルをUploadする、FSR_XXXX_外部名.xlsx",
         },
@@ -299,6 +295,10 @@ app.post('/cmd', async (req, res) => {
             msg: "sendInfo",
             desc: "情報発送",
         }, "#12#": {
+            msg: "listInfo",
+            args: { type: "user" },
+            desc: "社内ユーザ一覧",
+        }, "#13#": {
             msg: "listInfo",
             args: { type: "account" },
             desc: "取引先一覧、関連取引先責任者全て発送する",

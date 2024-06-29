@@ -1,21 +1,23 @@
 <template>
   <div>
     <DynamicList ref="senderList" />
-    <van-field
-      v-if="showMail == true"
-      v-model="addMail"
-      label=""
-      placeholder="メールを入力してくださいï"
-    />
+
     <van-space>
       <Select
+        v-if="false"
         ref="senderTypeList"
         @onSelect="onSelect"
         :list="sendTypeList"
         label="送りタイプ"
         :selectedValue="initSelect"
       />
-      <van-button type="primary" @click="onAddSender">宛先追加</van-button>
+      <van-field
+        v-if="showMail == true"
+        v-model="addMail"
+        label=""
+        placeholder="メールを入力してくださいï"
+      />
+      <van-button type="primary" @click="onAddSender">Mail追加</van-button>
     </van-space>
     <van-divider>技術者一覧</van-divider>
     <DynamicList ref="workerList" /><!--:isChecker="true"-->
@@ -57,9 +59,9 @@ export default {
   },
   data() {
     return {
-      selectType: 0, //選択タイプ
+      selectType: 2, //選択タイプ
       addMail: "",
-      showMail: false,
+      showMail: true,
       initFLg: false,
       initSelect: [1],
       initData: {},
@@ -102,21 +104,25 @@ export default {
         this.showMail = true;
       }
     },
+    /**
+     *根据选择 自动同步
+     */
     sync: function (data) {
-      //items
+      console.log("sync", data);
+
       let list = this.$refs.senderList.getList();
       if (data.model == "worker") {
         list = this.$refs.workerList.getList();
       }
       for (let item of data.items) {
+        //items
+        item.model = data.model;
+        item.type = this.getType(item.model);
+        item.icon = this.getIconByModel(item.model);
         if (!this.objInArray(item, list)) {
           if (data.model == "worker") {
-            item.type = 9;
             this.addWorker(item);
           } else {
-            if (typeof this.type == "undefined") {
-              item.type = 1;
-            }
             this.addSender(item);
           }
         }
@@ -137,8 +143,8 @@ export default {
         worker: this.$refs.workerList.getList(),
       };
     },
+    /**廃止 */
     onAddSender: function () {
-      console.log(this.selectType);
       if (this.selectType == 2) {
         //不同选项不同操作
         this.addSender({
@@ -152,47 +158,72 @@ export default {
       }
     },
     addSender: function (obj) {
-      obj.icon = this.getIcon(obj.type);
+      console.log("addSender", obj);
+
       this.$refs.senderList.addObj(obj);
     },
     addWorker: function (obj) {
       console.log("addWorker", obj);
-      obj.icon = this.getIcon(obj.type);
+
       this.$refs.workerList.addObj(obj);
     },
-    getIcon: function (type) {
+    getIconByModel: function (model) {
       //企業
-      if (type == 0) {
+      if (model == "account") {
         return "wap-home";
         //案件
-      } else if (type == 1) {
+      } else if (model == "project") {
         return "description-o";
         //Mail
-      } else if (type == 2) {
+      } else if (model == "mail") {
         return "envelop-o";
         //企業Wechat
-      } else if (type == 3) {
+      } else if (model == "user") {
         return "wechat";
         //その他
-      } else if (type == 4) {
+      } else if (model == "contact") {
         return "friends-o";
         //その他
       } else {
-        return "";
+        return "manager-o";
+      }
+    },
+    getType: function (model) {
+      //企業
+      if (model == "account") {
+        return 0;
+        //案件
+      } else if (model == "project") {
+        return 1;
+        //Mail
+      } else if (model == "mail") {
+        return 2;
+        //企業Wechat
+      } else if (model == "contact") {
+        return 3;
+        //その他
+      } else if (model == "friend") {
+        return 4;
+        //その他
+      } else if (model == "worker") {
+        return 9;
+        //その他
+      } else {
+        return 2;
       }
     },
     changeIcon: function (list) {
       for (let ele of list) {
-        ele.icon = this.getIcon(ele.type);
+        ele.icon = this.getIconByModel(ele.model);
       }
       return list;
     },
     loaded: function () {
       this.$emit("loaded");
-      this.$refs.senderTypeList.setInitValue({
-        value: 1,
-        text: "案件",
-      });
+      // this.$refs.senderTypeList.setInitValue({
+      //   value: 1,
+      //   text: "案件",
+      // });
     },
   },
 };

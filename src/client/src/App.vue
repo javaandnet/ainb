@@ -91,8 +91,12 @@ export default {
       this.mode = 0;
     },
     onCheckboxChangeInList: function (data) {
+      console.log("onCheckboxChangeInList", data);
       this.item = data;
     },
+    /**
+     * 点击列表 右键
+     */
     onClickRightButtonInList: async function (data) {
       this.mode = 1;
       this.item = data;
