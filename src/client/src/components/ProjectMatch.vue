@@ -96,6 +96,11 @@ export default {
   },
 
   methods: {
+    isValidEmail: function (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    },
+
     onSelect: function (data) {
       if (data[0]) {
         data = 2;
@@ -147,7 +152,8 @@ export default {
     /**Email 只有 */
     onAddSender: function () {
       if (this.selectType == 2) {
-        if (this.addMail == "") {
+        if (!this.isValidEmail(this.addMail)) {
+          alert("Not Email 格式");
           return;
         }
         const model = "mail";
