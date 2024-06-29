@@ -22,7 +22,10 @@
     <van-divider>技術者一覧</van-divider>
     <DynamicList ref="workerList" :isInput="true" /><!--:isChecker="true"-->
     <van-space>
-      <van-button type="primary" @click="onClickLeftButton"
+      <van-button
+        type="primary"
+        @click="onClickLeftButton"
+        :disabled="!buttonEnabled"
         >情報を送る</van-button
       ><van-button type="warning" @click="onClickRightButton"
         >閉じる</van-button
@@ -60,6 +63,7 @@ export default {
   },
   data() {
     return {
+      buttonEnabled: true,
       selectType: 2, //選択タイプ
       addMail: "",
       showMail: true,
@@ -96,6 +100,9 @@ export default {
   },
 
   methods: {
+    setEnabled: function (flag) {
+      this.buttonEnabled = flag;
+    },
     isValidEmail: function (email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(email);
@@ -201,6 +208,7 @@ export default {
         return "manager-o";
       }
     },
+    setDisabled: function (model) {},
     getType: function (model) {
       //企業
       if (model == "account") {

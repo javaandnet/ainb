@@ -61,11 +61,11 @@ export default {
   },
   data() {
     return {
-      // URL: "http://160.16.216.251:8379/",
-      URL: "http://192.168.1.160:8379/",
+      URL: "http://160.16.216.251:8379/",
+      //URL: "http://192.168.1.160:8379/",
       item: { items: [] },
       cmdList: {},
-      mode: 1,
+      mode: 0,
     };
   },
   methods: {
@@ -96,7 +96,9 @@ export default {
           }
 
           console.log("onClickLeftButtonInPM", info);
+          me.setEnabled(false);
           const rtn = await me.$axios.post(me.URL + "confirmInfo", info);
+          me.setEnabled(true);
           let content = rtn.data.out;
           if (rtn.statusText != "OK") {
             content = "エラー発生";
@@ -114,7 +116,9 @@ export default {
           // on cancel
         });
     },
-
+    setEnabled: function (flag) {
+      this.$refs.projectMatch.setEnabled(flag);
+    },
     onClickListCellUploader: async function (item) {},
 
     onClickRightButtonInPM: function () {
