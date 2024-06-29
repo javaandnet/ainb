@@ -1,6 +1,6 @@
 import SF from '../util/sf.js';
 import Util from '../util/util.js';
-import { Sender } from '../util/Sender.js';
+import { Sender } from '../util/sender.js';
 import Worker from '../model/worker.js';
 import path from 'path';
 import fs from 'fs';
