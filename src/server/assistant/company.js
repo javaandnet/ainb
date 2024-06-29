@@ -206,10 +206,23 @@ class Company {
             let mailStr = "";
             let mailRtn = [];
             let ids = [];
+            let workerPrice = {};
+            let wecomName = {};
             for (const worker of workers) {
+                //worker.info 修改单价 
                 ids.push(worker.value);
+                if (worker.info && worker.info.replaceAll(" ", "") != "") {
+                    workerPrice[worker.value] = worker.info;
+                }
             }
             var datas = await workerModel.getDataByIds(ids);
+            for (const data of datas) {
+                //如果存在才替换
+                if (workerPrice[data.Id]) {
+                    data.Information__c = workerModel.replaceFieldValue(data.Information__c, "単 価", workerPrice[data.Id]);
+                }
+
+            }
 
             for (const sender of senders) {
                 if (sender.model == "account") {
@@ -219,6 +232,7 @@ class Company {
                     toMails.push({ "name": sender.text, "email": sender.value });
                 } else if (sender.model == "user") {
                     toWecoms.push(sender.value);
+                    wecomName[sender.value] = sender.text;
                 } else if (sender.model == "contact") {
                     toContacts.push(sender.value);
                 }
@@ -244,8 +258,7 @@ class Company {
                 //メール送信文字列
                 //1 外部 无需替换、Info 内部处理 
                 const workerMailObj = await workerModel.info(datas, 1, true, true);
-                mailStr = workerMailObj.rtn;
-                mailStr = "下記の技術者を提案いたしました。ご確認をお願いします。<br>" + mailStr;
+                mailStr = "下記の技術者を提案いたしました。ご確認をお願いします。<br>" + workerMailObj.rtn;
                 let filesStrs = workerMailObj.files;
                 let files = [];
                 //File attatch
@@ -270,18 +283,22 @@ class Company {
             /** WebCom Start **/
             async function sendWecom(sender, datas) {
                 let rtn = [];
+                let flag = true;
                 for (const data of datas) {
                     /** 每一个用户,长度有限制，只能1条1条发 */
                     let wecomStr = await workerModel.infoHtml([data], 1);//外部
                     //Id、内容 0 个人
                     const rtnWecom = await senderToOut.wecom(wecomStr, 0, sender);
                     //成功返回
-                    if (rtnWecom.data == "success") {
-                        rtn.push(sender);
-                    }
+                    if (rtnWecom.data != "success") {
+                        flag = false;
 
+                    }
                 }
-                return rtn;
+                if (flag) {
+                    rtn.push(sender);
+                }
+                return flag;
             }
 
             /** WebCom Start **/
@@ -290,7 +307,11 @@ class Company {
                 // let toWecomIds = await sf.queryByIds("SELECT Id,  Name, LastName, Email FROM Contact where id in", toWecoms);
                 //企業一覧にメール
                 for (const wecom of toWecoms) {
-                    wecomRtn.push(await sendWecom(wecom, datas));
+                    const rtnFlg = await sendWecom(wecom, datas);
+                    if (rtnFlg) {
+                        wecomRtn.push(wecomName[wecom]);
+                    }
+
                 }
             }
             let rtnMailStr = "";

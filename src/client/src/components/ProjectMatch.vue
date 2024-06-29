@@ -20,9 +20,10 @@
       <van-button type="primary" @click="onAddSender">Mail追加</van-button>
     </van-space>
     <van-divider>技術者一覧</van-divider>
-    <DynamicList ref="workerList" /><!--:isChecker="true"-->
+    <DynamicList ref="workerList" :isInput="true" /><!--:isChecker="true"-->
     <van-space>
-      <van-button type="primary" @click="onClickLeftButton">情報を送る</van-button
+      <van-button type="primary" @click="onClickLeftButton"
+        >情報を送る</van-button
       ><van-button type="warning" @click="onClickRightButton"
         >閉じる</van-button
       >
@@ -149,7 +150,7 @@ export default {
         //不同选项不同操作
         this.addSender({
           type: this.selectType,
-          model:"mail",
+          model: "mail",
           text: this.addMail,
           value: this.addMail,
         });
@@ -225,6 +226,13 @@ export default {
       //   value: 1,
       //   text: "案件",
       // });
+      this.addWorker({
+        text: "宋岩",
+        value: "a05F300000HYu5xIAD",
+        checked: true,
+        type: 9,
+        icon: "",
+      });
     },
   },
 };
