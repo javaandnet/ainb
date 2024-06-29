@@ -37,6 +37,7 @@ class JSH {
         if (me.conn == null) {
             await me.login();
         }
+        fields = fields.replaceAll(" ", "");
         var fieldsArr = fields.split(",");
         return new Promise((resolve, reject) => {
             const records = me.conn.sobject(objectName)
