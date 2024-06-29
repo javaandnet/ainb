@@ -7,6 +7,7 @@
           <span class="span-left" @click="onClickListCell(model, item)">{{
             item.text
           }}</span>
+          <van-field  v-model="item.info" label="" :border="true" v-if="isInput"/>
           <van-icon
             v-if="isDelete == true"
             name="close"
@@ -51,11 +52,12 @@
   </div>
 </template>
 <script>
-import { List, Cell, Checkbox } from "vant";
+import { List, Cell, Checkbox, Field } from "vant";
 import { showConfirmDialog } from "vant";
 import "vant/lib/index.css";
 export default {
   components: {
+    Field: Field,
     VanCell: Cell,
     VanList: List,
     VanCheckbox: Checkbox,
@@ -68,6 +70,7 @@ export default {
     "onRemoveItem",
   ],
   props: {
+    isInput: { type: Boolean, default: false },
     confirmBeforeDelete: { type: Boolean, default: false },
     model: { type: String, default: "" },
     isDelete: { type: Boolean, default: true },
@@ -106,7 +109,7 @@ export default {
       this.$emit("onClickListCell", {
         model: model,
         id: item.value,
-        text: item.text
+        text: item.text,
       });
     },
     //最近选择的列表，选择一览提出
@@ -211,7 +214,7 @@ export default {
 .span-left {
   position: relative;
   padding-left: 4px;
-  width: 100%;
+  width: 40%;
   left: 2px; /* 向右偏移20px */
   text-align: left; /* 文本左对齐 */
 }
