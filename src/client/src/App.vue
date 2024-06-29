@@ -80,9 +80,39 @@ export default {
     },
 
     onClickLeftButtonInPM: async function () {
-      let info = this.$refs.projectMatch.getInfo();
-      console.log(info);
-      await this.$axios.post(this.URL + "confirmInfo", info);
+      const me = this;
+      showConfirmDialog({
+        message: "情報を送信してよろしいでしょうか？",
+      })
+        .then(async function () {
+          let info = me.$refs.projectMatch.getInfo();
+          if (info.sender.list.length == 0) {
+            alert("送信情報を選択してください。");
+            return;
+          }
+          if (info.wouker.list.length == 0) {
+            alert("技術者情報を選択してください。");
+            return;
+          }
+
+          console.log("onClickLeftButtonInPM", info);
+          const rtn = await me.$axios.post(me.URL + "confirmInfo", info);
+          let content = rtn.data.out;
+          if (rtn.statusText != "OK") {
+            content = "エラー発生";
+          }
+          showDialog({
+            title: rtn.statusText,
+            message: content,
+          }).then(() => {
+            // on close
+          });
+
+          // console.log("confirmInfo", rtn);
+        })
+        .catch(() => {
+          // on cancel
+        });
     },
 
     onClickListCellUploader: async function (item) {},

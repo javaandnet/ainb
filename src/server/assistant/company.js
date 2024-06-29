@@ -212,14 +212,14 @@ class Company {
             var datas = await workerModel.getDataByIds(ids);
 
             for (const sender of senders) {
-                if (sender.type == 0) {
+                if (sender.model == "account") {
                     toCompanys.push(sender.value);
-                } else if (sender.type == 2) {
+                } else if (sender.model == "mail") {
                     /**個人メールの場合、自由追加 */
                     toMails.push({ "name": sender.text, "email": sender.value });
-                } else if (sender.type == 3) {
+                } else if (sender.model == "user") {
                     toWecoms.push(sender.value);
-                } else if (sender.type == 4) {
+                } else if (sender.model == "contact") {
                     toContacts.push(sender.value);
                 }
             }
@@ -239,7 +239,6 @@ class Company {
                     toMails.push({ "name": contact.LastName, "email": contact.Email });
                 }
             }
-
 
             if (toMails.length > 0) {
                 //メール送信文字列
@@ -277,7 +276,7 @@ class Company {
                     //Id、内容 0 个人
                     const rtnWecom = await senderToOut.wecom(wecomStr, 0, sender);
                     //成功返回
-                    if (rtnWecom.data == "ok") {
+                    if (rtnWecom.data == "success") {
                         rtn.push(sender);
                     }
 
@@ -290,16 +289,22 @@ class Company {
             if (toWecoms.length > 0) {
                 // let toWecomIds = await sf.queryByIds("SELECT Id,  Name, LastName, Email FROM Contact where id in", toWecoms);
                 //企業一覧にメール
-
                 for (const wecom of toWecoms) {
                     wecomRtn.push(await sendWecom(wecom, datas));
                 }
             }
-            let rtnStr = "[" + mailRtn.join(",") + "]にメールを送信いたしました。"
-            let rtnWecomStr = "[" + wecomRtn.join(",") + "]にWeComを送信いたしました。"
+            let rtnMailStr = "";
+            if (mailRtn.length > 0) {
+                rtnMailStr = "[" + mailRtn.join(",") + "]にメールを送信いたしました。"
+            }
+            let rtnWecomStr = "";
+            if (wecomRtn.length > 0) {
+                rtnWecomStr = "[" + wecomRtn.join(",") + "]にWeComを送信いたしました。"
+            }
+
             const mailResult = {
                 ai: JSON.stringify({ mailto: mailRtn.join(",") }), //只有名字
-                out: rtnStr + "\r\n" + rtnWecomStr
+                out: rtnMailStr + "\r\n" + rtnWecomStr
             };
 
             return mailResult;

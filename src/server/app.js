@@ -302,7 +302,7 @@ app.post('/cmd', async (req, res) => {
             msg: "listInfo",
             args: { type: "account" },
             desc: "取引先一覧、関連取引先責任者全て発送する",
-        }, "#13#": {
+        }, "#14#": {
             msg: "listInfo",
             args: { type: "contact" },
             desc: "取引先責任者一覧",

@@ -22,7 +22,7 @@
     <van-divider>技術者一覧</van-divider>
     <DynamicList ref="workerList" /><!--:isChecker="true"-->
     <van-space>
-      <van-button type="primary" @click="onClickLeftButton">発送確認</van-button
+      <van-button type="primary" @click="onClickLeftButton">情報を送る</van-button
       ><van-button type="warning" @click="onClickRightButton"
         >閉じる</van-button
       >
@@ -143,12 +143,13 @@ export default {
         worker: this.$refs.workerList.getList(),
       };
     },
-    /**廃止 */
+    /**Email 只有 */
     onAddSender: function () {
       if (this.selectType == 2) {
         //不同选项不同操作
         this.addSender({
           type: this.selectType,
+          model:"mail",
           text: this.addMail,
           value: this.addMail,
         });
