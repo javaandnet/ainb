@@ -237,13 +237,13 @@ export default {
       //   value: 1,
       //   text: "案件",
       // });
-      this.addWorker({
-        text: "宋岩",
-        value: "a05F300000HYu5xIAD",
-        checked: true,
-        type: 9,
-        icon: "",
-      });
+      // this.addWorker({
+      //   text: "宋岩",
+      //   value: "a05F300000HYu5xIAD",
+      //   checked: true,
+      //   type: 9,
+      //   icon: "",
+      // });
     },
   },
 };
