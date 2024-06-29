@@ -147,10 +147,15 @@ export default {
     /**Email 只有 */
     onAddSender: function () {
       if (this.selectType == 2) {
+        if (this.addMail == "") {
+          return;
+        }
+        const model = "mail";
         //不同选项不同操作
         this.addSender({
           type: this.selectType,
-          model: "mail",
+          model: model,
+          icon: this.getIconByModel(model),
           text: this.addMail,
           value: this.addMail,
         });
