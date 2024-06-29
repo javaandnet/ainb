@@ -52,7 +52,30 @@ export default class Util {
         });
         return rtn;
     }
-
+    /**
+     * 
+     * @param {*} objs 
+     * @param {*} map  from:to
+     * @returns 
+     */
+    objsToArray(objs, map, cb) {
+        if (objs == null) {
+            return [];
+        }
+        let rtn = [];
+        for (const obj of objs) {
+            let ele = {};
+            Object.keys(map).forEach((k) => {
+                ele[map[k]] = obj[k];
+                //个别对应
+                if (cb) {
+                    cb(obj, ele);
+                }
+            });
+            rtn.push(ele);
+        }
+        return rtn;
+    }
 
     encrypt(text) {
         const key = Buffer.from("37725295ea78b626");

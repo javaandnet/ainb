@@ -309,25 +309,33 @@ class Company {
             return args;
         },
         listInfo: async function (args, obj) {
-            if (args.type == "worker" || args.type == "project") {
-                let model = "Worker__c";
-                let condition = { SalesStatus__c: '可能' };
-                if (args.type == "project") {
-                    model = "Project__c";
-                    condition = { Status__c: '0' };
-                }
-                var data = await sf.find(model, condition, "Status__c,Id, Name", 50);
-                if (data == null || data.totalSize == 0) {
-                    return [];
-                } else {
-                    var rtn = [];
-                    data.forEach((element, index) => {
-                        rtn.push({ text: workerModel.transValue("Status__c", element) + " :" + element.Name, value: element.Id });
-                    });
-                    return rtn;
-                }
+
+            let model = args.type;
+            let condition = {};
+            let field = " Name,Id";
+            if (args.type == "project") {
+                model = "Project__c";
+                condition = { Status__c: '0' };
+                field = "Status__c,Id, Name";
+            } else if (args.type == "worker") {
+                model = "Worker__c";
+                condition = { SalesStatus__c: '可能' };
+                field = "Status__c,Id, Name";
             }
-            return [];
+            var datas = await sf.find(model, condition, field, 50);
+            var rtn = [];
+            var cb = function () {
+            }
+            if (args.type == "worker") {
+                //data:before ele:after
+                cb = function (before, after) {
+                    after.text = workerModel.transValue("Status__c", before) + " :" + after.text;
+                };
+            }
+            rtn = util.objsToArray(datas, { "Id": "value", "Name": "text" }, cb);
+            return { model: args.type, list: rtn };
+
+            return {};
         },
         addInfo: async function (args, obj) {
             var insertObj = { Name: util.firstLine(args.info), Detail__c: args.info, status__c: 0 };

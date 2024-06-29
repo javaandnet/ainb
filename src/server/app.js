@@ -288,14 +288,26 @@ app.post('/cmd', async (req, res) => {
             args: { type: "interview" },
             desc: "面接一覧",
         }, "#5#": {
+            msg: "listInfo",
+            args: { type: "user" },
+            desc: "社内ユーザ一覧",
+        }, "#6#": {
             msg: "upload",
             desc: "ファイルをUploadする、FSR_XXXX_外部名.xlsx",
         },
         "#9#": {
             msg: "sendInfo",
             desc: "情報発送",
-        },
-    };
+        }, "#12#": {
+            msg: "listInfo",
+            args: { type: "account" },
+            desc: "取引先一覧、関連取引先責任者全て発送する",
+        }, "#13#": {
+            msg: "listInfo",
+            args: { type: "contact" },
+            desc: "取引先責任者一覧",
+        }
+    }
     // 返回响应
     res.json(cmdList);
 });

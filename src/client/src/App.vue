@@ -65,16 +65,11 @@ export default {
       URL: "http://192.168.1.160:8379/",
       item: { items: [] },
       cmdList: {},
-      mode: 2,
+      mode: 0,
     };
   },
   methods: {
-    loaded: async function () {
-      // var me = this;
-      // this.socket = io(this.URL);
-      // let rtn = await me.$axios.post(me.URL + "cmd");
-      // this.cmdList = rtn.data;
-    },
+    loaded: async function () {},
     onClickCloseUploader: function () {
       this.mode = 0;
     },
@@ -183,26 +178,41 @@ export default {
         },
       };
     },
-
+    /**
+     *  一览时生成列表
+     */
+    createListInfoList(list, model) {
+      return {
+        mode: "list",
+        model: model,
+        list: list,
+        isChecker: true,
+        button: {
+          right: { label: "宛先追加" },
+        },
+      };
+    },
     /**
      *入力发送信息时, TODO chatWindow中处理
      */
     onSendMsg(message) {
-      console.log(message);
+      // console.log(message);
     },
 
     //サーバから情報戻す
     onMessage(message) {
-      console.log(message);
+      console.log("onMessage", message);
       let data = message;
       if (data.func == "listInfo") {
+        let msg = {};
         if (data.args.type == "worker") {
-          const msg = this.createWorkerList(data.text);
-          this.$refs.chatWindow.addMessage(msg);
+          msg = this.createWorkerList(data.text.list);
         } else if (data.args.type == "project") {
-          const msg = this.createProjectList(data.text);
-          this.$refs.chatWindow.addMessage(msg);
+          msg = this.createProjectList(data.text.list);
+        } else {
+          msg = this.createListInfoList(data.text.list);
         }
+        this.$refs.chatWindow.addMessage(msg);
       } else if (data.func == "upload") {
         this.mode = "2";
       }
