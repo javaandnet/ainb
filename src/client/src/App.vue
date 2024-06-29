@@ -125,27 +125,30 @@ export default {
         this.$refs.chatWindow.onSendMsg({ message: data.id });
         return;
       }
-      //先弹Modal，显示详细信息
-      try {
-        const response = await this.$axios.post(this.URL + "model", data);
-        let content = "";
-        if (data.model == "project") {
-          content = "<br><br>" + response.data.rtn;
-        } else {
-          // console.log(response.data);
-          content = response.data.rtn;
+      // console.log(data);
+      if (data.model == "project" || data.model == "worker") {
+        //先弹Modal，显示详细信息
+        try {
+          const response = await this.$axios.post(this.URL + "model", data);
+          let content = "";
+          if (data.model == "project") {
+            content = "<br><br>" + response.data.rtn;
+          } else {
+            // console.log(response.data);
+            content = response.data.rtn;
+          }
+          showDialog({
+            messageAlign: "left",
+            allowHtml: true,
+            title: data.text,
+            message: content,
+          }).then(() => {
+            // on close
+          });
+          console.log(response.data);
+        } catch (error) {
+          console.error("获取数据失败");
         }
-        showDialog({
-          messageAlign: "left",
-          allowHtml: true,
-          title: data.text,
-          message: content,
-        }).then(() => {
-          // on close
-        });
-        console.log(response.data);
-      } catch (error) {
-        console.error("获取数据失败");
       }
     },
     /**
@@ -210,7 +213,7 @@ export default {
         } else if (data.args.type == "project") {
           msg = this.createProjectList(data.text.list);
         } else {
-          msg = this.createListInfoList(data.text.list);
+          msg = this.createListInfoList(data.text.list, data.text.model);
         }
         this.$refs.chatWindow.addMessage(msg);
       } else if (data.func == "upload") {
