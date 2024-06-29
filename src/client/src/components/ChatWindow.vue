@@ -140,6 +140,7 @@ export default {
       return rtn;
     },
     getMsg(key, args) {
+      console.log(key);
       var cmd = this.cmdList[key];
       if (cmd) {
         if (key == "#0#") {
@@ -164,6 +165,7 @@ export default {
       this.addMessage(this.cmdList[key].desc);
     },
     onSendMsg(message) {
+      console.log(message);
       let data = message.message;
       let info = "";
       let cmdKey = "";
@@ -189,8 +191,8 @@ export default {
           this.addMessage(testData.listMsg());
         } else if (msg.option == "server") {
           this.addTransKeyInfo(cmdKey);
+          //Hel@
           if (cmdKey == "#0#") {
-            //Need not to send
             this.addMessage(this.createCmdList());
           } else {
             if (msg.args) {

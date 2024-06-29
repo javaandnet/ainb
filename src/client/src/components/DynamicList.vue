@@ -41,7 +41,7 @@
         >{{ button.left.label }}</van-button
       >
       <van-button
-        :type="button.left.type || 'primary'"
+        :type="button.right.type || 'primary'"
         @click="onClickRightButtonInList"
         size="small"
         v-if="button && button.right"
