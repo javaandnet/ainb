@@ -252,6 +252,8 @@ export default {
         this.$refs.chatWindow.addMessage(msg);
       } else if (data.func == "upload") {
         this.mode = "2";
+      } else if (data.func == "sendInfo") {
+        this.mode = "1";
       }
     },
   },
