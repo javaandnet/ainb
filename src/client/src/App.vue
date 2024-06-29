@@ -65,7 +65,7 @@ export default {
       URL: "http://192.168.1.160:8379/",
       item: { items: [] },
       cmdList: {},
-      mode: 0,
+      mode: 1,
     };
   },
   methods: {
@@ -86,11 +86,11 @@ export default {
       })
         .then(async function () {
           let info = me.$refs.projectMatch.getInfo();
-          if (info.sender.list.length == 0) {
+          if (info.sender.length == 0) {
             alert("送信情報を選択してください。");
             return;
           }
-          if (info.wouker.list.length == 0) {
+          if (info.worker.length == 0) {
             alert("技術者情報を選択してください。");
             return;
           }

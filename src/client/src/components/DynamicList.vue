@@ -4,10 +4,17 @@
       <div v-if="isChecker != true">
         <div v-for="(item, index) in list" :key="index" class="list-item">
           <van-icon :name="item.icon" />
-          <span class="span-left" @click="onClickListCell(model, item)">{{
-            item.text
-          }}</span>
-          <van-field  v-model="item.info" label="" :border="true" v-if="isInput"/>
+          <span
+            :class="['span-left', isInput ? '-input' : '']"
+            @click="onClickListCell(model, item)"
+            >{{ item.text }}</span
+          >
+          <van-field
+            v-model="item.info"
+            label=""
+            :border="true"
+            v-if="isInput"
+          />
           <van-icon
             v-if="isDelete == true"
             name="close"
@@ -214,10 +221,19 @@ export default {
 .span-left {
   position: relative;
   padding-left: 4px;
+  width: 100%;
+  left: 2px; /* 向右偏移20px */
+  text-align: left; /* 文本左对齐 */
+}
+
+.span-left-input {
+  position: relative;
+  padding-left: 4px;
   width: 40%;
   left: 2px; /* 向右偏移20px */
   text-align: left; /* 文本左对齐 */
 }
+
 .span-right {
   position: relative;
   padding-right: 4px;
