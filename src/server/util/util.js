@@ -292,7 +292,16 @@ export default class Util {
             console.error(error)
         }
     }
-
+    checkExistFile(filePath) {
+        var isExist = false;
+        try {
+            fs.statSync(filePath);
+            isExist = true;
+        } catch (err) {
+            isExist = false;
+        }
+        return isExist;
+    }
 }
 
 export { Util };
