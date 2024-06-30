@@ -17,6 +17,24 @@ class AI {
         this.assistantName = "";
     }
 
+    embedTxt = async function (text) {
+        try {
+            const response = await openai.embeddings.create({
+                model: "text-embedding-ada-002",
+                input: text,
+            });
+            if (response.data && response.data.length > 0 && response.data[0].embedding) {
+                return response.data[0].embedding;
+            } else {
+                return Buffer.from('');
+            }
+        } catch (error) {
+            console.error("embedTxt:", error);
+            return Buffer.from('');
+        }
+    }
+
+
     similar = async function (text1, text2) {
         try {
             const response1 = await openai.embeddings.create({
