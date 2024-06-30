@@ -20,6 +20,7 @@
     "jsforce": "^1.11.1",
     "microsoft-cognitiveservices-speech-sdk": "^1.36.0",
     "mime-types": "^2.1.35",
+    "mysql2": "^3.10.1",
     "natural": "^7.0.6",
     "node-mic-record": "^0.0.1",
     "node-record-lpcm16": "^1.0.1",

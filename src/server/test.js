@@ -6,7 +6,7 @@ const sf = new SF();
 import { Config } from "./util/config.js";
 import OpenAI from "openai";
 
-import fs from "fs";
+
 import fs from "fs";
 const openai = new OpenAI(Config.openai);
 const ai = new AI();
