@@ -20,7 +20,7 @@ export default class Worker extends Model {
         super(server, "Worker__c", keyToValue);
         this.excel = new Excel();
         this.model = "worker";
-        this.rootPath = "/Users/fengleiren/git/ainb/src/server/files/resume/";
+
     }
 
 
@@ -82,7 +82,7 @@ export default class Worker extends Model {
      */
     async infoById(id, fields = "id", type = 0, isHtml = true, isSendMail = false) {
         fields = fields.replaceAll(" ", "");
-        let datas = await sf.find(this.name, { id: id }, fields, 1);
+        let datas = await sf.find(this.sfModel, { id: id }, fields, 1);
         this.trans(datas, fields);
         return await this.info(datas, type = 0, isHtml = true, isSendMail = false);
     }

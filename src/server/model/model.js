@@ -8,12 +8,13 @@ const mySql = new MySql();
 const util = new Util();
 const sf = new SF();
 export default class Model {
-    constructor(server, name, keyToValue) {
-        this.name = name;
+    constructor(server, sfModel, keyToValue) {
+        this.sfModel = sfModel;
         this.server = server;
         this.keyToValue = keyToValue;
         mySql.createPool();
         this.mySql = mySql;
+        this.rootPath = "/Users/fengleiren/git/ainb/src/server/files/resume/";
     }
 
     setRootPath(path) {
@@ -42,7 +43,23 @@ export default class Model {
     }
 
 
-    async sync(condition= {}, isVec = true) {
+    getSyncCondition() {
+        return { SalesStatus__c: '可能' };
+    }
+
+    getSyncConfig() {
+        return {
+            model: "Model",
+            field: "Id, Name,Resume__c,AutoNo__c"
+        };
+    }
+
+
+    getSyncTxt(data) {
+
+        return "";
+    }
+    async sync(condition = {}, isVec = true) {
         const config = this.getSyncConfig();
         const mySql = this.mySql;
         const me = this;
@@ -61,7 +78,10 @@ export default class Model {
         let datas = await sf.find(model, condition, field, 200);
         let mysqlDatas = [];
         let nos = [];
-
+        if (datas == null) {
+            console.log("Query Data:", 0);
+            return 0;
+        }
         for (const data of datas) {
             let ele = {};
             ele.sfid = data.Id;
@@ -101,7 +121,7 @@ export default class Model {
     }
 
     async getDataByIds(ids) {
-        return await sf.retrieve(this.name, ids);
+        return await sf.retrieve(this.sfModel, ids);
     }
 
     /**
