@@ -4,15 +4,79 @@
  *  DBに保存する
  *  比較する
  */
+import { AI } from '../util/ai.js';
 import Excel from '../util/excel.js';
 import Util from '../util/util.js';
+import MySql from '../util/mysql.js';
+import SF from '../util/sf.js';
+const sf = new SF();
 const util = new Util();
-const excelPath = "/Users/fengleiren/git/ainb/src/server/files/resume/FSR_0107_宋E.xlsx";
-const txtPath = "/Users/fengleiren/git/ainb/src/server/files/resume/excel.txt";
-const excel = new Excel(excelPath);
+const mySql = new MySql();
+const ai = new AI();
+
+const rootPath = "/Users/fengleiren/git/ainb/src/server/files/resume/";
+const excel = new Excel();
 class Resume {
     constructor(path) {
+        if (util.defined(path)) {
+            excel.init(path);
+        }
+        mySql.createPool();
+    }
+    init(path) {
         excel.init(path);
+    }
+
+    async sync(condition, isVec = true) {
+        const me = this;
+        const model = "Worker__c";
+        const field = "Status__c,Id, Name,Resume__c,AutoNo__c";
+        /**
+         * Atuto__c No
+         */
+        if (util.undefined(condition)) {
+            condition = { SalesStatus__c: '可能' };
+        } else if (condition.no) {
+            condition = { "AutoNo__c": condition.no };
+        } else if (condition.id) {
+            condition = { "Id": condition.id };
+        }
+
+
+        let datas = await sf.find(model, condition, field, 200);
+        let mysqlDatas = [];
+        let nos = [];
+
+        for (const data of datas) {
+            let ele = {};
+            ele.sfid = data.Id;
+            ele.name = data.Name
+            ele.no = data.AutoNo__c;
+            const filePath = rootPath + data.Resume__c;
+            let resume = "";
+            const fileExist = util.checkExistFile(filePath);
+            if (fileExist) {// 文件存在
+                excel.init(filePath);
+                resume = me.toTxt();
+            }
+            ele.resume = resume;
+            //Sync vec
+            if (isVec) {
+                let vec = Buffer.from("");
+                if (fileExist) {
+                    vec = await ai.embedTxt(resume);
+                }
+                ele.vec = vec;
+            }
+            nos.push(ele.no);
+            mysqlDatas.push(ele);
+        }
+        const deleteRow = await mySql.deleteIn("worker", "no", nos);
+
+        console.log("Sync Data:", deleteRow);
+        return await mySql.insert("worker", mysqlDatas);
+
+
     }
     toTxt() {
         const lastRow = excel.getLastRow();
@@ -119,7 +183,21 @@ class Resume {
                 }
             }
         }
-        console.log(skillArray.join("\r\n"));
+        const txt = skillArray.join("\r\n");
+        return txt;
+        // console.log(skillArray.join("\r\n"));
+    }
+
+
+    async addWorker() {
+        const txt = "Bufferクラスは固定長のメモリ領域を表現したオブジェクトです。";
+        // const resume = await ai.embedTxt(txt);
+        // return await mySql.insert("worker", [{ name: "songyan", resume: resume, vec: resume }]);
+        // const resume = "";
+
+
+
+        return await mySql.insert("worker", [{ name: "songyan" }, { name: "songyan2" }]);
     }
 }
 export default Resume;

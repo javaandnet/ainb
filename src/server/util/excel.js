@@ -6,8 +6,9 @@ const util = new Util();
 
 class Excel {
   constructor(inputFile) {
-
-    this.init(inputFile);
+    if(inputFile){
+      this.init(inputFile);
+    }
     this.sheet = null;
   }
 
