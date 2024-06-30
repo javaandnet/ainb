@@ -15,6 +15,15 @@ export default class Model {
         mySql.createPool();
         this.mySql = mySql;
     }
+
+    setRootPath(path) {
+        this.rootPath = path;
+    }
+
+    initExcel(path) {
+        this.excel.init(path);
+    }
+
     embedTxt = async function (text) {
         try {
             const response = await openai.embeddings.create({
@@ -31,6 +40,53 @@ export default class Model {
             return Buffer.from('');
         }
     }
+
+
+    async sync(condition= {}, isVec = true) {
+        const config = this.getSyncConfig();
+        const mySql = this.mySql;
+        const me = this;
+        const model = config.model;
+        const field = config.field;
+        if (util.undefined(condition)) {
+            condition = this.getSyncCondition();
+        } else {
+            if (condition.no) {
+                condition = { "AutoNo__c": condition.no };
+            } else if (condition.id) {
+                condition = { "Id": condition.id };
+            }
+        }
+
+        let datas = await sf.find(model, condition, field, 200);
+        let mysqlDatas = [];
+        let nos = [];
+
+        for (const data of datas) {
+            let ele = {};
+            ele.sfid = data.Id;
+            ele.name = data.Name
+            ele.no = data.AutoNo__c;
+            let txt = this.getSyncTxt(data);
+            ele.txt = txt;
+            //Sync vec
+            if (isVec) {
+                let vec = Buffer.from("");
+                if (txt != "") {
+                    vec = await this.embedTxt(txt);
+                }
+                ele.vec = vec;
+            }
+            nos.push(ele.no);
+            mysqlDatas.push(ele);
+        }
+        const deleteRow = await mySql.deleteIn(this.model, "no", nos);
+
+        console.log("Sync Data:", deleteRow);
+        return await mySql.insert(this.model, mysqlDatas);
+    }
+
+
     /**
      *  変換
      * @param {*} key 

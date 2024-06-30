@@ -4,12 +4,13 @@ import Util from '../util/util.js';
 import SF from '../util/sf.js';
 import Model from '../model/model.js';
 
- 
+
 
 const util = new Util();
 const sf = new SF();
 export default class Worker extends Model {
     constructor(server = "") {
+
         const keyToValue =
         {
             "Status__c": { "0": "待機中", "2": "提案中", "3": "面接あり", "4": "契約済", "9": "稼働中", "-1": "管理外", "8": "保留中" },
@@ -18,14 +19,10 @@ export default class Worker extends Model {
         };
         super(server, "Worker__c", keyToValue);
         this.excel = new Excel();
-    }
-    setRootPath(path) {
-        this.rootPath = path;
+        this.model = "worker";
+        this.rootPath = "/Users/fengleiren/git/ainb/src/server/files/resume/";
     }
 
-    initExcel(path) {
-        this.excel.init(path);
-    }
 
     /**
        *  技術者情報
@@ -90,56 +87,31 @@ export default class Worker extends Model {
         return await this.info(datas, type = 0, isHtml = true, isSendMail = false);
     }
 
-    async sync(condition, isVec = true) {
-        const mySql = this.mySql;
-        const me = this;
-        const model = "Worker__c";
-        const field = "Status__c,Id, Name,Resume__c,AutoNo__c";
-        /**
-         * Atuto__c No
-         */
-        if (util.undefined(condition)) {
-            condition = { SalesStatus__c: '可能' };
-        } else if (condition.no) {
-            condition = { "AutoNo__c": condition.no };
-        } else if (condition.id) {
-            condition = { "Id": condition.id };
-        }
 
-
-        let datas = await sf.find(model, condition, field, 200);
-        let mysqlDatas = [];
-        let nos = [];
-
-        for (const data of datas) {
-            let ele = {};
-            ele.sfid = data.Id;
-            ele.name = data.Name
-            ele.no = data.AutoNo__c;
-            const filePath = this.rootPath + data.Resume__c;
-            let resume = "";
-            const fileExist = util.checkExistFile(filePath);
-            if (fileExist) {// 文件存在
-                this.initExcel(filePath);
-                resume = me.toTxt();
-            }
-            ele.resume = resume;
-            //Sync vec
-            if (isVec) {
-                let vec = Buffer.from("");
-                if (fileExist) {
-                    vec = await this.embedTxt(resume);
-                }
-                ele.vec = vec;
-            }
-            nos.push(ele.no);
-            mysqlDatas.push(ele);
-        }
-        const deleteRow = await mySql.deleteIn("worker", "no", nos);
-
-        console.log("Sync Data:", deleteRow);
-        return await mySql.insert("worker", mysqlDatas);
+    getSyncCondition() {
+        return { SalesStatus__c: '可能' };
     }
+
+    getSyncConfig() {
+        return {
+            model: "Worker__c",
+            field: "Id, Name,Resume__c,AutoNo__c"
+        };
+    }
+
+
+    getSyncTxt(data) {
+        let txt = "";
+        const filePath = this.rootPath + data.Resume__c;
+        const fileExist = util.checkExistFile(filePath);
+        if (fileExist) {// 文件存在
+            this.initExcel(filePath);
+            txt = this.toTxt();
+        }
+        return txt;
+    }
+
+
     toTxt() {
         const lastRow = this.excel.getLastRow();
         const skillConfig = {
