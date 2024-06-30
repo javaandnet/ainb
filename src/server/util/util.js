@@ -1,5 +1,6 @@
 
 import crypto from 'crypto';
+import fs from 'fs';
 
 export default class Util {
     copy(obj) {
@@ -45,6 +46,12 @@ export default class Util {
         return strs.join("\r\n");
     }
 
+    /**
+     *  根据Map只查询有用的数据 
+     * @param {*} obj 
+     * @param {*} map 
+     * @returns 
+     */
     objToObj(obj, map) {
         let rtn = {};
         Object.keys(map).forEach((k) => {
@@ -276,6 +283,14 @@ export default class Util {
             }
         });
         return str;
+    };
+    async readFile(filePath) {
+        try {
+            const content = await fs.readFileSync(filePath, 'utf8', function () { });
+            return content;
+        } catch (error) {
+            console.error(error)
+        }
     }
 
 }
