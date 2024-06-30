@@ -4,9 +4,11 @@ import Util from '../util/util.js';
 const util = new Util();
 import WavEncoder from 'wav-encoder';
 import { AssistantFactory } from './assistantFactory.js';
+const assistantFactory = new AssistantFactory();
+
+
 import OpenAI from "openai";
 import { toFile } from "openai/uploads";
-const assistantFactory = new AssistantFactory();
 const openai = new OpenAI(Config.openai);
 
 class AI {

@@ -1,5 +1,10 @@
 import Util from '../util/util.js';
 import SF from '../util/sf.js';
+import { Config } from "../util/config.js";
+import OpenAI from "openai";
+import MySql from '../util/mysql.js';
+const openai = new OpenAI(Config.openai);
+const mySql = new MySql();
 const util = new Util();
 const sf = new SF();
 export default class Model {
@@ -7,8 +12,25 @@ export default class Model {
         this.name = name;
         this.server = server;
         this.keyToValue = keyToValue;
+        mySql.createPool();
+        this.mySql = mySql;
     }
-
+    embedTxt = async function (text) {
+        try {
+            const response = await openai.embeddings.create({
+                model: "text-embedding-ada-002",
+                input: text,
+            });
+            if (response.data && response.data.length > 0 && response.data[0].embedding) {
+                return response.data[0].embedding;
+            } else {
+                return Buffer.from('');
+            }
+        } catch (error) {
+            console.error("embedTxt:", error);
+            return Buffer.from('');
+        }
+    }
     /**
      *  変換
      * @param {*} key 
