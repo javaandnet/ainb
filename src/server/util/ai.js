@@ -17,6 +17,37 @@ class AI {
         this.assistantName = "";
     }
 
+    similar = async function (text1, text2) {
+        try {
+            const response1 = await openai.embeddings.create({
+                model: "text-embedding-ada-002",
+                input: text1,
+            });
+
+            const response2 = await openai.embeddings.create({
+                model: "text-embedding-ada-002",
+                input: text2,
+            });
+
+            const embedding1 = response1.data[0].embedding;
+            const embedding2 = response2.data[0].embedding;
+            console.log();
+            const similarity = cosineSimilarity(embedding1, embedding2);
+            return similarity;
+            console.log(`相似度: ${similarity}`);
+        } catch (error) {
+            console.error("Error calculating similarity:", error);
+        }
+
+
+        function cosineSimilarity(vecA, vecB) {
+            const dotProduct = vecA.reduce((sum, a, idx) => sum + a * vecB[idx], 0);
+            const magnitudeA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
+            const magnitudeB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
+            return dotProduct / (magnitudeA * magnitudeB);
+        }
+    };
+
     /**
      * 
      * 

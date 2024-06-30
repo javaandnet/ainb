@@ -36,3 +36,15 @@ const io = require('socket.io')(server, {
   }
 });
 //【Text Embedding 3】OpenAIの最新Embeddingモデルの使い方~実際の性能を検証してみた
+
+"技術者情報<br>…………………………<br>【氏 名】：宋E  <br>【年 齢】：26歳<br>【性 別】：男<br>【国 籍】：中国<br>【来 日】：7年<br>【実務経験】：4年<br>【スキル】：Java、HTML、CSS、JavaSricpt、SQL、Oracle、SQLserver<br>【工 程】：基本設計～結合試験<br>【日本語】：N1<br>【単 価】：55万（精算あり）<br>【稼働可能日】：7月～<br>【最寄り駅】：蔵前駅<br>【営業状況】：稼働中<br>【 備 考】：技術に馴染みが早い。 責任感が強くとても真面目な人です。<br>……………………………………………………"
+
+##
+1. app.js
+2. pm2 stop 7
+3. Folder
+   1. util
+   2. model
+   3. assistant
+   4. pnpm install pinyin@alpha --save 
+   5. 

@@ -81,7 +81,7 @@ export default {
     },
 
     handleKeyup(event) {
-      console.log(event);
+      // console.log(event);
       if ((event.ctrlKey && event.key === "Enter") || event.keyCode == 93) {
          this.sendMsg();
       }

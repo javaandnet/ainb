@@ -20,6 +20,55 @@ async function testGetModelById() {
     console.log(data);
 }
 
+async function testCompany_001() {
+    await ai.chat("劉磊営業停止");
+}
+
+/**
+ *  案件一覧、状態変更
+ * */
+async function testCompany_002() {
+    await ai.chat("案件一覧を教えてください");
+    await ai.chat("案件FSR-004停止");
+}
+
+
+/**
+ *  案件一覧、状態変更
+ * */
+async function testCompany_004() {
+    await ai.chat("未稼働技術者一覧は教えてください");
+    await ai.chat("FSR-TW607の技術者")
+}
+
+/**
+ *  测试修改单价内容
+ * */
+async function testCompany_003() {
+    // await ai.chat("未稼働技術者一覧は教えてください");
+    await ai.chat("未稼働社員一覧は教えてください");
+    // await ai.chat("単価修正100");
+}
+
+/**
+ *  案件一覧、状態変更
+ * */
+async function testCompany_005() {
+    await ai.chat("案件一覧を教えてください");
+    await ai.chat("案件FSR-0004の情報");
+}
+// testCompany_005();
+// testAI_001();
+
+
+async function testCompany_006() {
+    var outFuncMap = {};
+    outFuncMap[ASSISITANT_NAME] = ["selectInfo", "addInfo", "listInfo"];
+    var message = { content: 'listInfo', args: { type: 'worker' }, option: 'server' };
+    const rtn = await ai.exe(outFuncMap, { func: message.content, args: message.args }, {}).then(function (data) {
+        console.log(data);
+    });
+}
 async function testConfirmInfo() {
     var data = {
         root: "/Users/fengleiren/git/ainb/src/server",

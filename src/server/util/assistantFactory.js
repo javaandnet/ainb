@@ -2,7 +2,7 @@
 import { Company } from "../assistant/company.js";
 import { Restaurant } from "../assistant/restaurant.js";
 class AssistantFactory {
-    SERVER = "http://160.16.216.251:8379/";
+    // SERVER = "http://160.16.216.251:8379/";
     SERVER = "http://192.168.1.160:8379/";
     assistants = {};
     get = function (id = "company") {
