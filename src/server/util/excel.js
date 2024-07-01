@@ -6,7 +6,7 @@ const util = new Util();
 
 class Excel {
   constructor(inputFile) {
-    if(inputFile){
+    if (inputFile) {
       this.init(inputFile);
     }
     this.sheet = null;
@@ -26,13 +26,12 @@ class Excel {
   }
 
   getCellValue(cellAddress, col = 0, line = 0, sheetName) {
-    if (this.sheet == null) {
-      if (util.undefined(sheetName)) {
-        sheetName = this.workbook.SheetNames[0];
-      }
-      this.sheet = this.workbook.Sheets[sheetName];
-      const a = `¥`;
+
+    if (util.undefined(sheetName)) {
+      sheetName = this.workbook.SheetNames[0];
     }
+    this.sheet = this.workbook.Sheets[sheetName];
+
     if (!(col == 0 && line == 0)) {
       cellAddress = this.calColumn(cellAddress, col, line);
     }
