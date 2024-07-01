@@ -6,7 +6,7 @@
       readonly
       :label="label"
       placeholder=""
-      @click="showPicker = true"
+      @click="showPicker"
     />
     <van-popup v-model:show="showPicker" round position="bottom">
       <van-picker
@@ -14,7 +14,7 @@
         :columns="list"
         :value-key="'value'"
         :default-index="3"
-        @cancel="showPicker = false"
+        @cancel="!showPicker"
         @confirm="onConfirm"
       />
     </van-popup>
