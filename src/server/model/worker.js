@@ -241,11 +241,13 @@ export default class Worker extends Model {
                 }
             }
         }
-
+        rtn.phase = "";
         Object.keys(cellPhaseFlg).forEach((k) => {
             if (cellPhaseFlg[k]) {//添加工程经验
+                /** TODO 不要 */
                 skillArray.push(k);
-                rtn.must += ("\r\n" + k);
+                // rtn.must += ("\r\n" + k);
+                rtn.phase += ("," + k);
             }
         });
 

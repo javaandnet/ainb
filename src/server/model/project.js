@@ -36,7 +36,49 @@ export default class Project extends Model {
     }
 
     getSyncTxt(data) {
-        return { txt: data.Detail__c || "", must: "" };
+        return { txt: data.Detail__c || "", must: "", phase: "" };
     }
 
+    async getMustTxt(txt) {
+        const msg = `
+下文中的必须要求的关键词找出来，并用逗号分隔。\r\n
+            ${txt.txt}`;
+        const skill = await this.ask(msg);
+
+        const regex = /[a-zA-Z]+|,/g;
+        const matches = skill.match(regex);
+        // matches = matches.split(",");
+        // 使用 Set 去除数组中的重复项
+        const uniqueMatches = [...new Set(matches)].filter(item => item !== ',' && item.length > 1);
+
+        // 重新合成字符串
+        const resultText = uniqueMatches.join(',');
+        return resultText;
+    }
+    /**
+     *  
+     * @param {*} project 
+     * @param {*} workers 
+     * @param {*} isMust  要不要求必须条件
+     */
+    static async sortWorker(project, workers, isMust = false) {
+        for (const worker of workers) {
+            // console.log(util.getNotExist(project.must, worker.must));
+            worker.notExist = util.getNotExist(project.must, worker.must);
+            // if(worker.notExist.length > 0){
+            //     console.log(`${project.must}:${worker.name} :${worker.must}`);
+            // }
+            if (worker["vec"] != null && worker["vec"].length > 0) {
+                worker.score = util.similarity(project["vec"], worker["vec"]);
+            } else {
+                worker.score = 0;
+            }
+        }
+        if (isMust) {
+            workers = workers.filter(item => item.worker.notExist != "");
+        }
+        workers = workers.sort((a, b) => a.score - b.score);
+        project.workers = workers;
+        return workers;
+    }
 }
