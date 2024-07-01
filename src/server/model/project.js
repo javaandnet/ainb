@@ -36,7 +36,7 @@ export default class Project extends Model {
     }
 
     getSyncTxt(data) {
-        return data.Detail__c || "";
+        return { txt: data.Detail__c || "", must: "" };
     }
 
 }

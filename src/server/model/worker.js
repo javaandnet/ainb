@@ -99,9 +99,12 @@ export default class Worker extends Model {
         };
     }
 
+    initExcel(path) {
+        this.excel.init(path);
+    }
 
     getSyncTxt(data) {
-        let txt = "";
+        let txt = {};
         const filePath = this.rootPath + data.Resume__c;
         const fileExist = util.checkExistFile(filePath);
         if (fileExist) {// 文件存在
@@ -113,6 +116,7 @@ export default class Worker extends Model {
 
 
     toTxt() {
+        let rtn = {};
         const lastRow = this.excel.getLastRow();
         const skillConfig = {
             start: "◇工程経験：",
@@ -127,6 +131,17 @@ export default class Worker extends Model {
             judgeCell: "K",
             infoCell: "I",
         };
+        let cellPhaseFlg = {
+            "調査分析": false,
+            "要件定義": false,
+            "基本設計": false,
+            "詳細設計": false,
+            "製　　造": false,
+            "単体試験": false,
+            "結合試験": false,
+            "総合試験": false,
+            "運用保守": false,
+        };
         let skillFLg = false;
         let skillFinishFLg = false;
         let skillArray = [];
@@ -140,27 +155,33 @@ export default class Worker extends Model {
                 if (util.defined(cell)) {
                     if (cell == skillConfig.start) {
                         skillFLg = true;
-                        skillArray.push("スキル部分開始する");
+                        // skillArray.push("スキル部分開始する");
                     } else if (cell == skillConfig.end) {
                         skillFLg = false;
                         skillFinishFLg = true;
-                        skillArray.push("スキル部分終了する");
+                        //Skill部分，用于判断
+                        rtn.must = skillArray.join("\r\n");
+                        // skillArray.push("スキル部分終了する");
                     }
                     if (skillFLg) {
-                        skillArray.push(cell + ":" + this.excel.getCellValue(infoName));
+                        // skillArray.push(cell + ":" + this.excel.getCellValue(infoName));
+                        //Label不要
+                        skillArray.push(this.excel.getCellValue(infoName));
+
                     }
                 }
+
             }
             /**resume Part */
             if (skillFinishFLg) {
                 const judgeCellName = resumeConfig.judgeCell + i;
-
                 let cellResumeNames = {
                     "kind": [1, 0],
                     "sepg": [1, 4],
                     "os": [5, 0],
                     "language": [3, 0],
-                    "info": [-6, 0],
+                    "info": [-6, 1],
+                    "title": [-6, 0],
                 };
                 let cellPhaseNames = {
                     "調査分析": [9, 0],
@@ -173,6 +194,8 @@ export default class Worker extends Model {
                     "総合試験": [16, 0],
                     "運用保守": [17, 0],
                 };
+
+
                 const judgeCell = this.excel.getCellValue(judgeCellName);
                 //Index確定
                 if (util.defined(judgeCell)) {
@@ -200,25 +223,35 @@ export default class Worker extends Model {
                         Object.keys(resumeCellMap).forEach((k) => {
                             infoAray.push(this.excel.getCellValue(resumeCellMap[k]));
                         });
-                        skillArray.push("業務部分開始する");
+                        // skillArray.push("業務部分開始する");
                         skillArray.push(infoAray.join("\t"));
-                        skillArray.push("業務部分終了する");
+                        // skillArray.push("業務部分終了する");
 
                         infoAray = [];
                         Object.keys(phaseCellMap).forEach((k) => {
                             if (this.excel.getCellValue(phaseCellMap[k]) == "●") {
-                                infoAray.push(k);
+                                // infoAray.push(k);//1回 不要
+                                cellPhaseFlg[k] = true;
                             }
                         });
-                        skillArray.push("業務担当部分開始する");
+                        // skillArray.push("担当部分開始する");
                         skillArray.push(infoAray.join("\t"));
-                        skillArray.push("業務担当部分終了する");
+                        // skillArray.push("担当部分終了する");
                     }
                 }
             }
         }
-        const txt = skillArray.join("\r\n");
-        return txt;
+
+        Object.keys(cellPhaseFlg).forEach((k) => {
+            if (cellPhaseFlg[k]) {//添加工程经验
+                skillArray.push(k);
+                rtn.must += ("\r\n" + k);
+            }
+        });
+
+        // rtn.must = skillArray.join("\r\n");
+        rtn.txt = skillArray.join("\r\n");
+        return rtn;
         // console.log(skillArray.join("\r\n"));
     }
 }

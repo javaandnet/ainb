@@ -2,8 +2,9 @@ import Util from '../util/util.js';
 import SF from '../util/sf.js';
 import { Config } from "../util/config.js";
 import OpenAI from "openai";
-import MySql from '../util/mysql.js';
 const openai = new OpenAI(Config.openai);
+import MySql from '../util/mysql.js';
+
 const mySql = new MySql();
 const util = new Util();
 const sf = new SF();
@@ -21,8 +22,35 @@ export default class Model {
         this.rootPath = path;
     }
 
-    initExcel(path) {
-        this.excel.init(path);
+    async includeMust(content, must) {
+        try {
+            // const response = await openai.chat.completions.create({
+            //     model: "gpt-3.5-turbo",
+            //     messages: [
+            //         { role: "user", content: `${content}\nPlease include: ${must}` }
+            //     ],
+            //     max_tokens: 150,
+            //     temperature: 0.5,
+            // });
+            const msg = ` Whether  [${must}] exist in the  [${content}]. pls answer yes or no`;
+            // console.log(msg);
+            const response = await openai.chat.completions.create({
+                model: "gpt-3.5-turbo",
+                messages: [{ role: "user", content: msg }],
+            });
+            const result = response.choices[0].message.content.trim();
+            console.log("Filtered content:", result);
+            if (result == ("Yes")) {
+                // console.log("Filtered content:", result);
+                return true;
+            } else {
+                // console.log("Content does not meet the criteria.");
+                return false;
+            }
+        } catch (error) {
+            console.error("Error filtering content:", error);
+            return false;
+        }
     }
 
     embedTxt = async function (text) {
@@ -57,7 +85,7 @@ export default class Model {
 
     getSyncTxt(data) {
 
-        return "";
+        return {};
     }
     async sync(condition = {}, isVec = true) {
         const config = this.getSyncConfig();
@@ -88,15 +116,16 @@ export default class Model {
             ele.name = data.Name
             ele.no = data.AutoNo__c;
             let txt = this.getSyncTxt(data);
-            ele.txt = txt;
+            ele.txt = txt.txt || "";
+            ele.must = txt.must || "";
+            let vec = Buffer.from("");
             //Sync vec
-            if (isVec) {
-                let vec = Buffer.from("");
+            if (isVec && ele.txt != "") {
                 if (txt != "") {
-                    vec = await this.embedTxt(txt);
+                    vec = await this.embedTxt(ele.txt);
                 }
-                ele.vec = vec;
             }
+            ele.vec = vec;
             nos.push(ele.no);
             mysqlDatas.push(ele);
         }
@@ -189,4 +218,9 @@ export default class Model {
         // newText = newText +"\r\n";
         return newText;
     }
+
+    async getDBData(fields, condition, options) {
+        return await mySql.query(this.model, fields, condition, options);
+    }
+
 }
