@@ -303,6 +303,21 @@ export default class Util {
         return isExist;
     }
 
+
+
+    getNotExist(must, info) {
+        let rtn = [];
+        must.split(",").forEach(condition => {
+            if (!new RegExp(`\\b${condition}\\b`).test(info)) {
+                rtn.push(condition);
+            }
+        });
+        return rtn.join(",");
+    }
+
+
+
+
     similarity(vecA, vecB) {
         const maxLength = Math.max(vecA.length, vecB.length);
         let arrayVeca = Array.from(vecA);

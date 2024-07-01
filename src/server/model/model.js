@@ -17,7 +17,17 @@ export default class Model {
         this.mySql = mySql;
         this.rootPath = "/Users/fengleiren/git/ainb/src/server/files/resume/";
     }
-
+    async ask(txt) {
+        const response = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: txt }],
+        });
+        let result = '';
+        if (response.choices && response.choices[0].message) {
+            result = response.choices[0].message.content;
+        }
+        return result;
+    }
     setRootPath(path) {
         this.rootPath = path;
     }
@@ -80,6 +90,11 @@ export default class Model {
 
         return {};
     }
+
+    async getMustTxt(syncTxt) {
+        return syncTxt.must || "";
+    }
+
     async sync(condition = {}, isVec = true) {
         const config = this.getSyncConfig();
         const mySql = this.mySql;
@@ -110,7 +125,11 @@ export default class Model {
             ele.no = data.AutoNo__c;
             let txt = this.getSyncTxt(data);
             ele.txt = txt.txt || "";
-            ele.must = txt.must || "";
+            ele.must = await this.getMustTxt(txt);
+            ele.phase = (txt.phase && txt.phase.length > 0) ? txt.phase.substring(1) : "";
+            // if (ele.must != "") {
+            //     console.log("must:" + ele.must);
+            // }
             let vec = Buffer.from("");
             //Sync vec
             if (isVec && ele.txt != "") {
@@ -119,12 +138,14 @@ export default class Model {
                 }
             }
             ele.vec = vec;
+
             nos.push(ele.no);
             mysqlDatas.push(ele);
         }
         const deleteRow = await mySql.deleteIn(this.model, "no", nos);
 
         console.log("Sync Data:", deleteRow);
+        // return 0;
         return await mySql.insert(this.model, mysqlDatas);
     }
 
@@ -212,7 +233,7 @@ export default class Model {
         return newText;
     }
 
-    async getDBData(fields, condition, options) {
+    static async  getDBData(fields, condition, options) {
         return await mySql.query(this.model, fields, condition, options);
     }
 
