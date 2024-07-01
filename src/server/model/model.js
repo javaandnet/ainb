@@ -24,14 +24,7 @@ export default class Model {
 
     async includeMust(content, must) {
         try {
-            // const response = await openai.chat.completions.create({
-            //     model: "gpt-3.5-turbo",
-            //     messages: [
-            //         { role: "user", content: `${content}\nPlease include: ${must}` }
-            //     ],
-            //     max_tokens: 150,
-            //     temperature: 0.5,
-            // });
+
             const msg = ` Whether  [${must}] exist in the  [${content}]. pls answer yes or no`;
             // console.log(msg);
             const response = await openai.chat.completions.create({
@@ -39,9 +32,9 @@ export default class Model {
                 messages: [{ role: "user", content: msg }],
             });
             const result = response.choices[0].message.content.trim();
-            console.log("Filtered content:", result);
+            console.log("result:", result);
             if (result == ("Yes")) {
-                // console.log("Filtered content:", result);
+                console.log(msg);
                 return true;
             } else {
                 // console.log("Content does not meet the criteria.");

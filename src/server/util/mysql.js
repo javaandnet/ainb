@@ -130,7 +130,7 @@ class MySql {
     try {
       const values = Object.values(conditions);
       const [rows] = await this.pool.execute(query, values);
-      console.log('Query results:', rows);
+      // console.log('Query results:', rows);
       return rows;
     } catch (error) {
       console.error('Error querying records:', error);

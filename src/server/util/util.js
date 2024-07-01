@@ -302,6 +302,25 @@ export default class Util {
         }
         return isExist;
     }
+
+    similarity(vecA, vecB) {
+        const maxLength = Math.max(vecA.length, vecB.length);
+        let arrayVeca = Array.from(vecA);
+        let arrayVecb = Array.from(vecB);
+        while (arrayVeca.length < maxLength) {
+            arrayVeca.push(0);
+        }
+
+        while (arrayVecb.length < maxLength) {
+            arrayVecb.push(0);
+        }
+
+        const dotProduct = arrayVeca.reduce((sum, a, idx) => sum + a * arrayVecb[idx], 0);
+        const magnitudeA = Math.sqrt(arrayVeca.reduce((sum, a) => sum + a * a, 0));
+        const magnitudeB = Math.sqrt(arrayVecb.reduce((sum, b) => sum + b * b, 0));
+
+        return dotProduct / (magnitudeA * magnitudeB);
+    }
 }
 
 export { Util };
